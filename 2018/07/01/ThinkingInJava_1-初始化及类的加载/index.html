@@ -79,14 +79,14 @@
 
 
 
-<meta name="description" content="类只有在用到时才进行加载，并且只加载一次，首先加载main的入口类，因为它第一个被用到喽，如果入口类有父类，则先加载入口类的父类。第一次加载时会按照定义顺序初始化类中的静态区，即被static修饰的，注意static方法里的局部变量是不会被初始化的，如果有人问如果static方法里面万一有个static变量怎么办？？好问题，不过这种情况是不存在的，因为static不能修饰局部变量。">
+<meta name="description" content="如今再看之前写的东西，简直是漏洞百出，之前对Java理解浅薄，现在再看初始化应该叫做实例化，当然这对初学者还是值得一看的，如果想真正理解类的加载和实例化的过程，还需要深入学习JVM。  类只有在用到时才进行加载，并且只加载一次，首先加载main的入口类，因为它第一个被用到喽，如果入口类有父类，则先加载入口类的父类。第一次加载时会按照定义顺序初始化类中的静态区，即被static修饰的，注意stati">
 <meta property="og:type" content="article">
-<meta property="og:title" content="初始化与类的加载">
-<meta property="og:url" content="https://saltedfishust.github.io/2018/07/01/1-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%8A%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD/index.html">
+<meta property="og:title" content="类的加载与初始化">
+<meta property="og:url" content="https://saltedfishust.github.io/2018/07/01/ThinkingInJava_1-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%8A%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD/index.html">
 <meta property="og:site_name" content="CodingCoding!">
-<meta property="og:description" content="类只有在用到时才进行加载，并且只加载一次，首先加载main的入口类，因为它第一个被用到喽，如果入口类有父类，则先加载入口类的父类。第一次加载时会按照定义顺序初始化类中的静态区，即被static修饰的，注意static方法里的局部变量是不会被初始化的，如果有人问如果static方法里面万一有个static变量怎么办？？好问题，不过这种情况是不存在的，因为static不能修饰局部变量。">
+<meta property="og:description" content="如今再看之前写的东西，简直是漏洞百出，之前对Java理解浅薄，现在再看初始化应该叫做实例化，当然这对初学者还是值得一看的，如果想真正理解类的加载和实例化的过程，还需要深入学习JVM。  类只有在用到时才进行加载，并且只加载一次，首先加载main的入口类，因为它第一个被用到喽，如果入口类有父类，则先加载入口类的父类。第一次加载时会按照定义顺序初始化类中的静态区，即被static修饰的，注意stati">
 <meta property="article:published_time" content="2018-07-01T04:29:39.000Z">
-<meta property="article:modified_time" content="2020-10-19T07:42:03.009Z">
+<meta property="article:modified_time" content="2021-01-23T10:07:26.518Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="初始化">
 <meta property="article:tag" content="java基础知识">
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://saltedfishust.github.io/2018/07/01/1-初始化及类的加载/"/>
+  <link rel="canonical" href="https://saltedfishust.github.io/2018/07/01/ThinkingInJava_1-初始化及类的加载/"/>
 
 
 
 
 
-  <title>初始化与类的加载 | CodingCoding!</title>
+  <title>类的加载与初始化 | CodingCoding!</title>
   
 
 
@@ -253,7 +253,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2018/07/01/1-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%8A%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2018/07/01/ThinkingInJava_1-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%8A%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -270,7 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">初始化与类的加载</h1>
+          <h1 class="post-title" itemprop="name headline">类的加载与初始化</h1>
         
 
         <div class="post-meta">
@@ -305,8 +305,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/saltedfishust.github.io/categories/Thinking-in-java/" itemprop="url" rel="index">
-                    <span itemprop="name">Thinking in java</span>
+                  <a href="/saltedfishust.github.io/categories/Thinking-in-Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Thinking in Java</span>
                   </a>
                 </span>
 
@@ -336,7 +336,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  722
+                  793
                 </span>
               
 
@@ -373,7 +373,8 @@
       
 
       
-        <ul>
+        <p><strong>如今再看之前写的东西，简直是漏洞百出，之前对Java理解浅薄，现在再看初始化应该叫做实例化，当然这对初学者还是值得一看的，如果想真正理解类的加载和实例化的过程，还需要深入学习JVM。</strong></p>
+<ul>
 <li>类只有在用到时才进行加载，并且只加载一次，首先加载main的入口类，因为它第一个被用到喽，如果入口类有父类，则先加载入口类的父类。第一次加载时会按照定义顺序初始化类中的静态区，即被static修饰的，注意static方法里的局部变量是不会被初始化的，如果有人问如果static方法里面万一有个static变量怎么办？？好问题，不过这种情况是不存在的，因为static不能修饰局部变量。<a id="more"></a></li>
 <li>只有在创建对象时才会对非静态区进行初始化，最后调用构造方法，即在调用构造方法前，所有的初始化都已经完成，换个角度而言，在对象创建之前，非静态区都无法被使用，所以就没必要初始化。</li>
 <li>有一点难以理解的是【欢迎讨论】，导出类的构造方法一定会调用基类的构造方法，尽管调用基类的代码在导出类构造方法中，即看似在导出类非静态对象或变量之后，但初始化顺序仍然为先基类构造方法再导出类非静态对象或变量，再是导出类构造方法。</li>
@@ -386,7 +387,7 @@
 
 <hr>
 <p>更新：</p>
-<p>有一点需要注意的是，当基类有多个构造方法时，此时并不是每个构造方法都会初始化，<strong>只初始化需要的构造方法</strong>，当然可能还会涉及到更为复杂的<strong>动态绑定</strong>（可看我多态那一篇）问题。例如：</p>
+<p>有一点需要注意的是，当基类有多个构造方法时，此时并不是每个构造方法都会初始化，<strong>只初始化需要的构造方法</strong>，当然可能还会涉及到更为复杂的<strong>动态绑定</strong>问题。例如：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"A(1)"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">(<span class="keyword">int</span> i)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"A(2)"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    B b = <span class="keyword">new</span> B();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"B(1)"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">B</span><span class="params">(<span class="keyword">int</span> i)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"B(2)"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    B b = <span class="keyword">new</span> B(<span class="number">1</span>);</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">C</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(<span class="number">1</span>); <span class="comment">//此时调用有参的构造方法</span></span><br><span class="line">        System.out.println(<span class="string">"C()"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        C c = <span class="keyword">new</span> C();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    B(1)</span></span><br><span class="line"><span class="comment">    A(1)</span></span><br><span class="line"><span class="comment">    B(2)</span></span><br><span class="line"><span class="comment">    C()</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
 
 
@@ -427,7 +428,7 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/saltedfishust.github.io/2018/08/08/2-%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E6%B8%85%E7%90%86/" rel="prev" title="初始化与清理">
+              <a href="/saltedfishust.github.io/2018/08/08/ThinkingInJava_2-%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E6%B8%85%E7%90%86/" rel="prev" title="初始化与清理">
                 初始化与清理 <i class="fa fa-chevron-right"></i>
               </a>
             
@@ -501,7 +502,7 @@
               
                 <a href="/saltedfishust.github.io/archives">
               
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -523,7 +524,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/saltedfishust.github.io/tags/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

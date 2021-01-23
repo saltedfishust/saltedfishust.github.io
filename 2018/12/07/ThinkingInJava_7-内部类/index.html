@@ -82,11 +82,11 @@
 <meta name="description" content="内部类的创建内部类和组合是完全不同的概念，并不仅仅是将类置于其他类的内部那么简单，他能够与外部类进行通信。内部类对象的创建应具体指明这个对象的类型：OutClassName.InnerClassName；有两种方式：用函数返回一个内部类对象，或者用.new，两种都要先创建外部类对象； 当生成一个内部类的对象时，此对象与制造它的外围对象（enclosing object）之间就有了一种联系，所以他能">
 <meta property="og:type" content="article">
 <meta property="og:title" content="内部类">
-<meta property="og:url" content="https://saltedfishust.github.io/2018/12/07/7-%E5%86%85%E9%83%A8%E7%B1%BB/index.html">
+<meta property="og:url" content="https://saltedfishust.github.io/2018/12/07/ThinkingInJava_7-%E5%86%85%E9%83%A8%E7%B1%BB/index.html">
 <meta property="og:site_name" content="CodingCoding!">
 <meta property="og:description" content="内部类的创建内部类和组合是完全不同的概念，并不仅仅是将类置于其他类的内部那么简单，他能够与外部类进行通信。内部类对象的创建应具体指明这个对象的类型：OutClassName.InnerClassName；有两种方式：用函数返回一个内部类对象，或者用.new，两种都要先创建外部类对象； 当生成一个内部类的对象时，此对象与制造它的外围对象（enclosing object）之间就有了一种联系，所以他能">
 <meta property="article:published_time" content="2018-12-07T14:25:23.000Z">
-<meta property="article:modified_time" content="2020-01-16T11:20:39.109Z">
+<meta property="article:modified_time" content="2021-01-23T11:58:32.943Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="java基础知识">
 <meta property="article:tag" content="内部类">
@@ -120,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="https://saltedfishust.github.io/2018/12/07/7-内部类/"/>
+  <link rel="canonical" href="https://saltedfishust.github.io/2018/12/07/ThinkingInJava_7-内部类/"/>
 
 
 
@@ -253,7 +253,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2018/12/07/7-%E5%86%85%E9%83%A8%E7%B1%BB/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2018/12/07/ThinkingInJava_7-%E5%86%85%E9%83%A8%E7%B1%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -305,8 +305,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/saltedfishust.github.io/categories/Thinking-in-java/" itemprop="url" rel="index">
-                    <span itemprop="name">Thinking in java</span>
+                  <a href="/saltedfishust.github.io/categories/Thinking-in-Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Thinking in Java</span>
                   </a>
                 </span>
 
@@ -434,7 +434,6 @@
 <p>通过<strong>回调（callback）</strong>，对象能够携带一些信息，这些信息允许他在稍后的某个时刻调用初始的对象。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Incrementable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">increment</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 简单的解决方式，直接实现接口Incrementable：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Callee1</span> <span class="keyword">implements</span> <span class="title">Incrementable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">increment</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">        i++;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyIncrement</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">increment</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Other operation"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">(MyIncrement mi)</span> </span>&#123;</span><br><span class="line">        mi.increment();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果要求类必须以不同的方式（应该指通过不同的引用调用）</span></span><br><span class="line"><span class="comment">// 如下c2.getCallbackReference() ）实现increment()方法，必须使用内部类：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Callee2</span> <span class="keyword">extends</span> <span class="title">MyIncrement</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">increment</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.increment();</span><br><span class="line">        i++;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Closure</span> <span class="keyword">implements</span> <span class="title">Incrementable</span> </span>&#123;   <span class="comment">//内部类就是一个闭包</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">increment</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="comment">// Specify outer-class method, otherwise you'd get an infinite recursion:</span></span><br><span class="line">            Callee2.<span class="keyword">this</span>.increment();</span><br><span class="line">            <span class="comment">// 内部类Closure实现了Incrementable，以提供一个返回Callee2的钩子（hook），</span></span><br><span class="line">            <span class="comment">// 而且是一个安全的钩子，无论谁获得此Incrementable的引用，都只能调用increment()方法</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">Incrementable <span class="title">getCallbackReference</span><span class="params">()</span> </span>&#123;   <span class="comment">//回调Incrementable类型</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Closure();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Caller</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Incrementable callbackReference;</span><br><span class="line">    Caller(Incrementable cbh) &#123;</span><br><span class="line">        callbackReference = cbh;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">go</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        callbackReference.increment();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Callbacks</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Callee1 c1 = <span class="keyword">new</span> Callee1();</span><br><span class="line">        Callee2 c2 = <span class="keyword">new</span> Callee2();</span><br><span class="line">        MyIncrement.f(c2);</span><br><span class="line">        Caller caller1 = <span class="keyword">new</span> Caller(c1);</span><br><span class="line">        Caller caller2 = <span class="keyword">new</span> Caller(c2.getCallbackReference()); <span class="comment">// 通过不同的引用调用</span></span><br><span class="line">        caller1.go();</span><br><span class="line">        caller1.go();</span><br><span class="line">        caller2.go();</span><br><span class="line">        caller2.go();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    Other operation</span></span><br><span class="line"><span class="comment">    1</span></span><br><span class="line"><span class="comment">    1</span></span><br><span class="line"><span class="comment">    2</span></span><br><span class="line"><span class="comment">    Other operation</span></span><br><span class="line"><span class="comment">    2</span></span><br><span class="line"><span class="comment">    other operation</span></span><br><span class="line"><span class="comment">    3</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="内部类与控制框架"><a href="#内部类与控制框架" class="headerlink" title="内部类与控制框架"></a><strong>内部类与控制框架</strong></h2><p>……待补充</p>
 <hr>
 <h1 id="内部类的继承"><a href="#内部类的继承" class="headerlink" title="内部类的继承"></a><strong>内部类的继承</strong></h1><p>内部类的继承，在导出类的构造器中，需要定义特殊的语法来说明导出类与外围类对象之间的关系，即必须使用以下语法：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">enclosingClassReference.<span class="keyword">super</span>();</span><br></pre></td></tr></table></figure>
@@ -482,7 +481,7 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/saltedfishust.github.io/2018/11/20/6-%E6%8E%A5%E5%8F%A3/" rel="next" title="接口">
+              <a href="/saltedfishust.github.io/2018/11/20/ThinkingInJava_6-%E6%8E%A5%E5%8F%A3/" rel="next" title="接口">
                 <i class="fa fa-chevron-left"></i> 接口
               </a>
             
@@ -491,6 +490,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/" rel="prev" title="持有对象（容器）">
+                持有对象（容器） <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -571,7 +574,7 @@
               
                 <a href="/saltedfishust.github.io/archives">
               
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -593,7 +596,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/saltedfishust.github.io/tags/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -636,7 +639,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类的创建"><span class="nav-number">1.</span> <span class="nav-text">内部类的创建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类与向上转型"><span class="nav-number">2.</span> <span class="nav-text">内部类与向上转型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在方法和作用域内的内部类（局部内部类）"><span class="nav-number">3.</span> <span class="nav-text">在方法和作用域内的内部类（局部内部类）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#匿名内部类"><span class="nav-number">4.</span> <span class="nav-text">匿名内部类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#嵌套类"><span class="nav-number">5.</span> <span class="nav-text">嵌套类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#接口内部的类"><span class="nav-number">5.1.</span> <span class="nav-text">接口内部的类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从多层嵌套类中访问外部类的成员"><span class="nav-number">5.2.</span> <span class="nav-text">从多层嵌套类中访问外部类的成员</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#为什么需要内部类"><span class="nav-number">6.</span> <span class="nav-text">为什么需要内部类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#闭包和回调"><span class="nav-number">6.1.</span> <span class="nav-text">闭包和回调</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内部类与控制框架"><span class="nav-number">6.2.</span> <span class="nav-text">内部类与控制框架</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类的继承"><span class="nav-number">7.</span> <span class="nav-text">内部类的继承</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类不可以被覆盖"><span class="nav-number">8.</span> <span class="nav-text">内部类不可以被覆盖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类标识符"><span class="nav-number">9.</span> <span class="nav-text">内部类标识符</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类的创建"><span class="nav-number">1.</span> <span class="nav-text">内部类的创建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类与向上转型"><span class="nav-number">2.</span> <span class="nav-text">内部类与向上转型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在方法和作用域内的内部类（局部内部类）"><span class="nav-number">3.</span> <span class="nav-text">在方法和作用域内的内部类（局部内部类）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#匿名内部类"><span class="nav-number">4.</span> <span class="nav-text">匿名内部类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#嵌套类"><span class="nav-number">5.</span> <span class="nav-text">嵌套类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#接口内部的类"><span class="nav-number">5.1.</span> <span class="nav-text">接口内部的类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从多层嵌套类中访问外部类的成员"><span class="nav-number">5.2.</span> <span class="nav-text">从多层嵌套类中访问外部类的成员</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#为什么需要内部类"><span class="nav-number">6.</span> <span class="nav-text">为什么需要内部类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#闭包和回调"><span class="nav-number">6.1.</span> <span class="nav-text">闭包和回调</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类的继承"><span class="nav-number">7.</span> <span class="nav-text">内部类的继承</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类不可以被覆盖"><span class="nav-number">8.</span> <span class="nav-text">内部类不可以被覆盖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#内部类标识符"><span class="nav-number">9.</span> <span class="nav-text">内部类标识符</span></a></li></ol></div>
             
 
           </div>
