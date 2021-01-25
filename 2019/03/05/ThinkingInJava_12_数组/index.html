@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/saltedfishust.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/saltedfishust.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/saltedfishust.github.io/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/saltedfishust.github.io/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/saltedfishust.github.io/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/saltedfishust.github.io/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/saltedfishust.github.io/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数组," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="数组与容器数组与其他种类的容器之间的区别有三方面：效率、类型和保存基本类型的能力。在Java中，数组是一种效率最高的存储和随机访问对象引用序列的方式。数组就是一个简单的线性序，这使得元素访问非常快速。但是为这种速度所付出的代价是数组对象的大小被固定，并且在其生命周期中不可改变。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数组">
+<meta property="og:url" content="https://saltedfishust.github.io/2019/03/05/ThinkingInJava_12_%E6%95%B0%E7%BB%84/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="数组与容器数组与其他种类的容器之间的区别有三方面：效率、类型和保存基本类型的能力。在Java中，数组是一种效率最高的存储和随机访问对象引用序列的方式。数组就是一个简单的线性序，这使得元素访问非常快速。但是为这种速度所付出的代价是数组对象的大小被固定，并且在其生命周期中不可改变。">
+<meta property="article:published_time" content="2019-03-05T06:15:15.000Z">
+<meta property="article:modified_time" content="2021-01-25T07:44:10.008Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="数组">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/saltedfishust.github.io/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://saltedfishust.github.io/2019/03/05/ThinkingInJava_12_数组/"/>
+
+
+
+
+
+  <title>数组 | Saltedfish</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/saltedfishust.github.io/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Saltedfish</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Welcome to the home of saltedfish</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/saltedfishust.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/saltedfishust.github.io/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/saltedfishust.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/saltedfishust.github.io/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/03/05/ThinkingInJava_12_%E6%95%B0%E7%BB%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">数组</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-05T14:15:15+08:00">
+                2019-03-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/saltedfishust.github.io/categories/Thinking-in-java/" itemprop="url" rel="index">
+                    <span itemprop="name">Thinking in java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="数组与容器"><a href="#数组与容器" class="headerlink" title="数组与容器"></a>数组与容器</h1><p>数组与其他种类的容器之间的区别有三方面：效率、类型和保存基本类型的能力。在Java中，数组是一种效率最高的存储和随机访问对象引用序列的方式。数组就是一个简单的线性序，这使得元素访问非常快速。但是为这种速度所付出的代价是数组对象的大小被固定，并且在其生命周期中不可改变。</p>
+<a id="more"></a>
+
+<p>数组可以持有基本类型，而泛型之前的容器则不能。但是有了泛型，容器就可以指定并检查它们所持有对象的类型，并且有了自动包装机制，容器看起来还能够持有基本类型。其后的Java版本对容器的支持得到了明显的改进，并且现在的容器在除了性能之外的各个方面都使得数组相形见绌。有了额外的自动包装机制和泛型，在容器中持有基本类型就变得易如反掌了，而这也进一步促使你用容器来替换数组。因为泛型可以产生类型安全的容器，因此数组面对这一变化，已经变得亳无优势了。</p>
+<p>所有这些话题都表示：“优选容器而不是数组”。只有在已证明性能成为问题（并且切换到数组对性能提高有所帮助）时，你才应该将程序重构为使用数组。</p>
+<h1 id="数组是第一级对象"><a href="#数组是第一级对象" class="headerlink" title="数组是第一级对象"></a>数组是第一级对象</h1><p>无论使用哪种类型的数组，数组标识符其实只是一个引用，指向在堆中创建的一个真实对象，这个（数组）对象用以保存指向其他对象的引用。可以作为数组初始化语法的一部分隐式地创建此对象，或者用new表达式显式地创建。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayOptions</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Arrays of objects:</span></span><br><span class="line">    BerylliumSphere[] a; <span class="comment">// Local uninitialized variable</span></span><br><span class="line">    BerylliumSphere[] b = <span class="keyword">new</span> BerylliumSphere[<span class="number">5</span>];</span><br><span class="line">    <span class="comment">// The references inside the array are</span></span><br><span class="line">    <span class="comment">// automatically initialized to null:</span></span><br><span class="line">    print(<span class="string">"b: "</span> + Arrays.toString(b));</span><br><span class="line">    BerylliumSphere[] c = <span class="keyword">new</span> BerylliumSphere[<span class="number">4</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; c.length; i++)</span><br><span class="line">      <span class="keyword">if</span>(c[i] == <span class="keyword">null</span>) <span class="comment">// Can test for null reference</span></span><br><span class="line">        c[i] = <span class="keyword">new</span> BerylliumSphere();</span><br><span class="line">    <span class="comment">// Aggregate initialization:</span></span><br><span class="line">    BerylliumSphere[] d = &#123; <span class="keyword">new</span> BerylliumSphere(),</span><br><span class="line">      <span class="keyword">new</span> BerylliumSphere(), <span class="keyword">new</span> BerylliumSphere()</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// Dynamic aggregate initialization:</span></span><br><span class="line">    a = <span class="keyword">new</span> BerylliumSphere[]&#123;</span><br><span class="line">      <span class="keyword">new</span> BerylliumSphere(), <span class="keyword">new</span> BerylliumSphere(),</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// (Trailing comma is optional in both cases)</span></span><br><span class="line">    print(<span class="string">"a.length = "</span> + a.length);</span><br><span class="line">    print(<span class="string">"b.length = "</span> + b.length);</span><br><span class="line">    print(<span class="string">"c.length = "</span> + c.length);</span><br><span class="line">    print(<span class="string">"d.length = "</span> + d.length);</span><br><span class="line">    a = d;</span><br><span class="line">    print(<span class="string">"a.length = "</span> + a.length);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Arrays of primitives:</span></span><br><span class="line">    <span class="keyword">int</span>[] e; <span class="comment">// Null reference</span></span><br><span class="line">    <span class="keyword">int</span>[] f = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">5</span>];</span><br><span class="line">    <span class="comment">// The primitives inside the array are</span></span><br><span class="line">    <span class="comment">// automatically initialized to zero:</span></span><br><span class="line">    print(<span class="string">"f: "</span> + Arrays.toString(f));</span><br><span class="line">    <span class="keyword">int</span>[] g = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">4</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; g.length; i++)</span><br><span class="line">      g[i] = i*i;</span><br><span class="line">    <span class="keyword">int</span>[] h = &#123; <span class="number">11</span>, <span class="number">47</span>, <span class="number">93</span> &#125;;</span><br><span class="line">    <span class="comment">// Compile error: variable e not initialized:</span></span><br><span class="line">    <span class="comment">//!print("e.length = " + e.length);</span></span><br><span class="line">    print(<span class="string">"f.length = "</span> + f.length);</span><br><span class="line">    print(<span class="string">"g.length = "</span> + g.length);</span><br><span class="line">    print(<span class="string">"h.length = "</span> + h.length);</span><br><span class="line">    e = h;</span><br><span class="line">    print(<span class="string">"e.length = "</span> + e.length);</span><br><span class="line">    e = <span class="keyword">new</span> <span class="keyword">int</span>[]&#123; <span class="number">1</span>, <span class="number">2</span> &#125;;</span><br><span class="line">    print(<span class="string">"e.length = "</span> + e.length);</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">b: [null, null, null, null, null]</span></span><br><span class="line"><span class="comment">a.length = 2</span></span><br><span class="line"><span class="comment">b.length = 5</span></span><br><span class="line"><span class="comment">c.length = 4</span></span><br><span class="line"><span class="comment">d.length = 3</span></span><br><span class="line"><span class="comment">a.length = 3</span></span><br><span class="line"><span class="comment">f: [0, 0, 0, 0, 0]</span></span><br><span class="line"><span class="comment">f.length = 5</span></span><br><span class="line"><span class="comment">g.length = 4</span></span><br><span class="line"><span class="comment">h.length = 3</span></span><br><span class="line"><span class="comment">e.length = 3</span></span><br><span class="line"><span class="comment">e.length = 2</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+<p>此例也说明，对象数组和基本类型数组在使用上几乎是相同的；唯一的区别就是对象数组保存的是引用，基本类型数组直接保存基本类型的值。你无法知道在数组中确切地有多少元素，因为 length只表示数组能够容纳多少元素。也就是说，length是数组的大小，而不是实际保存的元素个数。新生成一个数组对象时，其中所有的引用被自动初始化为null，所以检查其中的引用是否为nul，即可知道数组的某个位置是否存有对象。同样，基本类型的数组如果是数值型的，就被自动初始化为0；如果是字符型（char）的，就被自动初始化为（char）0；如果是布尔型（ boolean），就被自动初始化为false。</p>
+<h1 id="多维数组"><a href="#多维数组" class="headerlink" title="多维数组"></a>多维数组</h1><p>创建多维数组很方便。对于基本类型的多维数组，可以通过使用花括号将每个向量分隔开，每对花括号括起来的集合都会把你带到下一级数组。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MultidimensionalPrimitiveArray</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[][] a = &#123;</span><br><span class="line">      &#123; <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, &#125;,</span><br><span class="line">      &#123; <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line">    System.out.println(Arrays.deepToString(a));</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">[[1, 2, 3], [4, 5, 6]]</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+<p>Arrays.deepTostring()方法，它可以将多维数组转换为多个String，正如从输出中所看到的那样。</p>
+<h1 id="Arrays实用功能"><a href="#Arrays实用功能" class="headerlink" title="Arrays实用功能"></a>Arrays实用功能</h1><h2 id="Arrays-asList"><a href="#Arrays-asList" class="headerlink" title="Arrays.asList()"></a>Arrays.asList()</h2><p>注意：该方法返回的是 Arrays 内部静态类 ArrayList，而不是我们平常使用的 ArrayList,，该静态类 ArrayList 没有覆盖父类的 add(), remove() 等方法，所以如果直接调用，会报 UnsupportedOperationException 异常。</p>
+<ul>
+<li>将数组转换为集合，接收一个可变参。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">list.forEach(System.out::println); <span class="comment">// 1 2 3</span></span><br><span class="line"></span><br><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">List&lt;Integer&gt; list = Arrays.asList(data);</span><br><span class="line">list.forEach(System.out::println); <span class="comment">// 1 2 3</span></span><br></pre></td></tr></table></figure></li>
+<li>如果将基本数据类型的数组作为参数传入，该方法会把整个数组当作一个元素。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">List&lt;<span class="keyword">int</span>[]&gt; list = Arrays.asList(data);</span><br><span class="line">System.out.println(list.size()); <span class="comment">// 1</span></span><br><span class="line">System.out.println(Arrays.toString(list.get(<span class="number">0</span>))); <span class="comment">// [1, 2, 3]</span></span><br></pre></td></tr></table></figure>
+<h2 id="Arrays-fill"><a href="#Arrays-fill" class="headerlink" title="Arrays.fill()"></a>Arrays.fill()</h2></li>
+<li>Arrays.fill(Object[] array, Object obj)：用指定元素填充整个数组 (会替换掉数组中原来的元素)。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line">Arrays.fill(data, <span class="number">9</span>);</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [9, 9, 9, 9]</span></span><br></pre></td></tr></table></figure></li>
+<li>Arrays.fill(Object[] array, int fromIndex, int toIndex, Object obj)：用指定元素填充数组，从起始位置到结束位置，取头不取尾 (会替换掉数组中原来的元素)。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line">Arrays.fill(data, <span class="number">0</span>, <span class="number">2</span>, <span class="number">9</span>);</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [9, 9, 3, 4]</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="Arrays-sort"><a href="#Arrays-sort" class="headerlink" title="Arrays.sort()"></a>Arrays.sort()</h2><ul>
+<li>Arrays.sort(Object[] array)：对数组元素进行排序 (串行排序)。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String[] data = &#123;<span class="string">"1"</span>, <span class="string">"4"</span>, <span class="string">"3"</span>, <span class="string">"2"</span>&#125;;</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 4, 3, 2]</span></span><br><span class="line">Arrays.sort(data);</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 2, 3, 4]</span></span><br></pre></td></tr></table></figure></li>
+<li>Arrays.sort(T[] array, Comparator&lt;? super T&gt; comparator)：使用自定义比较器，对数组元素进行排序 (串行排序)。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">String[] data = &#123;<span class="string">"1"</span>, <span class="string">"4"</span>, <span class="string">"3"</span>, <span class="string">"2"</span>&#125;;</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 4, 3, 2]</span></span><br><span class="line"><span class="comment">// 实现降序排序，返回-1放左边，1放右边，0保持不变</span></span><br><span class="line">Arrays.sort(data, (str1, str2) -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (str1.compareTo(str2) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [4, 3, 2, 1]</span></span><br></pre></td></tr></table></figure></li>
+<li>Arrays.sort(Object[] array, int fromIndex, int toIndex)： 对指定范围内的数组元素进行排序 (串行排序)。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String[] data = &#123;<span class="string">"1"</span>, <span class="string">"4"</span>, <span class="string">"3"</span>, <span class="string">"2"</span>&#125;;</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 4, 3, 2]</span></span><br><span class="line"><span class="comment">// 对下标[0, 3)的元素进行排序，即对1，4，3进行排序，2保持不变</span></span><br><span class="line">Arrays.sort(data, <span class="number">0</span>, <span class="number">3</span>);</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 3, 4, 2]</span></span><br></pre></td></tr></table></figure></li>
+<li>Arrays.sort(T[] array, int fromIndex, int toIndex, Comparator&lt;? super T&gt; c)：使用自定义比较器，对指定范围内的数组元素进行排序 (串行排序)。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">String[] data = &#123;<span class="string">"1"</span>, <span class="string">"4"</span>, <span class="string">"3"</span>, <span class="string">"2"</span>&#125;;</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 4, 3, 2]</span></span><br><span class="line"><span class="comment">// 对下标[0, 3)的元素进行降序排序，即对1，4，3进行降序排序，2保持不变</span></span><br><span class="line">Arrays.sort(data, <span class="number">0</span>, <span class="number">3</span>, (str1, str2) -&gt; &#123;</span><br><span class="line">	<span class="keyword">if</span> (str1.compareTo(str2) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [4, 3, 1, 2]</span></span><br></pre></td></tr></table></figure>
+<h2 id="Arrays-binarySearch"><a href="#Arrays-binarySearch" class="headerlink" title="Arrays.binarySearch()"></a>Arrays.binarySearch()</h2></li>
+<li>Arrays.binarySearch(Object[] array, Object key)：使用二分法查找数组内指定元素的索引值。</li>
+</ul>
+<p>注意：在调用该方法之前，必须先调用 Arrays.sort() 方法进行排序，如果数组没有排序，那么结果是不确定的，此外如果数组中包含多个指定元素，则无法保证将找到哪个元素； 当搜索元素是数组元素时，返回该元素的索引值，当搜索元素不是数组元素时，返回 - (索引值 + 1)。</p>
+<p>搜索元素是数组元素，返回该元素索引值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>&#125;;</span><br><span class="line">Arrays.sort(data);</span><br><span class="line">System.out.println(Arrays.binarySearch(data, <span class="number">1</span>)); <span class="comment">// 0</span></span><br></pre></td></tr></table></figure>
+<p>搜索元素不是数组元素，且小于数组中的最小值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>&#125;;</span><br><span class="line">Arrays.sort(data);</span><br><span class="line"><span class="comment">// 此时程序会把数组看作 &#123;0, 1, 3, 5, 7&#125;，此时0的索引值为0，则搜索0时返回 -(0 + 1) = -1</span></span><br><span class="line">System.out.println(Arrays.binarySearch(data, <span class="number">0</span>)); <span class="comment">// -1</span></span><br></pre></td></tr></table></figure>
+<p>搜索元素不是数组元素，且大于数组中的最大值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>&#125;;</span><br><span class="line">Arrays.sort(data);</span><br><span class="line"><span class="comment">// 此时程序会把数组看作 &#123;1, 3, 5, 7， 9&#125;，此时9的索引值为4，则搜索8时返回 -(4 + 1) = -5</span></span><br><span class="line">System.out.println(Arrays.binarySearch(data, <span class="number">9</span>)); <span class="comment">// -5</span></span><br></pre></td></tr></table></figure>
+<p>搜索元素不是数组元素，但在数组范围内：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>&#125;;</span><br><span class="line">Arrays.sort(data);</span><br><span class="line"><span class="comment">// 此时程序会把数组看作 &#123;1, 2, 3, 5, 7&#125;，此时2的索引值为1，则搜索2时返回 -(1 + 1) = -2</span></span><br><span class="line">System.out.println(Arrays.binarySearch(data, <span class="number">2</span>)); <span class="comment">// -2</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Arrays.binarySearch(Object[] array, int fromIndex, int toIndex, Object obj)：使用二分法查找数组内指定范围内的指定元素的索引值。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>&#125;;</span><br><span class="line">Arrays.sort(data);</span><br><span class="line"><span class="comment">// &#123;1, 3&#125;，3的索引值为1</span></span><br><span class="line">System.out.println(Arrays.binarySearch(data, <span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>)); <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="Arrays-copyOf"><a href="#Arrays-copyOf" class="headerlink" title="Arrays.copyOf()"></a>Arrays.copyOf()</h2><ul>
+<li><p>System.arraycopy(T[] original,int fromIndex, T[] object, int toIndex, copyNumber)：Arrays.copyOf()内部调用了 System.arraycopy() 方法，arraycopy()需要的参数有：源数组，表示从源数组中的什么位置开始复制的偏移量，目标数组，表示从目标数组的什么位置开始复制的偏移量，以及需要复制的元素个数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CopyingArrays</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[] i = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">7</span>];</span><br><span class="line">    <span class="keyword">int</span>[] j = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">10</span>];</span><br><span class="line">    Arrays.fill(i, <span class="number">47</span>);</span><br><span class="line">    Arrays.fill(j, <span class="number">99</span>);</span><br><span class="line">    print(<span class="string">"i = "</span> + Arrays.toString(i));</span><br><span class="line">    print(<span class="string">"j = "</span> + Arrays.toString(j));</span><br><span class="line">    System.arraycopy(i, <span class="number">0</span>, j, <span class="number">0</span>, i.length);</span><br><span class="line">    print(<span class="string">"j = "</span> + Arrays.toString(j));</span><br><span class="line">    <span class="keyword">int</span>[] k = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">5</span>];</span><br><span class="line">    Arrays.fill(k, <span class="number">103</span>);</span><br><span class="line">    System.arraycopy(i, <span class="number">0</span>, k, <span class="number">0</span>, k.length);</span><br><span class="line">    print(<span class="string">"k = "</span> + Arrays.toString(k));</span><br><span class="line">    Arrays.fill(k, <span class="number">103</span>);</span><br><span class="line">    System.arraycopy(k, <span class="number">0</span>, i, <span class="number">0</span>, k.length);</span><br><span class="line">    print(<span class="string">"i = "</span> + Arrays.toString(i));</span><br><span class="line">    <span class="comment">// Objects:</span></span><br><span class="line">    Integer[] u = <span class="keyword">new</span> Integer[<span class="number">10</span>];</span><br><span class="line">    Integer[] v = <span class="keyword">new</span> Integer[<span class="number">5</span>];</span><br><span class="line">    Arrays.fill(u, <span class="keyword">new</span> Integer(<span class="number">47</span>));</span><br><span class="line">    Arrays.fill(v, <span class="keyword">new</span> Integer(<span class="number">99</span>));</span><br><span class="line">    print(<span class="string">"u = "</span> + Arrays.toString(u));</span><br><span class="line">    print(<span class="string">"v = "</span> + Arrays.toString(v));</span><br><span class="line">    System.arraycopy(v, <span class="number">0</span>, u, u.length/<span class="number">2</span>, v.length);</span><br><span class="line">    print(<span class="string">"u = "</span> + Arrays.toString(u));</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">i = [47, 47, 47, 47, 47, 47, 47]</span></span><br><span class="line"><span class="comment">j = [99, 99, 99, 99, 99, 99, 99, 99, 99, 99]</span></span><br><span class="line"><span class="comment">j = [47, 47, 47, 47, 47, 47, 47, 99, 99, 99]</span></span><br><span class="line"><span class="comment">k = [47, 47, 47, 47, 47]</span></span><br><span class="line"><span class="comment">i = [103, 103, 103, 103, 103, 47, 47]</span></span><br><span class="line"><span class="comment">u = [47, 47, 47, 47, 47, 47, 47, 47, 47, 47]</span></span><br><span class="line"><span class="comment">v = [99, 99, 99, 99, 99]</span></span><br><span class="line"><span class="comment">u = [47, 47, 47, 47, 47, 99, 99, 99, 99, 99]</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+<p>这个例子说明基本类型数组与对象数组都可以复制。然而，如果复制对象数组，那么只是复制了对象的引用一而不是对象本身的拷贝。这被称作浅复制（shallow copy）。System.arraycopy()不会执行自动包装和自动拆包，两个数组必须具有相同的确切类型。</p>
+</li>
+<li><p>Arrays.copyOf(T[] original, int newLength)：拷贝数组，其内部调用了 System.arraycopy() 方法，从下标 0 开始，如果超过原数组长度，则会用 null 进行填充。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data1 = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line">Integer[] data2 = Arrays.copyOf(data1, <span class="number">2</span>);</span><br><span class="line">System.out.println(Arrays.toString(data2)); <span class="comment">// [1, 2]</span></span><br><span class="line">Integer[] data3 = Arrays.copyOf(data1, <span class="number">5</span>);</span><br><span class="line">System.out.println(Arrays.toString(data3)); <span class="comment">// [1, 2, 3, 4, null]</span></span><br></pre></td></tr></table></figure></li>
+<li><p>Arrays.copyOfRange(T[] original, int from, int to)： 拷贝数组，指定起始位置和结束位置，如果超过原数组长度，则会用 null 进行填充。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data1 = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line">Integer[] data2 = Arrays.copyOfRange(data1, <span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line">System.out.println(Arrays.toString(data2)); <span class="comment">// [1, 2]</span></span><br><span class="line">Integer[] data2 = Arrays.copyOfRange(data1, <span class="number">0</span>, <span class="number">5</span>);</span><br><span class="line">System.out.println(Arrays.toString(data2)); <span class="comment">// [1, 2, 3, 4, null]</span></span><br></pre></td></tr></table></figure>
+<h2 id="Arrays-equals-Object-array1-Object-array2"><a href="#Arrays-equals-Object-array1-Object-array2" class="headerlink" title="Arrays.equals(Object[] array1, Object[] array2)"></a>Arrays.equals(Object[] array1, Object[] array2)</h2><p>判断两个数组是否相等。数组元素为基本数据类型时，依次比较值；数组元素为引用数据类型时，依次调用元素的 equals() 方法进行比较。即如果两个数组被认为是相等的，则两个数组中应包含相同顺序的相同元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data1 = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">Integer[] data2 = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">System.out.println(Arrays.equals(data1, data2)); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<h2 id="Arrays-deepEquals-Object-array1-Object-array2"><a href="#Arrays-deepEquals-Object-array1-Object-array2" class="headerlink" title="Arrays.deepEquals(Object[] array1, Object[] array2)"></a>Arrays.deepEquals(Object[] array1, Object[] array2)</h2><p>判断两个多维数组是否相等。数组元素为基本数据类型时，依次比较值；数组元素为引用数据类型时，依次调用元素的 equals() 方法进行比较。即如果两个多维数组被认为是相等的，则两个多维数组中应包含相同顺序的相同元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Integer[][] data1 = &#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;&#125;;</span><br><span class="line">Integer[][] data2 = &#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;&#125;;</span><br><span class="line">System.out.println(Arrays.deepEquals(data1, data2)); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="Arrays-hashCode-Object-array"><a href="#Arrays-hashCode-Object-array" class="headerlink" title="Arrays.hashCode(Object[] array)"></a>Arrays.hashCode(Object[] array)</h2><p>返回数组的哈希值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">System.out.println(Arrays.hashCode(data)); <span class="comment">// 30817</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Arrays-deepHashCode-Object-array"><a href="#Arrays-deepHashCode-Object-array" class="headerlink" title="Arrays.deepHashCode(Object[] array)"></a>Arrays.deepHashCode(Object[] array)</h2><p>返回多维数组的哈希值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Integer[][] data = &#123;&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;, &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;&#125;;</span><br><span class="line">System.out.println(Arrays.deepHashCode(data)); <span class="comment">// 987105</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Arrays-toString-Object-array"><a href="#Arrays-toString-Object-array" class="headerlink" title="Arrays.toString(Object[] array)"></a>Arrays.toString(Object[] array)</h2><p>返回数组元素的字符串形式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Integer[] data = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">System.out.println(Arrays.toString(data)); <span class="comment">// [1, 2, 3]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Arrays-deepToString-Object-array"><a href="#Arrays-deepToString-Object-array" class="headerlink" title="Arrays.deepToString(Object[] array)"></a>Arrays.deepToString(Object[] array)</h2><p>返回多维数组元素的字符串形式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Integer[][] data = &#123;&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;, &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;&#125;;</span><br><span class="line">System.out.println(Arrays.deepToString(data)); <span class="comment">// [[1, 2, 3], [1, 2, 3]]</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>参考：</p>
+<ol>
+<li><a href="https://blog.csdn.net/Goodbye_Youth/article/details/81003817?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2" target="_blank" rel="noopener">Arrays类常用方法解析</a></li>
+<li><a href="https://blog.csdn.net/xlgen157387/article/details/91376347" target="_blank" rel="noopener">Arrays.asList()方法底层表示的是数组，因此不能调整尺寸，即不能用add()或delete()方法。</a></li>
+</ol>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/saltedfishust.github.io/tags/%E6%95%B0%E7%BB%84/" rel="tag"><i class="fa fa-tag"></i> 数组</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2019/03/01/C1_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/" rel="next" title="创建线程和查看线程">
+                <i class="fa fa-chevron-left"></i> 创建线程和查看线程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2019/03/10/C2_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/" rel="prev" title="Thread类里的线程状态 和 操作系统的线程状态">
+                Thread类里的线程状态 和 操作系统的线程状态 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/saltedfishust.github.io/uploads/jobs.png"
+                alt="Saltedfish" />
+            
+              <p class="site-author-name" itemprop="name">Saltedfish</p>
+              <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/saltedfishust.github.io/archives">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/saltedfishust.github.io/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/saltedfishust.github.io/tags/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/saltedfishust" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数组与容器"><span class="nav-number">1.</span> <span class="nav-text">数组与容器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数组是第一级对象"><span class="nav-number">2.</span> <span class="nav-text">数组是第一级对象</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多维数组"><span class="nav-number">3.</span> <span class="nav-text">多维数组</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Arrays实用功能"><span class="nav-number">4.</span> <span class="nav-text">Arrays实用功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-asList"><span class="nav-number">4.1.</span> <span class="nav-text">Arrays.asList()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-fill"><span class="nav-number">4.2.</span> <span class="nav-text">Arrays.fill()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-sort"><span class="nav-number">4.3.</span> <span class="nav-text">Arrays.sort()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-binarySearch"><span class="nav-number">4.4.</span> <span class="nav-text">Arrays.binarySearch()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-copyOf"><span class="nav-number">4.5.</span> <span class="nav-text">Arrays.copyOf()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-equals-Object-array1-Object-array2"><span class="nav-number">4.6.</span> <span class="nav-text">Arrays.equals(Object[] array1, Object[] array2)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-deepEquals-Object-array1-Object-array2"><span class="nav-number">4.7.</span> <span class="nav-text">Arrays.deepEquals(Object[] array1, Object[] array2)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-hashCode-Object-array"><span class="nav-number">4.8.</span> <span class="nav-text">Arrays.hashCode(Object[] array)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-deepHashCode-Object-array"><span class="nav-number">4.9.</span> <span class="nav-text">Arrays.deepHashCode(Object[] array)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-toString-Object-array"><span class="nav-number">4.10.</span> <span class="nav-text">Arrays.toString(Object[] array)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Arrays-deepToString-Object-array"><span class="nav-number">4.11.</span> <span class="nav-text">Arrays.deepToString(Object[] array)</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/saltedfishust.github.io/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
