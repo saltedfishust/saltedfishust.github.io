@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/saltedfishust.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/saltedfishust.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/saltedfishust.github.io/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/saltedfishust.github.io/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/saltedfishust.github.io/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/saltedfishust.github.io/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/saltedfishust.github.io/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="join,保护性暂停模式," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="保护性暂停模式（同步模式）即 Guarded Suspension，用在一个线程等待另一个线程的执行结果  要点  有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject 如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者&#x2F;消费者）  JDK 中，join 的实现、Future 的实现，采用的就是此模式 因为要等待另一方的结果，因此归类到同步模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="join 源码解析和保护性暂停模式">
+<meta property="og:url" content="https://saltedfishust.github.io/2019/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="保护性暂停模式（同步模式）即 Guarded Suspension，用在一个线程等待另一个线程的执行结果  要点  有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject 如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者&#x2F;消费者）  JDK 中，join 的实现、Future 的实现，采用的就是此模式 因为要等待另一方的结果，因此归类到同步模式">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/C8E2C88DB46C4911A8C53CC6F76E7441?method=download&shareKey=1ce13bad7e616ce6d3a26f4a8051ae51">
+<meta property="article:published_time" content="2019-05-24T10:09:41.000Z">
+<meta property="article:modified_time" content="2021-01-25T12:37:56.440Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="join">
+<meta property="article:tag" content="保护性暂停模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/C8E2C88DB46C4911A8C53CC6F76E7441?method=download&shareKey=1ce13bad7e616ce6d3a26f4a8051ae51">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/saltedfishust.github.io/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://saltedfishust.github.io/2019/05/24/C9_join源码解析/"/>
+
+
+
+
+
+  <title>join 源码解析和保护性暂停模式 | Saltedfish</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/saltedfishust.github.io/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Saltedfish</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Welcome to the home of saltedfish</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/saltedfishust.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/saltedfishust.github.io/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/saltedfishust.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/saltedfishust.github.io/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">join 源码解析和保护性暂停模式</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-24T18:09:41+08:00">
+                2019-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/saltedfishust.github.io/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">并发编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.6k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  5
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="保护性暂停模式（同步模式）"><a href="#保护性暂停模式（同步模式）" class="headerlink" title="保护性暂停模式（同步模式）"></a>保护性暂停模式（同步模式）</h2><p>即 Guarded Suspension，用在一个线程等待另一个线程的执行结果 </p>
+<p>要点</p>
+<ul>
+<li>有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject</li>
+<li>如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者/消费者） </li>
+<li>JDK 中，join 的实现、Future 的实现，采用的就是此模式</li>
+<li>因为要等待另一方的结果，因此归类到同步模式<a id="more"></a></li>
+</ul>
+<p><img src="https://note.youdao.com/yws/api/personal/file/C8E2C88DB46C4911A8C53CC6F76E7441?method=download&shareKey=1ce13bad7e616ce6d3a26f4a8051ae51" alt="image"></p>
+<h2 id="join-源码解析"><a href="#join-源码解析" class="headerlink" title="join 源码解析"></a>join 源码解析</h2><p> <code>join(long millis)</code>：等待被join的线程的时间最长为millis毫秒。如果在millis毫秒内被join的线程还没有执行结束，则不再等待。</p>
+<blockquote>
+<p>说明：例如在主线程中有个 t 线程，在主线程中调用了 t.join()，那么称 t 为 join 的线程，主线程为被 join 的线程。</p>
+<p>join 和 wait 这种是由线程对象调用的就得注意下，其实它们都是调用了 wait 方法，wait 方法必须在 synchronized 块里由加锁的对象调用，否则会抛出异常，sychronized 块一定锁住了一个对象，那么调用 wait 方法的就是锁对象（被 synchronized 锁住的对象，join 里是线程对象），这个时候不要犯糊涂，看调用方法发生是在哪个线程执行体（即看哪个线程获取到的锁，肯定是当前线程），那么当前线程就是 Monitor 的 Owner，此时调用 wait 方法会让当前线程让出 Owner ，当前线程就会被阻塞，并加入到 WaitSet 等待别的竞争到锁的线程调用 notify 唤醒。</p>
+</blockquote>
+<p> 源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// wait方法必须在synchronized块里使用，然后让加锁的对象调用wait方法</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">join</span><span class="params">(<span class="keyword">long</span> millis)</span></span></span><br><span class="line"><span class="function"><span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> base = System.currentTimeMillis();</span><br><span class="line">    <span class="keyword">long</span> now = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果小于0 ---&gt; 抛出异常</span></span><br><span class="line">    <span class="keyword">if</span> (millis &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"timeout value is negative"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果等于0 ---&gt; 无限等待直至 join 的线程死亡</span></span><br><span class="line">    <span class="keyword">if</span> (millis == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (isAlive()) &#123;  <span class="comment">// 注意：这里是检查 join 的线程是否还存活</span></span><br><span class="line">            wait(<span class="number">0</span>);  <span class="comment">// 这里进入无限等待</span></span><br><span class="line">        &#125; </span><br><span class="line">    <span class="comment">// 如果大于0 ---&gt; 进入保护性暂停模式</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (isAlive()) &#123;</span><br><span class="line">            <span class="keyword">long</span> delay = millis - now;</span><br><span class="line">            <span class="keyword">if</span> (delay &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            wait(delay);</span><br><span class="line">            now = System.currentTimeMillis() - base;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先 join 跟其他的保护性暂停模式不同的地方在于，这里等待的结果是线程是否结束，但其实现方式是一样的，此处的 Guarded Object 是 join 的线程对象，被 join 的线程等待 join 的线程结束的结果，只是恰好这个线程对象就是 Guarded Object。 </p>
+<p>首先从<code>synchronized</code>方法讲起，这里很巧妙，巧妙在调用这个<code>synchronized</code>方法的是 join 的线程对象，被 join 的线程对 join 的 <code>线程对象</code> 加了锁（Guarded Object）。简而言之，当前线程锁住的对象是线程对象，此时线程对象（把它看成一个普通的对象）会关联一个 Monitor（管程），加锁后被 join 的线程会成为这个 Monitor 的 Owner，它只有成为了 Owner 才能运行 join 方法。 </p>
+<p>我们先讨论<code>millis == 0</code>的情况，先判断线程对象指向的线程还在运行吗，如果还在运行，就可以调用 wait 使被 join 的线程进入 <code>线程对象的监视器上等待</code>，这个时候就使得被 join 的线程陷入阻塞，直至 join 的线程死亡，当然这里还有一个隐式的条件。</p>
+<blockquote>
+<p><strong>线程死亡的时候会自动调用自己的 notifyAll 方法，将关联此线程对象的 Monitor 上 WaitSet 中所有的线程唤醒</strong>，简而言之就是唤醒所有对自己线程对象加锁的线程中处于<code>WAITING</code>状态的线程，这个是由JVM底层实现的，源码中没有，不过我们可以通过分析源码的逻辑看出这个机制，这个机制是实现很多同步方法的基础。所以当 join 的线程执行结束就会唤醒被 join 的线程，这是 wait(0) 的执行流程。</p>
+</blockquote>
+<p>上面这个没什么问题，下面看一下下面的 millis 不等于 0 的情况。下面 while 这段代码的逻辑就是<strong>带超时的保护性暂停模式</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">while</span> (isAlive()) &#123;</span><br><span class="line">    <span class="keyword">long</span> delay = millis - now;</span><br><span class="line">    <span class="keyword">if</span> (delay &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    wait(delay);</span><br><span class="line">    now = System.currentTimeMillis() - base;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先我们知道 wait-notify 机制不太靠谱，因为 notify 是随机唤醒的，如果此时有多个线程都在 WaitSet 里等待，用一个 notify 可能唤醒的并不是我们想要的那个线程（被 join 的线程），为了保证一定可以唤醒那个我们希望的线程，一般我们用 <code>notifyAll</code> 方法。如果别的线程用 notifyAll 就会出现问题了，例如主线程中 join 了一个线程，同时有另外一个线程对 join 的线程对象加锁并处于等待状态，另外的那个线程先结束调用了 notifyAll，而此时并没有到规定的 join 时间，这时主线程就被 <code>虚假唤醒</code> 了，即还没达到唤醒条件就被唤醒。为了让虚假唤醒的线程还能有机会被正确的唤醒，于是我们通常会设计一个 while 循环，然后在被加锁的对象里设置一个标记位，如果被虚假唤醒了不要紧，虚假唤醒后并不会影响标志位，只要 join线程还没死亡它就是 true，还会进入 while 循环只要时间没耗尽还会继续等待，直到标记位为假（线程死亡）才代表被正确唤醒，或者时间耗尽退出等待。</p>
+<p>所以上面那个<code>isAlive</code>方法就是一个标志位，判断当前线程是否处于正在运行（<code>Running</code>）或就绪（<code>Runnable</code>）的状态，注意当前线程指的是当前加锁的线程对象指向的线程，所以<code>.isAlive()</code>方法代表现在加锁的这个线程对象指向的线程是否执行结束，也就是 join 的线程。如果还在运行就一直等待，有两种情况退出等待：</p>
+<ul>
+<li>标志位为假，即 join 的线程结束，调用 notifyAll，并且标志位为假（这种情况代表正确唤醒）；</li>
+<li>时间耗尽，退出等待。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/saltedfishust.github.io/tags/join/" rel="tag"><i class="fa fa-tag"></i> join</a>
+          
+            <a href="/saltedfishust.github.io/tags/%E4%BF%9D%E6%8A%A4%E6%80%A7%E6%9A%82%E5%81%9C%E6%A8%A1%E5%BC%8F/" rel="tag"><i class="fa fa-tag"></i> 保护性暂停模式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2019/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/" rel="next" title="wait & notify 原理">
+                <i class="fa fa-chevron-left"></i> wait & notify 原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2019/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/" rel="prev" title="park & unpark 原理">
+                park & unpark 原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/saltedfishust.github.io/uploads/jobs.png"
+                alt="Saltedfish" />
+            
+              <p class="site-author-name" itemprop="name">Saltedfish</p>
+              <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/saltedfishust.github.io/archives">
+              
+                  <span class="site-state-item-count">26</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/saltedfishust.github.io/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/saltedfishust.github.io/tags/index.html">
+                  <span class="site-state-item-count">60</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/saltedfishust" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#保护性暂停模式（同步模式）"><span class="nav-number">1.</span> <span class="nav-text">保护性暂停模式（同步模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join-源码解析"><span class="nav-number">2.</span> <span class="nav-text">join 源码解析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/saltedfishust.github.io/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
