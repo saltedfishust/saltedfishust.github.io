@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/saltedfishust.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/saltedfishust.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/saltedfishust.github.io/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/saltedfishust.github.io/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/saltedfishust.github.io/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/saltedfishust.github.io/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/saltedfishust.github.io/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="park,unpark," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="基本使用park 和 unpark 是 LockSupport 类中的方法 1234&#x2F;&#x2F; 暂停当前线程 LockSupport.park();&#x2F;&#x2F; 恢复某个线程的运行LockSupport.unpark(暂停线程对象);  park &amp; unpark 与 wait &amp; notify 异同 park 和 wait 都会让线程进入WAITING或TIMED_WAITING状态，都可以被">
+<meta property="og:type" content="article">
+<meta property="og:title" content="park &amp; unpark 原理">
+<meta property="og:url" content="https://saltedfishust.github.io/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="基本使用park 和 unpark 是 LockSupport 类中的方法 1234&#x2F;&#x2F; 暂停当前线程 LockSupport.park();&#x2F;&#x2F; 恢复某个线程的运行LockSupport.unpark(暂停线程对象);  park &amp; unpark 与 wait &amp; notify 异同 park 和 wait 都会让线程进入WAITING或TIMED_WAITING状态，都可以被">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/BE3303ECCF624BE8827DEB79AA3D04F2?method=download&shareKey=67b22596ce8f776c1383cd521263d20a">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/4A8C32B909BB425CBA381970F0219B14?method=download&shareKey=018c4ff85590c0825c73355e48840114">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/76E41E68054946ACABCA2B3F8BDEB094?method=download&shareKey=e34e0e8d026a2c52b606979a9816b553">
+<meta property="article:published_time" content="2020-06-02T15:01:45.000Z">
+<meta property="article:modified_time" content="2021-01-25T16:13:12.905Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="park">
+<meta property="article:tag" content="unpark">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/BE3303ECCF624BE8827DEB79AA3D04F2?method=download&shareKey=67b22596ce8f776c1383cd521263d20a">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/saltedfishust.github.io/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://saltedfishust.github.io/2020/06/02/C10_park&unpark原理/"/>
+
+
+
+
+
+  <title>park & unpark 原理 | Saltedfish</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/saltedfishust.github.io/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Saltedfish</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Welcome to the home of saltedfish</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/saltedfishust.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/saltedfishust.github.io/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/saltedfishust.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/saltedfishust.github.io/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">park & unpark 原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-02T23:01:45+08:00">
+                2020-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/saltedfishust.github.io/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">并发编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  815
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>park 和 unpark 是 LockSupport 类中的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 暂停当前线程 </span></span><br><span class="line">LockSupport.park();</span><br><span class="line"><span class="comment">// 恢复某个线程的运行</span></span><br><span class="line">LockSupport.unpark(暂停线程对象);</span><br></pre></td></tr></table></figure>
+
+<h2 id="park-amp-unpark-与-wait-amp-notify-异同"><a href="#park-amp-unpark-与-wait-amp-notify-异同" class="headerlink" title="park &amp; unpark 与 wait &amp; notify 异同"></a>park &amp; unpark 与 wait &amp; notify 异同</h2><ol>
+<li>park 和 wait 都会让线程进入<code>WAITING</code>或<code>TIMED_WAITING</code>状态，都可以被 interrupt 方法打断（ReentrateLock 可打断基于 park ）；</li>
+<li>wait、notify 和 notifyAll 必须配合一个锁对象及其关联的 Monitor 一起使用；而 park、unpark 不必，park没有锁的概念。<ul>
+<li>我们知道 wait 必须写在 synchronized 里，这是因为 wait 必须是由加锁的对象调用的，其原理是通过加锁的对象关联的同步监视器（Monitor）来管理线程，当调用 wait 方法时，把当前持锁线程放入 Monitor 的 WaitSet，所以无论是 wait 还是 notify 都必须由被锁对象调用。</li>
+<li>而 park 则不同，park 是类方法，调用方式类似于 sleep，而 unpark 必须指定线程对象，所以它是“精确唤醒”。</li>
+</ul>
+</li>
+<li>park &amp; unpark 是以线程为单位来【阻塞】和【唤醒】线程，wait 和 notify 都是以被锁对象（准确讲是其关联的 Monitor）为单位的，所以 notify 只能随机唤醒一个关联的 Monitor 里 WaitSet 等待的线程，notifyAll  是唤醒关联的 Monitor 里 WaitSet 所有的等待的线程，就不那么【精确】 。</li>
+<li><strong>park &amp; unpark 可以先 unpark，而 wait &amp; notify 不能先 notify</strong>。<a id="more"></a></li>
+</ol>
+<h2 id="park-amp-unpark-底层原理"><a href="#park-amp-unpark-底层原理" class="headerlink" title="park &amp; unpark 底层原理"></a>park &amp; unpark 底层原理</h2><h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><p>park是在怎么实现精准唤醒的哪，其实并不难理解，我们知道wait是基于锁的，所以它有竞争，所以搞了个Monitor管理被锁对象的这些个线程，但park并没有锁的概念，一个线程就关联一个<code>Parker</code>对象，你把我park了（类似于sleep）我就暂停呗，想把我唤醒就必须精确到我现在这一个线程对象。</p>
+<h3 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h3><p>在具体底层的原理上，每个线程都有自己的一个 <code>Parker</code> 对象，由三部分组成 <code>_counter</code> ， <code>_cond</code> 和 <code>_mutex</code>。介绍一下上面第4点为啥可以先 unpark。</p>
+<ul>
+<li><input disabled type="checkbox"> case1: park -&gt; unpark</li>
+</ul>
+<p><img src="https://note.youdao.com/yws/api/personal/file/BE3303ECCF624BE8827DEB79AA3D04F2?method=download&shareKey=67b22596ce8f776c1383cd521263d20a" alt="image"></p>
+<ol>
+<li>当前线程调用 Unsafe.park() 方法 </li>
+<li>检查 _counter ，本情况为 0，这时，获得 _mutex 互斥锁 </li>
+<li>线程进入 _cond 条件变量阻塞 </li>
+<li>设置 _counter = 0</li>
+</ol>
+<p><img src="https://note.youdao.com/yws/api/personal/file/4A8C32B909BB425CBA381970F0219B14?method=download&shareKey=018c4ff85590c0825c73355e48840114" alt></p>
+<ol>
+<li>调用 Unsafe.unpark(Thread_0) 方法，设置 _counter 为 1 </li>
+<li>唤醒 _cond 条件变量中的 Thread_0 </li>
+<li>Thread_0 恢复运行 </li>
+<li>设置 _counter 为 0</li>
+</ol>
+<p>例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestParkUnpark</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            log.debug(<span class="string">"start..."</span>);</span><br><span class="line">            sleep(<span class="number">1</span>);</span><br><span class="line">            log.debug(<span class="string">"park..."</span>);</span><br><span class="line">            LockSupport.park();</span><br><span class="line">            log.debug(<span class="string">"resume..."</span>);</span><br><span class="line">        &#125;, <span class="string">"t1"</span>);</span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        sleep(<span class="number">2</span>);</span><br><span class="line">        log.debug(<span class="string">"unpark..."</span>);</span><br><span class="line">        LockSupport.unpark(t1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">13:17:15.621 c.TestParkUnpark [t1] - start...</span></span><br><span class="line"><span class="comment">13:17:16.626 c.TestParkUnpark [t1] - park...</span></span><br><span class="line"><span class="comment">13:17:17.618 c.TestParkUnpark [main] - unpark...</span></span><br><span class="line"><span class="comment">13:17:17.618 c.TestParkUnpark [t1] - resume...</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><input disabled type="checkbox"> case2: unpark -&gt; park</li>
+</ul>
+<p><img src="https://note.youdao.com/yws/api/personal/file/76E41E68054946ACABCA2B3F8BDEB094?method=download&shareKey=e34e0e8d026a2c52b606979a9816b553" alt></p>
+<ol>
+<li>调用 Unsafe.unpark(Thread_0) 方法，设置 _counter 为1，发现线程正在运行，则无需唤醒</li>
+<li>当前线程调用 Unsafe.park()  方法</li>
+<li>检查 _counter ，本情况为1，这时线程无需阻塞，继续运行 </li>
+<li>设置 _counter 为 0</li>
+</ol>
+<p>例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestParkUnpark</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            log.debug(<span class="string">"start..."</span>);</span><br><span class="line">            sleep(<span class="number">2</span>);</span><br><span class="line">            log.debug(<span class="string">"park..."</span>);</span><br><span class="line">            LockSupport.park();</span><br><span class="line">            log.debug(<span class="string">"resume..."</span>);</span><br><span class="line">        &#125;, <span class="string">"t1"</span>);</span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">        log.debug(<span class="string">"unpark..."</span>);</span><br><span class="line">        LockSupport.unpark(t1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">13:18:31.336 c.TestParkUnpark [t1] - start...</span></span><br><span class="line"><span class="comment">13:18:32.334 c.TestParkUnpark [main] - unpark...</span></span><br><span class="line"><span class="comment">13:18:33.344 c.TestParkUnpark [t1] - park...</span></span><br><span class="line"><span class="comment">13:18:33.344 c.TestParkUnpark [t1] - resume...</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/saltedfishust.github.io/tags/park/" rel="tag"><i class="fa fa-tag"></i> park</a>
+          
+            <a href="/saltedfishust.github.io/tags/unpark/" rel="tag"><i class="fa fa-tag"></i> unpark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" rel="next" title="join 源码解析和保护性暂停模式">
+                <i class="fa fa-chevron-left"></i> join 源码解析和保护性暂停模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/saltedfishust.github.io/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/" rel="prev" title="锁的活跃性">
+                锁的活跃性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/saltedfishust.github.io/uploads/jobs.png"
+                alt="Saltedfish" />
+            
+              <p class="site-author-name" itemprop="name">Saltedfish</p>
+              <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/saltedfishust.github.io/archives">
+              
+                  <span class="site-state-item-count">55</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/saltedfishust.github.io/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/saltedfishust.github.io/tags/index.html">
+                  <span class="site-state-item-count">113</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/saltedfishust" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本使用"><span class="nav-number">1.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#park-amp-unpark-与-wait-amp-notify-异同"><span class="nav-number">2.</span> <span class="nav-text">park &amp; unpark 与 wait &amp; notify 异同</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#park-amp-unpark-底层原理"><span class="nav-number">3.</span> <span class="nav-text">park &amp; unpark 底层原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设计思想"><span class="nav-number">3.1.</span> <span class="nav-text">设计思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层原理"><span class="nav-number">3.2.</span> <span class="nav-text">底层原理</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/saltedfishust.github.io/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/saltedfishust.github.io/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/saltedfishust.github.io/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

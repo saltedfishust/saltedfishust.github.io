@@ -250,7 +250,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/07/15/C17_%E8%AE%BE%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E7%B1%BB-%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -269,7 +269,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/" itemprop="url">排序之归并排序</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/07/15/C17_%E8%AE%BE%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E7%B1%BB-%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB/" itemprop="url">设计线程安全的类——不可变类</a></h1>
         
 
         <div class="post-meta">
@@ -281,8 +281,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-04T19:25:15+08:00">
-                2019-07-04
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-15T18:03:10+08:00">
+                2020-07-15
               </time>
             
 
@@ -304,8 +304,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/saltedfishust.github.io/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构与算法</span>
+                  <a href="/saltedfishust.github.io/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">并发编程</span>
                   </a>
                 </span>
 
@@ -335,7 +335,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  828
+                  981
                 </span>
               
 
@@ -351,7 +351,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  3
+                  4
                 </span>
               
             </div>
@@ -373,14 +373,20 @@
 
       
         
-          <ul>
-<li>归并排序：基于递归和分治的思想，将一个数组对半分，然后将结果归并起来，被对半的数组又可以递归的对半分和归并… 其核心方法是原地归并，归并的过程就是排序的过程。</li>
-<li>时间复杂度：对于长度为N的任意数组，归并排序需要 1/2NlogN~NlogN 次比较，最多访问数组 6NlogN 次。</li>
-<li>特点：能够将任意长度为N的数组排序所需时间降低到与NlogN成正比，主要缺点是所需的额外空间和N成正比。</li>
-<li>理论：归并排序是一种渐进最优的基于比较排序的算法。</li></ul>
+          <blockquote>
+<p>注意：不可变类是线程安全的 指的是单个方法是线程安全的（原子的），但多个方法的组合并不是原子的，并不是说用了不可变类就不用考虑线程安全了。</p>
+</blockquote>
+<h2 id="不可变类设计的要素"><a href="#不可变类设计的要素" class="headerlink" title="不可变类设计的要素"></a>不可变类设计的要素</h2><p>以 String 为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">String</span> </span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span>, <span class="title">Comparable</span>&lt;<span class="title">String</span>&gt;, <span class="title">CharSequence</span> </span>&#123; </span><br><span class="line">    <span class="comment">/** The value is used for character storage. */</span> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">char</span> value[];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/** Cache the hash code for the string */</span> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> hash; <span class="comment">// Default to 0</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="要素1：final-的使用"><a href="#要素1：final-的使用" class="headerlink" title="要素1：final 的使用"></a>要素1：final 的使用</h3><p>发现该类、类中所有属性都是 final 的</p>
+<ul>
+<li>属性用 final 修饰保证了该属性是只读的，不能修改 （或私有，不设计 set 方法）</li>
+<li>类用 final 修饰保证了该类中的方法不能被覆盖，防止子类无意间破坏不可变性</li>
+</ul>
+<p>final 变量保证线程安全也是通过写屏障来实现的，保证线程读到的是相同的值。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/07/15/C17_%E8%AE%BE%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E7%B1%BB-%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -431,7 +437,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -450,7 +456,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" itemprop="url">单例模式与线程安全</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" itemprop="url">CAS & volatile 无锁实现线程安全</a></h1>
         
 
         <div class="post-meta">
@@ -462,8 +468,187 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-28T02:01:50+08:00">
-                2019-06-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-12T11:01:45+08:00">
+                2020-07-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/saltedfishust.github.io/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">并发编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.7k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  10
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="CAS-简介"><a href="#CAS-简介" class="headerlink" title="CAS 简介"></a>CAS 简介</h3><p>前面我们在 <code>初识线程安全问题</code> 中谈到有一种<strong>非阻塞同步</strong>方式也可以解决线程安全问题，就是 <strong>CAS 结合 volatile</strong> 实现的无锁并发（非阻塞同步）。</p>
+<p>CAS 的含义就是 比较并交换（<code>Compare-and-Swap</code>），这是一项依赖于硬件实现的操作。在 Java 中，有一个很底层的类—— <code>Unsafe</code>，里面提供了几种本地方法用于实现 CAS 操作，不过由于 Unsafe 类在设计上就不是提供给用户程序调用的类 ，因此在 JDK 9 之前只有 Java 类库可以使用 CAS，譬如 JUC 包里面的 <code>AtomicInteger</code> 类，其中的 compareAndSet() 和 getAndIncrement() 等方法都使用了 Unsafe 类的 CAS 操作来实现。而如果用户程序也有使用 CAS 操作的需求，那要么就采用反射手段突破 Unsafe 的访问限制，要么就只能通过 Java 类库 API 来 间接使用它。直到JDK 9之后，Java 类库才在 <code>VarHandle</code> 类里开放了面向用户程序使用的 CAS 操作。</p>
+<p>CAS指令需要有三个操作数，分别是内存位置（在Java中可以简单地理解为变量的内存地址，用 V<br>表示）、旧的预期值（用 A 表示）和准备设置的新值（用 B 表示）。CAS 指令执行时，<strong>当且仅当 V 符合 A 时，处理器才会用 B 更新 V 的值</strong>，否则它就不执行更新。但是，不管是否更新了 V 的值，都会返回 V 的旧值，上述的处理过程是一个原子操作，执行期间不会被其他线程中断。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/saltedfishust.github.io/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" itemprop="url">单例模式与线程安全</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-28T02:01:50+08:00">
+                2020-06-28
               </time>
             
 
@@ -566,7 +751,7 @@
 <li>静态内部类懒汉式</li></ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -617,7 +802,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/23/C14_happens-before%E8%A7%84%E5%88%99/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/23/C14_happens-before%E8%A7%84%E5%88%99/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -636,7 +821,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/23/C14_happens-before%E8%A7%84%E5%88%99/" itemprop="url">happens-before规则</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/06/23/C14_happens-before%E8%A7%84%E5%88%99/" itemprop="url">happens-before规则</a></h1>
         
 
         <div class="post-meta">
@@ -648,8 +833,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-23T01:05:45+08:00">
-                2019-06-23
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-23T01:05:45+08:00">
+                2020-06-23
               </time>
             
 
@@ -747,7 +932,7 @@
 <li>线程解锁前，必须把共享变量的最新值刷新到主内存中</li></ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/23/C14_happens-before%E8%A7%84%E5%88%99/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/06/23/C14_happens-before%E8%A7%84%E5%88%99/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -798,7 +983,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%88%9D%E7%BA%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -817,7 +1002,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%88%9D%E7%BA%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" itemprop="url">排序之初级排序算法（选择排序、插入排序、冒泡排序、希尔排序）</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/" itemprop="url">ReentrantLock 详解</a></h1>
         
 
         <div class="post-meta">
@@ -829,197 +1014,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-14T19:25:15+08:00">
-                2019-06-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/saltedfishust.github.io/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构与算法</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">字数统计&#58;</span>
-                
-                <span title="字数统计">
-                  1.4k
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">
-                  6
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>初级排序算法：</p>
-<ul>
-<li>选择排序   –    N^2</li>
-<li>插入排序   –   N~N^2</li>
-<li>冒泡排序   –    N^2</li>
-<li>希尔排序   –   NlogN ? </li>
-</ul>
-<p>高级排序算法：</p>
-<ul>
-<li>归并排序     –  NlogN</li>
-<li>快速排序     –  NlogN</li>
-<li>三向快速排序  – N ~ NlogN</li>
-<li>堆排序       –  NlogN</li></ul>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%88%9D%E7%BA%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/" itemprop="url">ReentrantLock 详解</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-14T01:05:45+08:00">
-                2019-06-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-14T01:05:45+08:00">
+                2020-06-14
               </time>
             
 
@@ -1118,7 +1114,7 @@
 <li>支持多个条件变量（可理解成多个条件多个WaitSet，可以提高唤醒的准确性）</li></ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1169,7 +1165,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/14/C13_Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/14/C13_Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -1188,7 +1184,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/14/C13_Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" itemprop="url">Java内存模型(JMM)与原子性、可见性、有序性</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/06/14/C13_Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" itemprop="url">Java内存模型(JMM)与原子性、可见性、有序性</a></h1>
         
 
         <div class="post-meta">
@@ -1200,8 +1196,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-14T01:05:45+08:00">
-                2019-06-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-14T01:05:45+08:00">
+                2020-06-14
               </time>
             
 
@@ -1303,7 +1299,7 @@
 <p>我们都知道<strong>volatile</strong>可以保证<code>可见性</code>和<code>有序性</code>，不能保证原子性；而<strong>synchronized</strong>最重要的功能就是保证<code>原子性</code>，它也可以保证<code>可见性</code>，并且在<strong>一定条件下</strong>也可以保证<code>有序性</code>，笼统的讲<strong>synchronized</strong>可以保证<code>有序性</code>是不准确的，稍后会解释。下面我将从JMM的角度解释一下<strong>volatile</strong>和<strong>synchronized</strong>的原理。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/14/C13_Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/06/14/C13_Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1354,7 +1350,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -1373,7 +1369,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/" itemprop="url">锁的活跃性</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/" itemprop="url">锁的活跃性</a></h1>
         
 
         <div class="post-meta">
@@ -1385,8 +1381,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-05T22:01:45+08:00">
-                2019-06-05
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-05T22:01:45+08:00">
+                2020-06-05
               </time>
             
 
@@ -1483,7 +1479,7 @@
 <li>t2 线程 获得 B 对象锁，接下来想获取 A 对象锁</li></ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1534,7 +1530,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -1553,7 +1549,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/" itemprop="url">对于数据结构的理解</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/" itemprop="url">park & unpark 原理</a></h1>
         
 
         <div class="post-meta">
@@ -1565,191 +1561,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-04T19:25:15+08:00">
-                2019-06-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/saltedfishust.github.io/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构与算法</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">字数统计&#58;</span>
-                
-                <span title="字数统计">
-                  901
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">
-                  3
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="程序是什么？"><a href="#程序是什么？" class="headerlink" title="程序是什么？"></a>程序是什么？</h2><p>程序 = 数据结构 + 算法；</p>
-<p>把编写程序想象成搭积木的过程，那么数据结构就是一块块形状各异的积木块，而算法则是你要搭配它们的策略，只有你真正了解了每个积木块的特点和用途，然后运用不用的算法，就可以搭建出漂亮的房子、车子…</p>
-<h2 id="最基本的数据结构是什么？"><a href="#最基本的数据结构是什么？" class="headerlink" title="最基本的数据结构是什么？"></a>最基本的数据结构是什么？</h2><p>很多人可能对这个问题一头雾水，数组？栈和队列？他们都很基本啊，但显然我想要的答案不是这些，最基本的数据结构是<code>变量</code>，在面向对象的语言中，这个变量的范畴会更加宽泛，例如在Java中，变量包括基本类型变量（基本类型的实例）和对象（类的实例）。接下来我会解释为什么我这么说。</p>
-<h2 id="两类数据结构"><a href="#两类数据结构" class="headerlink" title="两类数据结构"></a>两类数据结构</h2><p>在分类之前，我们想探讨一下关于数组和链表的问题，这两种数据结构相信大家再熟悉不过，请回答以下问题：</p>
-<ul>
-<li>数组的基本定义是什么？数组的特点是什么？</li>
-<li>链表的基本定义是什么？链表的特点是什么？</li></ul>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/" itemprop="url">park & unpark 原理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-02T23:01:45+08:00">
-                2019-06-02
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-02T23:01:45+08:00">
+                2020-06-02
               </time>
             
 
@@ -1854,7 +1667,7 @@
 <li><strong>park &amp; unpark 可以先 unpark，而 wait &amp; notify 不能先 notify</strong>。</li></ol>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1905,7 +1718,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2019/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Saltedfish">
@@ -1924,7 +1737,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/saltedfishust.github.io/2019/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" itemprop="url">join 源码解析和保护性暂停模式</a></h1>
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" itemprop="url">join 源码解析和保护性暂停模式</a></h1>
         
 
         <div class="post-meta">
@@ -1936,8 +1749,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-24T18:09:41+08:00">
-                2019-05-24
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-24T18:09:41+08:00">
+                2020-05-24
               </time>
             
 
@@ -2037,7 +1850,190 @@
 <li>因为要等待另一方的结果，因此归类到同步模式</li></ul>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/saltedfishust.github.io/2019/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more" rel="contents">
+            <a class="btn" href="/saltedfishust.github.io/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/saltedfishust.github.io/uploads/jobs.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/saltedfishust.github.io/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/" itemprop="url">wait & notify 原理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-15T18:06:21+08:00">
+                2020-05-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/saltedfishust.github.io/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">并发编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h2><p>我们在 synchronized 原理部分已经介绍过 Monitor。</p>
+<p>Monitor 结构如下：<br><img src="https://note.youdao.com/yws/api/personal/file/72E0FCAFB86D445AB04E2666D93C9B74?method=download&shareKey=a689d6da74b5eec0d59f27adf79b1d30" alt="image"></p>
+<ul>
+<li>Owner 线程发现条件不满足，调用 wait 方法，即可进入 WaitSet 变为 WAITING 状态；</li>
+<li>BLOCKED 和 WAITING 的线程都处于阻塞状态，占用 CPU 时间片；</li>
+<li>BLOCKED 线程会在 Owner 线程释放锁时唤醒；</li>
+<li>WAITING 线程会在 Owner 线程调用 notify 或 notifyAll； 时唤醒，但唤醒后并不意味者立刻获得锁，仍需进入 EntryList 重新竞争。</li></ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/saltedfishust.github.io/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2079,7 +2075,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/saltedfishust.github.io/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/saltedfishust.github.io/">1</a><span class="page-number current">2</span><a class="page-number" href="/saltedfishust.github.io/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/saltedfishust.github.io/page/5/">5</a><a class="extend next" rel="next" href="/saltedfishust.github.io/page/3/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
+    <a class="extend prev" rel="prev" href="/saltedfishust.github.io/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/saltedfishust.github.io/">1</a><span class="page-number current">2</span><a class="page-number" href="/saltedfishust.github.io/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/saltedfishust.github.io/page/6/">6</a><a class="extend next" rel="next" href="/saltedfishust.github.io/page/3/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
   </nav>
 
 
@@ -2129,7 +2125,7 @@
               
                 <a href="/saltedfishust.github.io/archives">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">55</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2140,7 +2136,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/saltedfishust.github.io/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -2151,7 +2147,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/saltedfishust.github.io/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">113</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
