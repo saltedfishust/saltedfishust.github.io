@@ -1798,13 +1798,6 @@
         
           <p><img src="https://note.youdao.com/yws/api/personal/file/2ADDAAA9C4B5467B9C0B4B304E0CE8EC?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
 <center>注：上图的“常量池”有误，应该是“运行时常量池”</center>
-#### 运行时常量池
-
-<p>运行时常量池与常量池：Class文件即字节码文件中除了有类的基本信息（版本、字段、方法、接口等描述信息），类方法定义，还有一项信息是<code>常量池表（Constant Pool Table）</code>，也简称为常量池，用于存放编译期生成的各种字面量与符号引用，类方法定义中的虚拟机指令将通过常量池来执行，这部分内容将在类加载后存放到方法区的<code>运行时常量池</code>中。</p>
-<ul>
-<li>常量池：就是一张表，虚拟机指令根据这张常量表找到要执行的类名、方法名、参数类型、字面量等信息；</li>
-<li>运行时常量池：常量池是*.class 文件中的，当该类被加载，它的常量池信息就会放入<code>运行时常量池</code>，并把里面的符号地址变为真实地址。运行时常量池相对于Class文件常量池的另外一个重要特征是具备动态性，Java语言并不要求常量一定只有编译期才能产生，也就是说，并非预置入Class文件中常量池的内容才能进入方法区运行时常量池，运行期间也可以将新的常量放入池中，这种特性被开发人员利用得比较多的便是String类的<code>intern()</code>方法；</li>
-<li>既然运行时常量池是方法区的一部分，自然受到方法区内存的限制，当运行时常量池无法再申请到内存时会抛出<code>OutOfMemoryError</code>异常。</li></ul>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/saltedfishust.github.io/2020/09/18/JVM_2_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E4%B9%8B%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0%E3%80%81%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%A5%E5%8F%8A%E4%B8%B2%E6%B1%A0/#more" rel="contents">
