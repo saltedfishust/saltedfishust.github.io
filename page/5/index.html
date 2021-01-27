@@ -1815,7 +1815,35 @@
 
       
         
-          <p>这三个关键词的场景及其作用有重叠，容易混淆，简单整理了一下：<br>| 关键字与应用场景 |                   数据                   |                             方法                             |                          类                           |<br>| :————–: | :————————————–: | :———————————————————-: | :—————————————————: |<br>|      static      |     与对象无关，与类有关，只加载一次     |                     与对象无关，与类有关                     |                内部类才能被static修饰                 |<br>|      final       | 可以继承访问，不可修改，不同对象可能不同 |                可访问，不可继承（重写、覆盖）                | 不允许继承，所有方法都隐式是final的，对于数据没有限制 |<br>|     private      |          不可以访问，更不能修改          | 不可访问，更不能继承；final和private关键字都隐式地指定方法为是final的 |                      不可以访问                       |</p>
+          <p>这三个关键词的场景及其作用有重叠，容易混淆，简单整理了一下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">关键字与应用场景</th>
+<th align="center">数据</th>
+<th align="center">方法</th>
+<th align="center">类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">static</td>
+<td align="center">与对象无关，与类有关，只加载一次</td>
+<td align="center">与对象无关，与类有关</td>
+<td align="center">内部类才能被static修饰</td>
+</tr>
+<tr>
+<td align="center">final</td>
+<td align="center">可以继承访问，不可修改，不同对象可能不同</td>
+<td align="center">可访问，不可继承（重写、覆盖）</td>
+<td align="center">不允许继承，所有方法都隐式是final的，对于数据没有限制</td>
+</tr>
+<tr>
+<td align="center">private</td>
+<td align="center">不可以访问，更不能修改</td>
+<td align="center">不可访问，更不能继承；final和private关键字都隐式地指定方法为是final的</td>
+<td align="center">不可以访问</td>
+</tr>
+</tbody></table>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/saltedfishust.github.io/2018/11/22/%E5%9F%BA%E7%A1%80_static&final&private/#more" rel="contents">
