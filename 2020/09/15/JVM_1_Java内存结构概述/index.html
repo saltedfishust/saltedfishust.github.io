@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="1234567### Java内存结构与垃圾回收 包括以下几篇学习笔记#### 1 - Java内存结构概述#### 2 - 运行时常量池#### 3 - 直接内存#### 4 - 堆和GC机制#### 5 - 可达性分析与四种引用类型#### 6 - HotSpot虚拟机对象  本系列大部分叙述是摘抄自书籍《深入理解Java虚拟机》第三版和黑马程序员的网上免费课程，结合了自己的学习感悟，所以定位">
+<meta name="description" content="1234567Java内存结构与垃圾回收 包括以下几篇学习笔记 1 - Java内存结构概述 2 - 运行时常量池 3 - 直接内存 4 - 堆和GC机制 5 - 可达性分析与四种引用类型 6 - HotSpot虚拟机对象  本系列大部分叙述是摘抄自书籍《深入理解Java虚拟机》第三版和黑马程序员的网上免费课程，结合了自己的学习感悟，所以定位成学习笔记与大家进行分享，对于参考的其他博客的都在文末进">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java内存结构概述">
 <meta property="og:url" content="https://saltedfishust.github.io/2020/09/15/JVM_1_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0/index.html">
 <meta property="og:site_name" content="Saltedfish">
-<meta property="og:description" content="1234567### Java内存结构与垃圾回收 包括以下几篇学习笔记#### 1 - Java内存结构概述#### 2 - 运行时常量池#### 3 - 直接内存#### 4 - 堆和GC机制#### 5 - 可达性分析与四种引用类型#### 6 - HotSpot虚拟机对象  本系列大部分叙述是摘抄自书籍《深入理解Java虚拟机》第三版和黑马程序员的网上免费课程，结合了自己的学习感悟，所以定位">
+<meta property="og:description" content="1234567Java内存结构与垃圾回收 包括以下几篇学习笔记 1 - Java内存结构概述 2 - 运行时常量池 3 - 直接内存 4 - 堆和GC机制 5 - 可达性分析与四种引用类型 6 - HotSpot虚拟机对象  本系列大部分叙述是摘抄自书籍《深入理解Java虚拟机》第三版和黑马程序员的网上免费课程，结合了自己的学习感悟，所以定位成学习笔记与大家进行分享，对于参考的其他博客的都在文末进">
 <meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/4FF3F454D8874DF38D1235364CAD8471?method=download&shareKey=d55375734274aff6748d28b843d9b790">
 <meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/678ABA50C7974612A52491CF54EFDCE8?method=download&shareKey=d55375734274aff6748d28b843d9b790">
 <meta property="article:published_time" content="2020-09-15T11:25:15.000Z">
-<meta property="article:modified_time" content="2021-01-25T16:41:11.331Z">
+<meta property="article:modified_time" content="2021-01-27T13:39:11.553Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="程序计数器">
 <meta property="article:tag" content="虚拟机栈">
@@ -380,7 +380,7 @@
       
 
       
-        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">### Java内存结构与垃圾回收 包括以下几篇学习笔记</span><br><span class="line">#### 1 - Java内存结构概述</span><br><span class="line">#### 2 - 运行时常量池</span><br><span class="line">#### 3 - 直接内存</span><br><span class="line">#### 4 - 堆和GC机制</span><br><span class="line">#### 5 - 可达性分析与四种引用类型</span><br><span class="line">#### 6 - HotSpot虚拟机对象</span><br></pre></td></tr></table></figure>
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Java内存结构与垃圾回收 包括以下几篇学习笔记</span><br><span class="line"> 1 - Java内存结构概述</span><br><span class="line"> 2 - 运行时常量池</span><br><span class="line"> 3 - 直接内存</span><br><span class="line"> 4 - 堆和GC机制</span><br><span class="line"> 5 - 可达性分析与四种引用类型</span><br><span class="line"> 6 - HotSpot虚拟机对象</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>本系列大部分叙述是摘抄自书籍《深入理解Java虚拟机》第三版和黑马程序员的网上免费课程，结合了自己的学习感悟，所以定位成学习笔记与大家进行分享，对于参考的其他博客的都在文末进行了引用，如有冒犯，请联系我更正。</p>
 </blockquote>
