@@ -556,7 +556,7 @@
 
       
         
-          <h2 id="Monitor-原理"><a href="#Monitor-原理" class="headerlink" title="Monitor 原理"></a>Monitor 原理</h2><p>在介绍 Monitor 之前，需要了解一下对象头的知识，建议阅读（JVM-6-HotSpot虚拟机对象头）。</p>
+          <h2 id="Monitor-原理"><a href="#Monitor-原理" class="headerlink" title="Monitor 原理"></a>Monitor 原理</h2><p>在介绍 Monitor 之前，需要了解一下对象头的知识，建议阅读<a href="https://saltedfishust.github.io/saltedfishust.github.io/2020/11/01/JVM_6_HotSpot%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E8%B1%A1/">HotSpot虚拟机对象头</a>。</p>
 <p>32位虚拟机对象头Mark Word：<br><img src="https://note.youdao.com/yws/api/personal/file/75DAE2F6DB5A4AE7B4AB4811CD9FC73C?method=download&shareKey=362bf3e98cf5735cf687f90350a87435" alt="image"></p>
 <p>Monitor 被翻译为监视器或<strong>管程</strong>，每个 Java 对象都可以关联一个 Monitor 对象，如果使用 synchronized 给对象上锁（注意，必须是重量级）之后，该对象头的 Mark Word 就被设置为指向 Monitor 对象的指针 + “10” 重量级锁标志。</p>
           <!--noindex-->
