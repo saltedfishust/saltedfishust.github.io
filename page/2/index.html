@@ -1248,7 +1248,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  2.9k
+                  3k
                 </span>
               
 
@@ -1837,7 +1837,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 暂停当前线程 </span></span><br><span class="line">LockSupport.park();</span><br><span class="line"><span class="comment">// 恢复某个线程的运行</span></span><br><span class="line">LockSupport.unpark(暂停线程对象);</span><br></pre></td></tr></table></figure>
 
 <h2 id="park-amp-unpark-与-wait-amp-notify-异同"><a href="#park-amp-unpark-与-wait-amp-notify-异同" class="headerlink" title="park &amp; unpark 与 wait &amp; notify 异同"></a>park &amp; unpark 与 wait &amp; notify 异同</h2><ol>
-<li>park 和 wait 都会让线程进入<code>WAITING</code>或<code>TIMED_WAITING</code>状态，都可以被 interrupt 方法打断（ReentrateLock 可打断基于 park ）；</li>
+<li>park 和 wait 都会让线程进入<code>WAITING</code>或<code>TIMED_WAITING</code>状态，都可以被 interrupt 方法打断（<strong>ReentrateLock 可打断基于 park</strong> ）；</li>
 <li>wait、notify 和 notifyAll 必须配合一个锁对象及其关联的 Monitor 一起使用；而 park、unpark 不必，park没有锁的概念。<ul>
 <li>我们知道 wait 必须写在 synchronized 里，这是因为 wait 必须是由加锁的对象调用的，其原理是通过加锁的对象关联的同步监视器（Monitor）来管理线程，当调用 wait 方法时，把当前持锁线程放入 Monitor 的 WaitSet，所以无论是 wait 还是 notify 都必须由被锁对象调用。</li>
 <li>而 park 则不同，park 是类方法，调用方式类似于 sleep，而 unpark 必须指定线程对象，所以它是“精确唤醒”。</li>
