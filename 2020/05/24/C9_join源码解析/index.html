@@ -79,15 +79,15 @@
 
 
 
-<meta name="description" content="保护性暂停模式（同步模式）即 Guarded Suspension，用在一个线程等待另一个线程的执行结果  要点  有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject 如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者&#x2F;消费者）  JDK 中，join 的实现、Future 的实现，采用的就是此模式 因为要等待另一方的结果，因此归类到同步模式">
+<meta name="description" content="保护性暂停模式（同步模式）即 Guarded Suspension，用在一个线程等待另一个线程的执行结果 。 要点：  有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject 如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者&#x2F;消费者）  JDK 中，join 的实现、Future 的实现，采用的就是此模式 因为要等待另一方的结果，因此归类到同步模式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="join 源码解析和保护性暂停模式">
 <meta property="og:url" content="https://saltedfishust.github.io/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="Saltedfish">
-<meta property="og:description" content="保护性暂停模式（同步模式）即 Guarded Suspension，用在一个线程等待另一个线程的执行结果  要点  有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject 如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者&#x2F;消费者）  JDK 中，join 的实现、Future 的实现，采用的就是此模式 因为要等待另一方的结果，因此归类到同步模式">
+<meta property="og:description" content="保护性暂停模式（同步模式）即 Guarded Suspension，用在一个线程等待另一个线程的执行结果 。 要点：  有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject 如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者&#x2F;消费者）  JDK 中，join 的实现、Future 的实现，采用的就是此模式 因为要等待另一方的结果，因此归类到同步模式">
 <meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/C8E2C88DB46C4911A8C53CC6F76E7441?method=download&shareKey=1ce13bad7e616ce6d3a26f4a8051ae51">
 <meta property="article:published_time" content="2020-05-24T10:09:41.000Z">
-<meta property="article:modified_time" content="2021-01-25T16:13:05.680Z">
+<meta property="article:modified_time" content="2021-01-27T12:54:33.411Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="join">
 <meta property="article:tag" content="保护性暂停模式">
@@ -375,8 +375,8 @@
       
 
       
-        <h2 id="保护性暂停模式（同步模式）"><a href="#保护性暂停模式（同步模式）" class="headerlink" title="保护性暂停模式（同步模式）"></a>保护性暂停模式（同步模式）</h2><p>即 Guarded Suspension，用在一个线程等待另一个线程的执行结果 </p>
-<p>要点</p>
+        <h2 id="保护性暂停模式（同步模式）"><a href="#保护性暂停模式（同步模式）" class="headerlink" title="保护性暂停模式（同步模式）"></a>保护性暂停模式（同步模式）</h2><p>即 Guarded Suspension，用在一个线程等待另一个线程的执行结果 。</p>
+<p>要点：</p>
 <ul>
 <li>有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject</li>
 <li>如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者/消费者） </li>
