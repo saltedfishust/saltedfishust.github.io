@@ -742,7 +742,7 @@
         
           <h3 id="CAS-简介"><a href="#CAS-简介" class="headerlink" title="CAS 简介"></a>CAS 简介</h3><p>前面我们在 <code>初识线程安全问题</code> 中谈到有一种<strong>非阻塞同步</strong>方式也可以解决线程安全问题，就是 <strong>CAS 结合 volatile</strong> 实现的无锁并发（非阻塞同步）。</p>
 <p>CAS 的含义就是 比较并交换（<code>Compare-and-Swap</code>），这是一项依赖于硬件实现的操作。在 Java 中，有一个很底层的类—— <code>Unsafe</code>，里面提供了几种本地方法用于实现 CAS 操作，不过由于 Unsafe 类在设计上就不是提供给用户程序调用的类 ，因此在 JDK 9 之前只有 Java 类库可以使用 CAS，譬如 JUC 包里面的 <code>AtomicInteger</code> 类，其中的 compareAndSet() 和 getAndIncrement() 等方法都使用了 Unsafe 类的 CAS 操作来实现。而如果用户程序也有使用 CAS 操作的需求，那要么就采用反射手段突破 Unsafe 的访问限制，要么就只能通过 Java 类库 API 来 间接使用它。直到JDK 9之后，Java 类库才在 <code>VarHandle</code> 类里开放了面向用户程序使用的 CAS 操作。</p>
-<p>CAS指令需要有三个操作数，分别是内存位置（在Java中可以简单地理解为变量的内存地址，用 V<br>表示）、旧的预期值（用 A 表示）和准备设置的新值（用 B 表示）。CAS 指令执行时，<strong>当且仅当 V 符合 A 时，处理器才会用 B 更新 V 的值</strong>，否则它就不执行更新。但是，不管是否更新了 V 的值，都会返回 V 的旧值，上述的处理过程是一个原子操作，执行期间不会被其他线程中断。</p>
+<p>CAS指令需要有三个操作数，分别是内存位置（在Java中可以简单地理解为变量的内存地址，用 V 表示）、旧的预期值（用 A 表示）和准备设置的新值（用 B 表示）。CAS 指令执行时，<strong>当且仅当 V 符合 A 时，处理器才会用 B 更新 V 的值</strong>，否则它就不执行更新。但是，不管是否更新了 V 的值，都会返回 V 的旧值，上述的处理过程是一个原子操作，执行期间不会被其他线程中断。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/saltedfishust.github.io/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/#more" rel="contents">
