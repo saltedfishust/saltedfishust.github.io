@@ -79,14 +79,14 @@
 
 
 
-<meta name="description" content="线程与进程进程 程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。  当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。 进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一">
+<meta name="description" content="线程与进程进程 程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。  当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一个">
 <meta property="og:type" content="article">
 <meta property="og:title" content="创建线程和查看线程">
 <meta property="og:url" content="https://saltedfishust.github.io/2020/03/01/C0_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Saltedfish">
-<meta property="og:description" content="线程与进程进程 程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。  当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。 进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一">
+<meta property="og:description" content="线程与进程进程 程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。  当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一个">
 <meta property="article:published_time" content="2020-03-01T04:29:39.000Z">
-<meta property="article:modified_time" content="2021-01-25T16:11:57.070Z">
+<meta property="article:modified_time" content="2021-03-02T06:55:37.062Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="进程与线程">
 <meta property="article:tag" content="创建线程">
@@ -337,7 +337,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.8k
+                  2.1k
                 </span>
               
 
@@ -353,7 +353,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  7
+                  8
                 </span>
               
             </div>
@@ -376,17 +376,28 @@
       
         <h3 id="线程与进程"><a href="#线程与进程" class="headerlink" title="线程与进程"></a>线程与进程</h3><h4 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h4><ul>
 <li>程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。 </li>
-<li>当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。</li>
-<li>进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一个实例进程（例如网易云音乐、360 安全卫士等）</li>
+<li>当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一个实例进程（例如网易云音乐、360 安全卫士等）。</li>
+<li>32位虚拟机的最大寻址地址为 2<sup>32</sup> 也就是 4G，也就是说给进程分配的最大内存为4G。</li>
+</ul>
+<h4 id="进程间的通信方式"><a href="#进程间的通信方式" class="headerlink" title="进程间的通信方式"></a>进程间的通信方式</h4><ul>
+<li>管道：简单方便，但是半双工的单向通信，效率低下，不适合频繁通信的场景。</li>
+<li>消息队列：类似于缓存，生产者和消费者模式，队列充当中间商，优点是高效，缺点是消耗的内存比较大。</li>
+<li>共享内存：将分配给多个进程的虚拟内存各取一部分映射到同一块物理内存，多个进程就完成了内存共享，优点是节约了内存，缺点是进程较多时，频繁发生进程竞争内存影响效率。</li>
+<li>信号量：为了解决共享内存的问题，可以引入信号量，其本质就是一个计数器，实现进程之间的互斥和同步。</li>
+<li>套接字（Socket）：用于远程进程间的通信。</li>
 </ul>
 <h4 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h4><ul>
-<li>一个进程之内可以分为一到多个线程。</li>
 <li>一个线程就是一个指令流，将指令流中的一条条指令以一定的顺序交给 CPU 执行。</li>
-<li>Java 中，线程作为最小调度单位，进程作为资源分配的最小单位。 在 windows 中进程是不活动的，只是作为线程的容器。<a id="more"></a></li>
+</ul>
+<h4 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h4><ul>
+<li>共享内存：volatile共享内存</li>
+<li>消息传递：wait / notify / join / lock(park) / unlock(unpark)</li>
+<li>管道流：使用较少</li>
 </ul>
 <h4 id="二者对比"><a href="#二者对比" class="headerlink" title="二者对比"></a>二者对比</h4><ul>
-<li>进程基本上相互独立的，而线程存在于进程内，是进程的一个子集</li>
-<li>进程拥有共享的资源，如内存空间等，供其内部的线程共享 </li>
+<li>定义区别如上</li>
+<li>进程基本上相互独立的，而线程存在于进程内，一个进程可包含多个线程，进程拥有共享的资源，如内存空间等，供其内部的线程共享 </li>
+<li>Java 中，进程作为资源分配的最小单位，线程作为最小调度单位</li>
 <li>进程间通信较为复杂<ul>
 <li>同一台计算机的进程通信称为 IPC（Inter-process communication）</li>
 <li>不同计算机之间的进程通信，需要通过网络，并遵守共同的协议，例如 HTTP</li>
@@ -654,7 +665,7 @@ Java 8 以后可以使用 lambda 精简代码<figure class="highlight java"><tab
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#线程与进程"><span class="nav-number">1.</span> <span class="nav-text">线程与进程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#进程"><span class="nav-number">1.1.</span> <span class="nav-text">进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程"><span class="nav-number">1.2.</span> <span class="nav-text">线程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二者对比"><span class="nav-number">1.3.</span> <span class="nav-text">二者对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建和运行线程"><span class="nav-number">2.</span> <span class="nav-text">创建和运行线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方法1，直接使用-Thread"><span class="nav-number">2.1.</span> <span class="nav-text">方法1，直接使用 Thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法2，使用-Runnable-配合-Thread"><span class="nav-number">2.2.</span> <span class="nav-text">方法2，使用 Runnable 配合 Thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法3，FutureTask-配合-Thread"><span class="nav-number">2.3.</span> <span class="nav-text">方法3，FutureTask 配合 Thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三种方法对比"><span class="nav-number">2.4.</span> <span class="nav-text">三种方法对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看进程线程的方法"><span class="nav-number">3.</span> <span class="nav-text">查看进程线程的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#windows"><span class="nav-number">3.1.</span> <span class="nav-text">windows</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linux"><span class="nav-number">3.2.</span> <span class="nav-text">linux</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java"><span class="nav-number">3.3.</span> <span class="nav-text">Java</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例1：CPU占用过高"><span class="nav-number">3.4.</span> <span class="nav-text">案例1：CPU占用过高</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例2：程序运行很长时间没有结果（死锁）"><span class="nav-number">3.5.</span> <span class="nav-text">案例2：程序运行很长时间没有结果（死锁）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）"><span class="nav-number">3.6.</span> <span class="nav-text">案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#线程与进程"><span class="nav-number">1.</span> <span class="nav-text">线程与进程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#进程"><span class="nav-number">1.1.</span> <span class="nav-text">进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#进程间的通信方式"><span class="nav-number">1.2.</span> <span class="nav-text">进程间的通信方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程"><span class="nav-number">1.3.</span> <span class="nav-text">线程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程间通信"><span class="nav-number">1.4.</span> <span class="nav-text">线程间通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二者对比"><span class="nav-number">1.5.</span> <span class="nav-text">二者对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建和运行线程"><span class="nav-number">2.</span> <span class="nav-text">创建和运行线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方法1，直接使用-Thread"><span class="nav-number">2.1.</span> <span class="nav-text">方法1，直接使用 Thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法2，使用-Runnable-配合-Thread"><span class="nav-number">2.2.</span> <span class="nav-text">方法2，使用 Runnable 配合 Thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法3，FutureTask-配合-Thread"><span class="nav-number">2.3.</span> <span class="nav-text">方法3，FutureTask 配合 Thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三种方法对比"><span class="nav-number">2.4.</span> <span class="nav-text">三种方法对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看进程线程的方法"><span class="nav-number">3.</span> <span class="nav-text">查看进程线程的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#windows"><span class="nav-number">3.1.</span> <span class="nav-text">windows</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linux"><span class="nav-number">3.2.</span> <span class="nav-text">linux</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java"><span class="nav-number">3.3.</span> <span class="nav-text">Java</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例1：CPU占用过高"><span class="nav-number">3.4.</span> <span class="nav-text">案例1：CPU占用过高</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例2：程序运行很长时间没有结果（死锁）"><span class="nav-number">3.5.</span> <span class="nav-text">案例2：程序运行很长时间没有结果（死锁）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）"><span class="nav-number">3.6.</span> <span class="nav-text">案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）</span></a></li></ol></li></ol></div>
             
 
           </div>
