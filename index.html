@@ -879,7 +879,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  3.8k
+                  4k
                 </span>
               
 
@@ -895,7 +895,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  17
+                  18
                 </span>
               
             </div>
@@ -917,7 +917,9 @@
 
       
         
-          <h3 id="语法糖"><a href="#语法糖" class="headerlink" title="语法糖"></a>语法糖</h3><p>所谓的 语法糖，其实就是指 java 编译器把 .java 源码编译为 .class 字节码的过程中，自动生成和转换的一些代码，主要是为了减轻程序员的负担，算是 java 编译器给我们的一个额外福利（给糖吃嘛），常见的语法糖有以下几种。</p>
+          <h2 id="先谈一下编译"><a href="#先谈一下编译" class="headerlink" title="先谈一下编译"></a>先谈一下编译</h2><p>在Java技术下谈“编译期”而没有具体上下文语境的话，其实是一句很含糊的表述，因为它可能是指一个前端编译器（叫“编译器的前端”更准确一些）把 <code>.java文件转变成.class文件</code>的过程；也可能是指Java虚拟机的即时编译器（常称JIT编译器，Just In Time Compiler）运行期把<code>字节码转变成本地机器码</code>的过程；还可能是指使用静态的提前编译器（常称AOT编译器，Ahead Of Time Compiler）直接把程序编译成与目标机器指令。 </p>
+<p>我们接下来将要讨论的是前端编译器的优化，也就是javac编译器，而后期优化将会在稍后讨论。</p>
+<h2 id="语法糖"><a href="#语法糖" class="headerlink" title="语法糖"></a>语法糖</h2><p>所谓的 语法糖，其实就是指 javac 编译器把 .java 源码编译为 .class 字节码的过程中，自动生成和转换的一些代码，主要是为了减轻程序员的负担，算是 java 编译器给我们的一个额外福利（给糖吃嘛），常见的语法糖有以下几种。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/saltedfishust.github.io/2020/11/20/JVM_8_%E7%BC%96%E8%AF%91%E6%9C%9F%E6%97%A9%E6%9C%9F%E4%BC%98%E5%8C%96%E8%AF%AD%E6%B3%95%E7%B3%96/#more" rel="contents">
