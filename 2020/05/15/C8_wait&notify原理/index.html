@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="底层原理我们在 synchronized 原理部分已经介绍过 Monitor。 Monitor 结构如下：  Owner 线程发现条件不满足，调用 wait 方法，即可进入 WaitSet 变为 WAITING 状态； BLOCKED 和 WAITING 的线程都处于阻塞状态，占用 CPU 时间片； BLOCKED 线程会在 Owner 线程释放锁时唤醒； WAITING 线程会在 Owner 线">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wait &amp; notify 原理">
+<meta property="og:url" content="http://example.com/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="底层原理我们在 synchronized 原理部分已经介绍过 Monitor。 Monitor 结构如下：  Owner 线程发现条件不满足，调用 wait 方法，即可进入 WaitSet 变为 WAITING 状态； BLOCKED 和 WAITING 的线程都处于阻塞状态，占用 CPU 时间片； BLOCKED 线程会在 Owner 线程释放锁时唤醒； WAITING 线程会在 Owner 线">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/72E0FCAFB86D445AB04E2666D93C9B74?method=download&shareKey=a689d6da74b5eec0d59f27adf79b1d30">
+<meta property="article:published_time" content="2020-05-15T10:06:21.000Z">
+<meta property="article:modified_time" content="2021-01-25T16:13:00.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="wait">
+<meta property="article:tag" content="notify">
+<meta property="article:tag" content="线程通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/72E0FCAFB86D445AB04E2666D93C9B74?method=download&shareKey=a689d6da74b5eec0d59f27adf79b1d30">
+
+
+<link rel="canonical" href="http://example.com/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>wait & notify 原理 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">底层原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wait-amp-notify"><span class="nav-number">2.</span> <span class="nav-text">wait &amp; notify</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-sleep-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.</span> <span class="nav-text">与 sleep 的区别</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          wait & notify 原理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-15 18:06:21" itemprop="dateCreated datePublished" datetime="2020-05-15T18:06:21+08:00">2020-05-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-26 00:13:00" itemprop="dateModified" datetime="2021-01-26T00:13:00+08:00">2021-01-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h2><p>我们在 synchronized 原理部分已经介绍过 Monitor。</p>
+<p>Monitor 结构如下：<br><img src="https://note.youdao.com/yws/api/personal/file/72E0FCAFB86D445AB04E2666D93C9B74?method=download&shareKey=a689d6da74b5eec0d59f27adf79b1d30" alt="image"></p>
+<ul>
+<li>Owner 线程发现条件不满足，调用 wait 方法，即可进入 WaitSet 变为 WAITING 状态；</li>
+<li>BLOCKED 和 WAITING 的线程都处于阻塞状态，占用 CPU 时间片；</li>
+<li>BLOCKED 线程会在 Owner 线程释放锁时唤醒；</li>
+<li>WAITING 线程会在 Owner 线程调用 notify 或 notifyAll； 时唤醒，但唤醒后并不意味者立刻获得锁，仍需进入 EntryList 重新竞争。<span id="more"></span></li>
+</ul>
+<h2 id="wait-amp-notify"><a href="#wait-amp-notify" class="headerlink" title="wait &amp; notify"></a>wait &amp; notify</h2><p>wait、notify 方法是 Object 类里的方法。</p>
+<ul>
+<li>wait()：导致当前线程等待，直到其他线程调用被加锁对象的 notify() 方法或 notifyAll() 方法来唤醒该线程。wait()方法有3种形式：<ul>
+<li>无时间参数的 wait（一直等待，直到其他线程通知）；</li>
+<li>带毫秒参数的 wait（等待指定时间后自动苏醒）；</li>
+<li>带毫秒、毫微秒参数的 wait（等待指定时间后自动苏醒）；</li>
+</ul>
+</li>
+<li>notify()：唤醒在此同步监视器上等待的单个线程。如果所有线程都在此同步监视器上等待，则会随机唤醒其中一个线程。只有当前线程放弃对该同步监视器的锁定后（可使用 wait() 方法或线程结束），才可以执行被唤醒的线程。</li>
+<li>notifyAll()：唤醒在此同步监视器上等待的所有线程。只有当前线程放弃对该同步监视器的锁定后，才可以执行被唤醒的线程。</li>
+</ul>
+<p>join 和 wait 这种是由线程对象调用的就得注意下，其实它们都是调用了 wait 方法，wait 方法必须在 synchronized 块里由加锁的对象调用，否则会抛出异常，sychronized 块一定锁住了一个对象，那么调用 wait 方法的就是锁对象（被 synchronized 锁住的对象，join 里是线程对象），这个时候不要犯糊涂，看调用方法发生是在哪个线程执行体（即看哪个线程获取到的锁，肯定是当前线程），那么当前线程就是 Monitor 的 Owner，此时调用 wait 方法会让当前线程让出 Owner ，当前线程就会被阻塞，并加入到 WaitSet 等待别的竞争到锁的线程调用 notify 唤醒。</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    Object lock = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;1. 先获得锁，对 lock 对象加锁成功&quot;</span>);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;2. wait，让出 Owner&quot;</span>);</span><br><span class="line">                lock.wait();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;6. 被 notify 唤醒了&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line">    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;3. 先获得锁，对 lock 对象加锁成功&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;4. notify，随机唤醒 lock 对象关联的 Monitor 上的 WaitSet 里的一个线程&quot;</span>);</span><br><span class="line">        lock.notify();</span><br><span class="line">        System.out.println(<span class="string">&quot;5. 别急，必须等我执行结束释放了锁 notify 才发挥作用&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">1. 先获得锁，对 lock 对象加锁成功</span></span><br><span class="line"><span class="comment">2. wait，让出 Owner</span></span><br><span class="line"><span class="comment">3. 先获得锁，对 lock 对象加锁成功</span></span><br><span class="line"><span class="comment">4. notify，随机唤醒 lock 对象关联的 Monitor 上的 WaitSet 里的一个线程</span></span><br><span class="line"><span class="comment">5. 别急，必须等我执行结束释放了锁 notify 才发挥作用</span></span><br><span class="line"><span class="comment">6. 被 notify 唤醒了</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="与-sleep-的区别"><a href="#与-sleep-的区别" class="headerlink" title="与 sleep 的区别"></a>与 sleep 的区别</h2><ul>
+<li>sleep 是 Thread 方法，而 wait 是 Object 的方法</li>
+<li>sleep 不需要强制和 synchronized 配合使用，但 wait 需要 和 synchronized 一起用</li>
+<li>sleep 在睡眠的同时，不会释放对象锁的，但 wait 在等待的时候会释放对象锁</li>
+<li>它们的状态都 TIMED_WAITING</li>
+</ul>
+<p>调用 wait() 方法的当前线程会释放对该同步监视器的锁定，即进入 WaitSet 并且让出 Owner【这是与 sleep() 最大的区别】，而 sleep 时线程状态虽然变成 TIMED_WAITING，但 Owner 仍然为自己。</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoWaitAndSleep</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Object locker = <span class="keyword">new</span> Object(); <span class="comment">// 被锁的对象，它关联一个 monitor</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">500</span>); <span class="comment">// 这里放前面是为了让线程 t1 有机会执行，暂停一会为了让主线程先获取同步监视器的锁</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">synchronized</span> (locker) &#123;</span><br><span class="line">                System.out.println(<span class="keyword">new</span> Date().toString());</span><br><span class="line">                System.out.println(<span class="string">&quot;Locked in t1&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;t1&quot;</span>).start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (locker) &#123;</span><br><span class="line">            System.out.println(<span class="keyword">new</span> Date().toString());</span><br><span class="line">            System.out.println(<span class="string">&quot;Locked in main&quot;</span>);</span><br><span class="line"><span class="comment">//            Thread.sleep(10000);  // 1. 睡眠 10s</span></span><br><span class="line">            locker.wait(<span class="number">10000</span>); <span class="comment">// 2. 等待 10s</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">sleep 输出，t1 晚了 10 秒</span></span><br><span class="line"><span class="comment">    Mon Dec 14 22:10:35 CST 2020</span></span><br><span class="line"><span class="comment">    Locked in main</span></span><br><span class="line"><span class="comment">    Mon Dec 14 22:10:45 CST 2020</span></span><br><span class="line"><span class="comment">    Locked in t1</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">wait 输出，几乎同步</span></span><br><span class="line"><span class="comment">    Mon Dec 14 22:11:08 CST 2020</span></span><br><span class="line"><span class="comment">    Locked in main</span></span><br><span class="line"><span class="comment">    Mon Dec 14 22:11:09 CST 2020</span></span><br><span class="line"><span class="comment">    Locked in t1</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/wait/" rel="tag"><i class="fa fa-tag"></i> wait</a>
+              <a href="/tags/notify/" rel="tag"><i class="fa fa-tag"></i> notify</a>
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E9%80%9A%E4%BF%A1/" rel="tag"><i class="fa fa-tag"></i> 线程通信</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/" rel="prev" title="synchronized 原理（Monitor、轻量级锁、锁重入、锁膨胀、重量级锁、自旋优化、偏向锁、锁消除、锁粗化）">
+                  <i class="fa fa-chevron-left"></i> synchronized 原理（Monitor、轻量级锁、锁重入、锁膨胀、重量级锁、自旋优化、偏向锁、锁消除、锁粗化）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" rel="next" title="join 源码解析和保护性暂停模式">
+                  join 源码解析和保护性暂停模式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

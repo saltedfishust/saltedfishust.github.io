@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="CAS 简介前面我们在 初识线程安全问题 中谈到有一种非阻塞同步方式也可以解决线程安全问题，就是 CAS 结合 volatile 实现的无锁并发（非阻塞同步）。 CAS 的含义就是 比较并交换（Compare-and-Swap），这是一项依赖于硬件实现的操作。在 Java 中，有一个很底层的类—— Unsafe，里面提供了几种本地方法用于实现 CAS 操作，不过由于 Unsafe 类在设计上就不是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS &amp; volatile 无锁实现线程安全">
+<meta property="og:url" content="http://example.com/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="CAS 简介前面我们在 初识线程安全问题 中谈到有一种非阻塞同步方式也可以解决线程安全问题，就是 CAS 结合 volatile 实现的无锁并发（非阻塞同步）。 CAS 的含义就是 比较并交换（Compare-and-Swap），这是一项依赖于硬件实现的操作。在 Java 中，有一个很底层的类—— Unsafe，里面提供了几种本地方法用于实现 CAS 操作，不过由于 Unsafe 类在设计上就不是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-12T03:01:45.000Z">
+<meta property="article:modified_time" content="2021-03-04T08:11:30.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="CAS">
+<meta property="article:tag" content="volatile">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>CAS & volatile 无锁实现线程安全 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">CAS 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">CAS 的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%97%A0%E9%94%81%E6%95%88%E7%8E%87%E9%AB%98"><span class="nav-number">3.</span> <span class="nav-text">为什么无锁效率高</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS-%E6%90%AD%E9%85%8D-volatile"><span class="nav-number">4.</span> <span class="nav-text">CAS 搭配 volatile</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%80%9F%E5%8A%A9%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.1.</span> <span class="nav-text">借助反射实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%80%9F%E5%8A%A9%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.</span> <span class="nav-text">借助原子类实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E6%95%B4%E6%95%B0"><span class="nav-number">4.2.1.</span> <span class="nav-text">原子整数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E5%BC%95%E7%94%A8"><span class="nav-number">4.2.2.</span> <span class="nav-text">原子引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E6%95%B0%E7%BB%84"><span class="nav-number">4.2.3.</span> <span class="nav-text">原子数组</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E5%AD%97%E6%AE%B5%E6%9B%B4%E6%96%B0%E5%99%A8"><span class="nav-number">4.2.4.</span> <span class="nav-text">原子字段更新器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E7%B4%AF%E5%8A%A0%EF%BC%88%E8%AE%A1%E7%AE%97%EF%BC%89%E5%99%A8"><span class="nav-number">4.2.5.</span> <span class="nav-text">原子累加（计算）器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS-%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%88ABA%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">CAS 的问题（ABA）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3"><span class="nav-number">5.1.</span> <span class="nav-text">如何解决</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/07/12/C16_CAS&volatile%E6%97%A0%E9%94%81%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CAS & volatile 无锁实现线程安全
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-12 11:01:45" itemprop="dateCreated datePublished" datetime="2020-07-12T11:01:45+08:00">2020-07-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-04 16:11:30" itemprop="dateModified" datetime="2021-03-04T16:11:30+08:00">2021-03-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="CAS-简介"><a href="#CAS-简介" class="headerlink" title="CAS 简介"></a>CAS 简介</h3><p>前面我们在 <code>初识线程安全问题</code> 中谈到有一种<strong>非阻塞同步</strong>方式也可以解决线程安全问题，就是 <strong>CAS 结合 volatile</strong> 实现的无锁并发（非阻塞同步）。</p>
+<p>CAS 的含义就是 比较并交换（<code>Compare-and-Swap</code>），这是一项依赖于硬件实现的操作。在 Java 中，有一个很底层的类—— <code>Unsafe</code>，里面提供了几种本地方法用于实现 CAS 操作，不过由于 Unsafe 类在设计上就不是提供给用户程序调用的类 ，因此在 JDK 9 之前只有 Java 类库可以使用 CAS，譬如 JUC 包里面的 <code>AtomicInteger</code> 类，其中的 compareAndSet() 和 getAndIncrement() 等方法都使用了 Unsafe 类的 CAS 操作来实现。而如果用户程序也有使用 CAS 操作的需求，那要么就采用反射手段突破 Unsafe 的访问限制，要么就只能通过 Java 类库 API 来 间接使用它。直到JDK 9之后，Java 类库才在 <code>VarHandle</code> 类里开放了面向用户程序使用的 CAS 操作。</p>
+<p>CAS指令需要有三个操作数，分别是内存位置（在Java中可以简单地理解为变量的内存地址，用 V 表示）、旧的预期值（用 A 表示）和准备设置的新值（用 B 表示）。CAS 指令执行时，<strong>当且仅当 V 符合 A 时，处理器才会用 B 更新 V 的值</strong>，否则它就不执行更新。但是，不管是否更新了 V 的值，都会返回 V 的旧值，上述的处理过程是一个原子操作，执行期间不会被其他线程中断。</p>
+<span id="more"></span>
+
+<p>我们可以看一下 Unsafe 类中 cas 方法的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 四个参数，分别为：操作的变量所属的对象引用，内存偏移量（通过这个变量地址获取 V），旧的预期值 A， 新值 B</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapObject</span><span class="params">(Object var1, <span class="keyword">long</span> var2, Object var4, Object var5)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapInt</span><span class="params">(Object var1, <span class="keyword">long</span> var2, <span class="keyword">int</span> var4, <span class="keyword">int</span> var5)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapLong</span><span class="params">(Object var1, <span class="keyword">long</span> var2, <span class="keyword">long</span> var4, <span class="keyword">long</span> var6)</span></span>;</span><br></pre></td></tr></table></figure>
+<h3 id="CAS-的特点"><a href="#CAS-的特点" class="headerlink" title="CAS 的特点"></a>CAS 的特点</h3><p>因为 CAS 往往都是搭配 while循环使用，会一直占用CPU，所以适用于线程数少、多核 CPU 的场景下。</p>
+<ul>
+<li>CAS 是基于乐观锁的思想：最乐观的估计，不怕别的线程来修改共享变量，就算改了也没关系，我吃亏点再重试呗。</li>
+<li>synchronized 是基于悲观锁的思想：最悲观的估计，得防着其它线程来修改共享变量，我上了锁你们都别想改，我改完了解开锁，你们才有机会。 </li>
+<li>CAS 体现的是无锁并发、无阻塞并发，因为没有使用 synchronized，所以线程不会陷入阻塞，这是效率提升的因素之一， 但如果竞争激烈，可以想到重试必然频繁发生，反而效率会受影响。</li>
+</ul>
+<h3 id="为什么无锁效率高"><a href="#为什么无锁效率高" class="headerlink" title="为什么无锁效率高"></a>为什么无锁效率高</h3><ul>
+<li>无锁情况下，即使重试失败，线程始终在高速运行，没有停歇，而 synchronized 会让线程在没有获得锁的时候，发生上下文切换，进入阻塞。</li>
+<li>打个比喻，线程就好像高速跑道上的赛车，高速运行时，速度超快，一旦发生上下文切换，就好比赛车要减速、熄火，等被唤醒又得重新打火、启动、加速… 恢复到高速运行，代价比较大</li>
+<li>但无锁情况下，因为线程要保持运行，需要额外 CPU 的支持，CPU 在这里就好比高速跑道，没有额外的跑道，线程想高速运行也无从谈起，虽然不会进入阻塞，但由于没有分到时间片，仍然会进入可运行状态，还是会导致上下文切换。</li>
+</ul>
+<h3 id="CAS-搭配-volatile"><a href="#CAS-搭配-volatile" class="headerlink" title="CAS 搭配 volatile"></a>CAS 搭配 volatile</h3><h4 id="借助反射实现"><a href="#借助反射实现" class="headerlink" title="借助反射实现"></a>借助反射实现</h4><p>CAS 必须借助 volatile 才能读取到共享变量的最新值来实现比较并交换的效果，为了更清楚底层的原理，我们先使用反射的方法来实现 cas 的操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sun.misc.Unsafe;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestCASAndVolatile</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> value1 = <span class="number">1000</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> value2 = <span class="number">1000</span>; <span class="comment">// volatile 修饰变量</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NoSuchFieldException, InterruptedException </span>&#123;</span><br><span class="line">        <span class="comment">// 线程不安全的实现</span></span><br><span class="line">        <span class="comment">// 新建 1000 个线程同时对 value - 1</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i ++) &#123;</span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                <span class="comment">// 为了更方便，我们让每个线程暂停 1 ms，更容易产生指令交错</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                value1 --;</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        System.out.println(value1); <span class="comment">// 输出大于 0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">// CAS + volatile 实现</span></span><br><span class="line">        <span class="comment">// 1. 获取 Unsafe 对象</span></span><br><span class="line">        Unsafe unsafe = UnsafeAccessor.getUnsafe();</span><br><span class="line">        <span class="comment">// 2. 获取域的偏移地址</span></span><br><span class="line">        <span class="keyword">long</span> valueOffset = unsafe.staticFieldOffset(TestCASAndVolatile.class.getDeclaredField(<span class="string">&quot;value2&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 新建 1000 个线程同时对 value -1</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i ++) &#123;</span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                <span class="comment">// 这里为了让对比更严谨</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">int</span> A;</span><br><span class="line">                <span class="keyword">int</span> B;</span><br><span class="line">                <span class="comment">// 3. 进行 CAS 操作</span></span><br><span class="line">                <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                    A = value2;</span><br><span class="line">                    B = A - <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">if</span> (unsafe.compareAndSwapInt(TestCASAndVolatile.class, valueOffset, A, B))&#123;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 验证结果</span></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        System.out.println(value2); <span class="comment">// 输出为 0</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 准备工作：通过反射获取 Unsafe 对象</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UnsafeAccessor</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Unsafe unsafe;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Field theUnsafe = Unsafe.class.getDeclaredField(<span class="string">&quot;theUnsafe&quot;</span>); <span class="comment">// 获取私有的成员变量</span></span><br><span class="line">            theUnsafe.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">            unsafe = (Unsafe) theUnsafe.get(<span class="keyword">null</span>); <span class="comment">// 静态成员变量，传 null 值，返回 Unsafe 类型的对象</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchFieldException | IllegalAccessException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Unsafe <span class="title">getUnsafe</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> unsafe;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="借助原子类实现"><a href="#借助原子类实现" class="headerlink" title="借助原子类实现"></a>借助原子类实现</h4><p>当然 J.U.C 并发包为提供了封装好的原子类。我们无需这么麻烦的用反射的方式实现 cas，主要分为以下几种：</p>
+<h5 id="原子整数"><a href="#原子整数" class="headerlink" title="原子整数"></a>原子整数</h5><ul>
+<li>AtomicBoolean</li>
+<li>AtomicInteger </li>
+<li>AtomicLong</li>
+</ul>
+<p>就把上面这些类看成Boolean、Integer、Long 即可，只不过是提供了 CAS 的封装。</p>
+<p>以 AtomicInteger 为例介绍一下原子类封装好的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestAtomicInteger</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        AtomicInteger i = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">       </span><br><span class="line">        <span class="comment">// 获取并自增（i = 0, 结果 i = 1, 返回 0），类似于 i++</span></span><br><span class="line">        System.out.println(i.getAndIncrement());</span><br><span class="line">        <span class="comment">// 自增并获取（i = 1, 结果 i = 2, 返回 2），类似于 ++i</span></span><br><span class="line">        System.out.println(i.incrementAndGet());</span><br><span class="line">        <span class="comment">// 自减并获取（i = 2, 结果 i = 1, 返回 1），类似于 --i</span></span><br><span class="line">        System.out.println(i.decrementAndGet());</span><br><span class="line">        <span class="comment">// 获取并自减（i = 1, 结果 i = 0, 返回 1），类似于 i--</span></span><br><span class="line">        System.out.println(i.getAndDecrement());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 获取并加值（i = 0, 结果 i = 5, 返回 0）</span></span><br><span class="line">        System.out.println(i.getAndAdd(<span class="number">5</span>));</span><br><span class="line">        <span class="comment">// 加值并获取（i = 5, 结果 i = 0, 返回 0）</span></span><br><span class="line">        System.out.println(i.addAndGet(-<span class="number">5</span>));</span><br><span class="line">      </span><br><span class="line">        <span class="comment">// 获取并更新（i = 0, p 为 i 的当前值, 结果 i = -2, 返回 0）</span></span><br><span class="line">        <span class="comment">// 其中函数中的操作能保证原子，但函数需要无副作用</span></span><br><span class="line">        System.out.println(i.getAndUpdate(p -&gt; p - <span class="number">2</span>));</span><br><span class="line">        <span class="comment">// 更新并获取（i = -2, p 为 i 的当前值, 结果 i = 0, 返回 0）</span></span><br><span class="line">        <span class="comment">// 其中函数中的操作能保证原子，但函数需要无副作用</span></span><br><span class="line">        System.out.println(i.updateAndGet(p -&gt; p + <span class="number">2</span>));</span><br><span class="line">      </span><br><span class="line">        <span class="comment">// 获取并计算（i = 0, p 为 i 的当前值, x 为参数1, 结果 i = 10, 返回 0），可以自己定义计算</span></span><br><span class="line">        <span class="comment">// 其中函数中的操作能保证原子，但函数需要无副作用</span></span><br><span class="line">        <span class="comment">// getAndUpdate 如果在 lambda 中引用了外部的局部变量，要保证该局部变量是 final 的</span></span><br><span class="line">        <span class="comment">// getAndAccumulate 可以通过 参数1 来引用外部的局部变量，但因为其不在 lambda 中因此不必是 final</span></span><br><span class="line">        System.out.println(i.getAndAccumulate(<span class="number">10</span>, (p, x) -&gt; p + x));</span><br><span class="line">        <span class="comment">// 计算并获取（i = 10, p 为 i 的当前值, x 为参数1, 结果 i = 0, 返回 0）</span></span><br><span class="line">        <span class="comment">// 其中函数中的操作能保证原子，但函数需要无副作用</span></span><br><span class="line">        System.out.println(i.accumulateAndGet(-<span class="number">10</span>, (p, x) -&gt; p + x));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们借助 AtomicInteger 来解决上述问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestCASAndVolatileAtomic</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> AtomicInteger value = <span class="keyword">new</span> AtomicInteger(<span class="number">1000</span>); <span class="comment">// 原子类内部的 value 也用 volatile 修饰了</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="comment">// 新建 1000 个线程同时对 value -1</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i ++) &#123;</span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                <span class="comment">// 这里为了让对比更严谨</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">int</span> A;</span><br><span class="line">                <span class="keyword">int</span> B;</span><br><span class="line">                <span class="comment">// 3. 进行 CAS 操作</span></span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                while (true) &#123;</span></span><br><span class="line"><span class="comment">                    A = value.get();</span></span><br><span class="line"><span class="comment">                    B = A - 1;</span></span><br><span class="line"><span class="comment">                    if (value.compareAndSet(A, B))&#123;</span></span><br><span class="line"><span class="comment">                        return;</span></span><br><span class="line"><span class="comment">                    &#125;</span></span><br><span class="line"><span class="comment">                &#125;</span></span><br><span class="line"><span class="comment">                */</span></span><br><span class="line">                <span class="comment">// 可以简化为</span></span><br><span class="line">                value.decrementAndGet(); <span class="comment">// 相当于 -- value</span></span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 验证结果</span></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        System.out.println(value); <span class="comment">// 输出为 0</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="原子引用"><a href="#原子引用" class="headerlink" title="原子引用"></a>原子引用</h5><ul>
+<li>AtomicReference </li>
+<li>AtomicMarkableReference （带版本更改标记）</li>
+<li>AtomicStampedReference （带版本号控制）</li>
+</ul>
+<p>当我们需要保证线程安全的共享变量不是整数时，可以用 AtomicReference 来实现，与原子整数用法类似，只需要把引用的类型通过<strong>泛型</strong>传进去即可，<strong>AtomicMarkableReference 和 AtomicStampedReference 可以同来解决 ABA 问题</strong>。</p>
+<h5 id="原子数组"><a href="#原子数组" class="headerlink" title="原子数组"></a>原子数组</h5><ul>
+<li>AtomicIntegerArray </li>
+<li>AtomicLongArray </li>
+<li>AtomicReferenceArray</li>
+</ul>
+<p>当我们想保护的并不是引用，而是引用里的某个或全部的元素，这个时候就要用到原子数组。</p>
+<h5 id="原子字段更新器"><a href="#原子字段更新器" class="headerlink" title="原子字段更新器"></a>原子字段更新器</h5><ul>
+<li>AtomicIntegerFieldUpdater </li>
+<li>AtomicLongFieldUpdater</li>
+<li>AtomicReferenceFieldUpdater // 域 字段 </li>
+</ul>
+<p>利用字段更新器，可以针对对象的某个域（Field）进行原子操作，只能配合 volatile 修饰的字段使用，否则会出现异常。</p>
+<h5 id="原子累加（计算）器"><a href="#原子累加（计算）器" class="headerlink" title="原子累加（计算）器"></a>原子累加（计算）器</h5><ul>
+<li>LongAdder （每次只能加减1）</li>
+<li>DoubleAdder</li>
+<li>LongAccmulator （可以自己定义计算）</li>
+<li>DoubleAccmulator</li>
+</ul>
+<p>专门做累加的，性能比 getAndIncrement() 、getAndAccumulate 等累加方法更好。</p>
+<p>LongAdder (DoubleAdder)性能提升的原因很简单，就是<strong>在有竞争时，设置多个累加单元，Therad-0 累加 Cell[0]，而 Thread-1 累加 Cell[1]… 最后将结果汇总。这样它们在累加时操作的不同的 Cell 变量，因此减少了 CAS 重试失败，从而提高性能</strong>。LongAdder 的源码设计的非常精巧，其中用到了<strong>cas 锁</strong>，并且巧妙的避免了<strong>缓存行的伪共享问题</strong>（我们在<code>JVM-4-堆和GC详解</code>中也有介绍），有兴趣的可以去研究一下 LongAdder 的源码。</p>
+<h3 id="CAS-的问题（ABA）"><a href="#CAS-的问题（ABA）" class="headerlink" title="CAS 的问题（ABA）"></a>CAS 的问题（ABA）</h3><p>且CAS从语义上来说并不是真正完美的，它存在一个逻辑漏洞：如果一个变量 V 初次读取的时候是 A 值，并且在准备赋值的时候检查到它仍然为 A 值，那就能说明它的值没有被其他线程改变过了吗？这是不能的，因为如果在这段期间它的值曾经被改成 B，后来又被改回为 A，那 CAS 操作就会误认为它从来没有被改变过。这个漏洞称为 CAS 操作的“ABA问题”。</p>
+<h4 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h4><p>AtomicMarkableReference 和 AtomicStampedReference 可以同来解决 ABA 问题。</p>
+<ul>
+<li><code>AtomicMarkableReference</code> 可以通过控制版本是否更改标记（<strong>boolean 值</strong>）来保证 CAS 的正确性；</li>
+<li><code>AtomicStampedReference</code> 可以通过控制变量值的版本号（<strong>int 值</strong>）来保证 CAS 的正确性。</li>
+</ul>
+<p>不过目前来说这两个类处于相当鸡肋的位置，大部分情况下 ABA 问题不会影响程序并发的正确性，如果需要解决ABA问题，改用传统的互斥同步可能会比原子类更为高效。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CAS/" rel="tag"><i class="fa fa-tag"></i> CAS</a>
+              <a href="/tags/volatile/" rel="tag"><i class="fa fa-tag"></i> volatile</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/28/C15_%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" rel="prev" title="单例模式与线程安全">
+                  <i class="fa fa-chevron-left"></i> 单例模式与线程安全
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/07/15/C17_%E8%AE%BE%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E7%B1%BB-%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB/" rel="next" title="设计线程安全的类——不可变类">
+                  设计线程安全的类——不可变类 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

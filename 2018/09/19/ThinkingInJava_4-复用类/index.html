@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="对psvm的理解Java初学者大都是从main函数在控制台打印HelloWorld来开始Java学习的， 其形式为：public static void main（String[ ] args）。 首先，main方法是JVM（java虚拟机）自动调用，JVM调用main方法的位置自然不会在某个类中、或某个包中，因此只有当main方法在公有级别上时，才对JVM可见，所以mian方法需要public修">
+<meta property="og:type" content="article">
+<meta property="og:title" content="复用类">
+<meta property="og:url" content="http://example.com/2018/09/19/ThinkingInJava_4-%E5%A4%8D%E7%94%A8%E7%B1%BB/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="对psvm的理解Java初学者大都是从main函数在控制台打印HelloWorld来开始Java学习的， 其形式为：public static void main（String[ ] args）。 首先，main方法是JVM（java虚拟机）自动调用，JVM调用main方法的位置自然不会在某个类中、或某个包中，因此只有当main方法在公有级别上时，才对JVM可见，所以mian方法需要public修">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-09-19T06:10:53.000Z">
+<meta property="article:modified_time" content="2021-01-24T09:32:02.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="复用类">
+<meta property="article:tag" content="向上转型">
+<meta property="article:tag" content="向下转型">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2018/09/19/ThinkingInJava_4-%E5%A4%8D%E7%94%A8%E7%B1%BB/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>复用类 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%B9psvm%E7%9A%84%E7%90%86%E8%A7%A3"><span class="nav-number">1.</span> <span class="nav-text">对psvm的理解</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%8D%E7%94%A8%E4%BB%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">复用代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#toString-NaN"><span class="nav-number">3.</span> <span class="nav-text">toString( )</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Esuper-super-%E7%9A%84%E5%87%A0%E7%82%B9%E6%80%9D%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">关于super.super??的几点思考</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%9F%BA%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">初始化基类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AD%90%E7%B1%BB%E9%87%8D%E8%BD%BD%E6%96%B9%E6%B3%95%E7%9A%84%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90%E4%B8%8D%E8%83%BD%E4%BD%8E%E4%BA%8E%E7%88%B6%E7%B1%BB%E4%B8%AD%E6%9D%83%E9%99%90%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">为什么子类重载方法的访问权限不能低于父类中权限？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%91%E4%B8%8A%E8%BD%AC%E5%9E%8B"><span class="nav-number">7.</span> <span class="nav-text">向上转型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%91%E4%B8%8B%E8%BD%AC%E5%9E%8B"><span class="nav-number">8.</span> <span class="nav-text">向下转型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#final%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">9.</span> <span class="nav-text">final关键字</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/09/19/ThinkingInJava_4-%E5%A4%8D%E7%94%A8%E7%B1%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          复用类
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-19 14:10:53" itemprop="dateCreated datePublished" datetime="2018-09-19T14:10:53+08:00">2018-09-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-24 17:32:02" itemprop="dateModified" datetime="2021-01-24T17:32:02+08:00">2021-01-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thinking-in-java/" itemprop="url" rel="index"><span itemprop="name">Thinking in java</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="对psvm的理解"><a href="#对psvm的理解" class="headerlink" title="对psvm的理解"></a><strong>对psvm的理解</strong></h1><p>Java初学者大都是从main函数在控制台打印HelloWorld来开始Java学习的， 其形式为：public static void main（String[ ] args）。</p>
+<p>首先，main方法是JVM（java虚拟机）自动调用，JVM调用main方法的位置自然不会在某个类中、或某个包中，因此只有当main方法在公有级别上时，才对JVM可见，所以mian方法需要public修饰，同理，main方法所在的类也需要public修饰符。</p>
+<p>其次，由于main方法是所有程序的入口，<strong>也就是main被调用时没有任何对象创建</strong>，不通过对象调用某一方法，只有将该方法定义为静态方法，所以main方法是一个静态方法，即需要static修饰。<span id="more"></span></p>
+<p>最后，JVM对于java程序已经是最底层，由它调用的方法的返回值已经没有任何地方可去，因此，main方法返回值为空，即需用void修饰。</p>
+<p>因此Java的main函数只能写作：public static void main（String[ ] args）。</p>
+<p>但是Java程序一定需要main函数，main函数是程序的入口。</p>
+<hr>
+<h1 id="复用代码"><a href="#复用代码" class="headerlink" title="复用代码"></a><strong>复用代码</strong></h1><p><strong>（1）组合</strong></p>
+<p>只需在新的类中产生现有类的对象，由于新的类是由现有类的对象所组成，所以称为组合，只复用现有代码的功能，而非它的形式。</p>
+<p><strong>（2）继承</strong></p>
+<p>按照现有类的类型来创建新类，无需改变现有类的形式，采用现有类的形式并在其中添加新代码。 </p>
+<h1 id="toString-NaN"><a href="#toString-NaN" class="headerlink" title="toString( )"></a><strong>toString( )</strong></h1><p><strong>toString( )方法返回反映这个对象的字符串</strong></p>
+<p>因为toString方法是Object里面已经有了的方法，而所有类都是继承Object，所以“<strong>所有对象都有这个方法</strong>”。它通常只是为了方便输出，比如System.out.println(xx)，括号里面的“xx”如果不是String类型的话，就自动调用xx对象的toString( )方法。</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/huan-guo/p/8404891.html">https://www.cnblogs.com/huan-guo/p/8404891.html</a></p>
+<hr>
+<h1 id="关于super-super-的几点思考"><a href="#关于super-super-的几点思考" class="headerlink" title="关于super.super??的几点思考"></a><strong>关于super.super??的几点思考</strong></h1><ul>
+<li><p>首先super.super 属于多继承错误。</p>
+</li>
+<li><p>对于子类而言，已经继承了父类的所有，那么自然也继承了爷爷类的所有，使用super.super 属于多此一举。</p>
+</li>
+<li><p>super是当前类的私有成员（或者说成是“隐含”的私有成员），代表着父类；而super.super的意思是访问父类中的私有成员，所以不可能。或者换种说法，super和this其实都不是类的成员，根本不存在<strong>对象.成员</strong>（即类似于：this.super,super.this）的语句。</p>
+</li>
+<li><p>super.super 破坏了Java的封装性，对于子类而言，它只考虑它自己和父类，而不关心父类的父类。</p>
+</li>
+</ul>
+<hr>
+<h1 id="初始化基类"><a href="#初始化基类" class="headerlink" title="初始化基类"></a><strong>初始化基类</strong></h1><p>对基类子对象的正确初始化，要在构造器中调用基类构造器来执行初始化，即构建过程是从基类“向外”扩散的，所以基类在导出类构造器可以访问它之前，就已经完成了初始化。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;A()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    B b = <span class="keyword">new</span> B();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;B()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">C</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    B b = <span class="keyword">new</span> B();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">C</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;C()&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        C c = <span class="keyword">new</span> C();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    B()</span></span><br><span class="line"><span class="comment">    A()</span></span><br><span class="line"><span class="comment">    B()</span></span><br><span class="line"><span class="comment">    C()</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>初始化过程：[在加载类完成后，执行main方法语句新建一个C类对象]&gt;&gt;首先初始化C的基类A(首先初始化A的成员变量，再调用构造方法)&gt;&gt;初始化C（首先初始化C的成员变量，再调用构造方法）。</p>
+</blockquote>
+<p>但是如果没有默认的基类构造器，或者想要调用一个带参数的基类构造器，就必须用super显式的编写调用基类构造器的语句，否则编译器会报错。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">(<span class="keyword">int</span> i)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;A()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">B</span><span class="params">(<span class="keyword">int</span> i)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;B()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">C</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">C</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(<span class="number">1</span>);  <span class="comment">//调用基类的构造方法</span></span><br><span class="line">        B b = <span class="keyword">new</span> B(<span class="number">1</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;C()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        C c = <span class="keyword">new</span> C();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    A()</span></span><br><span class="line"><span class="comment">    B()</span></span><br><span class="line"><span class="comment">    C()</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="为什么子类重载方法的访问权限不能低于父类中权限？"><a href="#为什么子类重载方法的访问权限不能低于父类中权限？" class="headerlink" title="为什么子类重载方法的访问权限不能低于父类中权限？"></a>为什么子类重载方法的访问权限不能低于父类中权限？</h1><p>里氏代换原则(Liskov Substitution Principle，LSP)是面向对象设计的基本原则之一。 里氏代换原则中说，任何基类可以出现的地方，子类一定可以出现。 LSP是继承复用的基石，只有当衍生类可以替换掉基类，软件单位的功能不受到影响时，基类才能真正被复用，而衍生类也能够在基类的基础上增加新的行为。里氏代换原则是对“开-闭”原则的补充。实现“开-闭”原则的关键步骤就是抽象化。而基类与子类的继承关系就是抽象化的具体实现，所以里氏代换原则是对实现抽象化的具体步骤的规范。</p>
+<p><strong>把里氏代换原则解释得更完整一些：在一个软件系统中，子类应该可以替换任何基类能够出现的地方，并且经过替换以后，代码还能正常工作。</strong></p>
+<hr>
+<h1 id="向上转型"><a href="#向上转型" class="headerlink" title="向上转型"></a><strong>向上转型</strong></h1><p>语法规则：&lt;父类型&gt; &lt;引用变量名&gt; = new &lt;子类型&gt;( );</p>
+<ul>
+<li>此时通过父类引用变量调用的方法是<strong>子类覆盖或继承父类的方法，不是父类的方法</strong>。</li>
+<li>此时通过父类引用变量无法调用子类特有的方法。</li>
+</ul>
+<p>优点：<strong>使代码简洁</strong>。</p>
+<p>缺点：无法调用子类特有的方法。</p>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Amphibian</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">creep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Amphibian Creep&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">move</span><span class="params">(Amphibian a)</span> </span>&#123;</span><br><span class="line">        a.creep();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Frog</span> <span class="keyword">extends</span> <span class="title">Amphibian</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">creep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Frog Creep&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">jump</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;Frog Jump&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Frog frog = <span class="keyword">new</span> Frog();</span><br><span class="line">        Amphibian amphibian = <span class="keyword">new</span> Amphibian();</span><br><span class="line">        Amphibian frog1 = <span class="keyword">new</span> Frog();</span><br><span class="line">        </span><br><span class="line">        Amphibian.move(frog);      <span class="comment">//向上转型，调用子类覆盖的方法</span></span><br><span class="line">        Amphibian.move(amphibian); <span class="comment">//调用对象自己即父类的方法</span></span><br><span class="line">        frog.creep();              <span class="comment">//调用对象自己即子类的方法</span></span><br><span class="line">        amphibian.creep();         <span class="comment">//调用对象自己即父类的方法</span></span><br><span class="line">        frog1.creep();             <span class="comment">//向上转型，调用子类覆盖的方法</span></span><br><span class="line">        <span class="comment">//! frog1.jump();          //报错,不是从父类中继承或覆盖的方法</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    Frog Creep</span></span><br><span class="line"><span class="comment">    Amphibian Creep</span></span><br><span class="line"><span class="comment">    Frog Creep</span></span><br><span class="line"><span class="comment">    Amphibian Creep</span></span><br><span class="line"><span class="comment">    Frog Creep</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>向上转型–子类引用指向父类，本质上还是子类的对象</strong>。这篇博客讲的很好 <a target="_blank" rel="noopener" href="https://blog.csdn.net/guchenjun789/article/details/81055317%E3%80%82">https://blog.csdn.net/guchenjun789/article/details/81055317。</a></p>
+<hr>
+<h1 id="向下转型"><a href="#向下转型" class="headerlink" title="向下转型"></a><strong>向下转型</strong></h1><p>怎么样才能既实现向上转型，又能使子类可以调用其独有的方法呢，这就需要使用向下转型了。<strong>注意：向下转型必须是在向上转型之后才能进行。</strong></p>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Amphibian</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">creep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Amphibian Creep&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">move</span><span class="params">(Amphibian a)</span> </span>&#123;</span><br><span class="line">        a.creep();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Frog</span> <span class="keyword">extends</span> <span class="title">Amphibian</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">creep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Frog Creep&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">jump</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Frog Jump&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Amphibian frog1 = <span class="keyword">new</span> Frog();       <span class="comment">//向上转型</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">boolean</span> result = frog1 <span class="keyword">instanceof</span> Frog;</span><br><span class="line">        System.out.println(result);         <span class="comment">//true,frog1 is Frog</span></span><br><span class="line">        <span class="keyword">if</span>(result) &#123;</span><br><span class="line">            Frog frog2 = (Frog)frog1;       <span class="comment">//向下转型</span></span><br><span class="line">            frog2.jump();</span><br><span class="line">        &#125;<span class="keyword">else</span></span><br><span class="line">            System.out.println(<span class="string">&quot;不能进行向下转型&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*Output：</span></span><br><span class="line"><span class="comment">    true</span></span><br><span class="line"><span class="comment">    Frog Jump</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>向下转型在Java的泛型编程中应用较多，只要记住向下转型之前必须进行向上转型，且可以配合instanceof关键字运用if判断一起使用就可以了。</p>
+<hr>
+<h1 id="final关键字"><a href="#final关键字" class="headerlink" title="final关键字"></a><strong>final关键字</strong></h1><p>以下讨论了final的三种情况，数据、方法和类。</p>
+<p><strong>（1）final数据</strong></p>
+<ul>
+<li>一个永不改变的编译时常量</li>
+<li>一个在运行时被初始化的值，而你不希望它被改变</li>
+</ul>
+<p>对于基本数据类型，即编译时不变的常量；对于引用而言，final使引用恒定不变，一旦引用被初始化指向一个对象（数组也是对象）后，就无法再把它改为指向其他的对象，<strong>但对象自身可以被修改</strong>。特殊的是，<strong>一个既是static又是final的域只占据一段不能改变的存储空间</strong>，对于对象而言，他只在装载时进行一次初始化，再次初始化对象不会改变它的值，按照惯例，既是static又是final的域（即编译期常量）将用大写表示，并使用下划线分隔各个单词。</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Value</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Value</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.i = i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FinalData</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Random rand = <span class="keyword">new</span> Random(<span class="number">47</span>);</span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">FinalData</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Can be compile-time constant:</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> valueOne = <span class="number">9</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VALUE_TWO = <span class="number">99</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Typital public constant:</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VALUE_THREE = <span class="number">39</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Cannot be compile-time constant:</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> i4 = rand.nextInt(<span class="number">20</span>);</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INT_5 = rand.nextInt(<span class="number">20</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Value v1 = <span class="keyword">new</span> Value(<span class="number">11</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Value v2 = <span class="keyword">new</span> Value(<span class="number">22</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Value VAL_3 = <span class="keyword">new</span> Value(<span class="number">33</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Arrays:</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span>[] a = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id + <span class="string">&quot;: &quot;</span> + <span class="string">&quot;i4 = &quot;</span> + i4 +<span class="string">&quot;, INT_5 = &quot;</span> + INT_5;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        FinalData fd1 = <span class="keyword">new</span> FinalData(<span class="string">&quot;fd1&quot;</span>);</span><br><span class="line">        <span class="comment">//! fd1.valueOne++;           //报错，valueOne是常量</span></span><br><span class="line"></span><br><span class="line">        fd1.v1 = <span class="keyword">new</span> Value(<span class="number">111</span>);      <span class="comment">//可以，v1不是final对象</span></span><br><span class="line">        <span class="comment">//！ fd1.v2 = new Value(222);</span></span><br><span class="line">        <span class="comment">//! fd1.VAL_3 = new Value(333);</span></span><br><span class="line">        <span class="comment">//! fd1.a = new int [6];      // 报错，v2、VAL_3、a是final对象，无法再指向其他对象</span></span><br><span class="line"></span><br><span class="line">        fd1.v2.i++;</span><br><span class="line">        fd1.VAL_3.i++;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; fd1.a.length; i++)</span><br><span class="line">            fd1.a[i]++;              <span class="comment">//可以，因为引用初始化指向一个对象后，无法把它改为指向其他的对象，但对象自身可以被修改。</span></span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;Creating new FinalData&quot;</span>);</span><br><span class="line">        FinalData fd2 = <span class="keyword">new</span> FinalData(<span class="string">&quot;fd2&quot;</span>);</span><br><span class="line">        FinalData fd3 = <span class="keyword">new</span> FinalData(<span class="string">&quot;fd3&quot;</span>);</span><br><span class="line">        System.out.println(fd1);</span><br><span class="line">        System.out.println(fd2);</span><br><span class="line">        System.out.println(fd3);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    Creating new FinalData</span></span><br><span class="line"><span class="comment">    fd1: i4 = 15, INT_5 = 18</span></span><br><span class="line"><span class="comment">    fd2: i4 = 13, INT_5 = 18</span></span><br><span class="line"><span class="comment">    fd3: i4 = 1, INT_5 = 18</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>从Output可以看出，分别在fd1、fd2、fd3中，i4的值是唯一的，但INT_5的值是不可以通过创建第二个FinalDate对象而加以改变的，这是因为它是static的，在装载时就已被初始化，而不是每次创建对象时初始化。</p>
+<p><strong>（2）final方法</strong></p>
+<p>使用final方法只有一个原因，就是把方法锁定以防任何继承类修改它的含义。这是处于设计的考虑：想要确保在继承中使方法行为保持不变，并且不会被覆盖。</p>
+<p><strong>final和private</strong>关键字都隐式地指定为是final的，可以为private方法添加final修饰词，但没必要，并不会有什么不同，因为无法取用private方法也就无法覆盖它。但有趣的是，似乎可以在导出类里“覆盖”private方法，编译器并不会报错，而覆盖final方法则会报错，let us have a try:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WithFinals</span> </span>&#123;</span><br><span class="line">    <span class="comment">//Identical to &quot;private&quot; alone:</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;WithFinals.f()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//Also automatically &quot;final&quot;:</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;WithFinals.g()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OverridingPrivate</span> <span class="keyword">extends</span> <span class="title">WithFinals</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate.f()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate.g()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OverridingPrivate2</span> <span class="keyword">extends</span> <span class="title">OverridingPrivate</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate2.f()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate2.g()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FinalOverridingIllusion</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        OverridingPrivate2 op2 = <span class="keyword">new</span> OverridingPrivate2();</span><br><span class="line">        op2.f();</span><br><span class="line">        op2.g();</span><br><span class="line">        <span class="comment">//向上造型</span></span><br><span class="line">        OverridingPrivate op1 = op2;</span><br><span class="line">        <span class="comment">//! op1.f();</span></span><br><span class="line">        <span class="comment">//! op1.g();  //不能调用f(),g();说明f()和g()并不是覆盖父类的方法，而是子类新的方法。</span></span><br><span class="line">        WithFinals wf = op2;</span><br><span class="line">        <span class="comment">//! wf.f();</span></span><br><span class="line">        <span class="comment">//! wf.g();  //同理</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    OverridingPrivate2.f()</span></span><br><span class="line"><span class="comment">    OverridingPrivate2.g()</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<p>看来编译器骗了我，<strong>f()和g()并不是真正的覆盖，而是子类的新方法</strong>。如果某方法为 private ，它就不是基类的接口的一部分。它仅是一些隐藏于类中的程序代码，只不过是具有相同的名称而已。辨别办法就是在继承的方法前加上@Override，这些方法是不是真的覆盖就原形毕露了。这也提醒我们，<strong>只有非private的方法才可以被覆盖，在导出类中对于基类中的private方法最好采用不用的名字</strong>。</p>
+<p><strong>（3）final类</strong></p>
+<p>定义为final类，意味着不允许继承该类，对该类的设计永远不需要做任何改动，或者出于安全的考虑，不允许它有子类。<strong>所以final类中的所有的方法都隐式的指定为final的</strong>，也可以给方法添加final修饰词，但没必要。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%8D%E7%94%A8%E7%B1%BB/" rel="tag"><i class="fa fa-tag"></i> 复用类</a>
+              <a href="/tags/%E5%90%91%E4%B8%8A%E8%BD%AC%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 向上转型</a>
+              <a href="/tags/%E5%90%91%E4%B8%8B%E8%BD%AC%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 向下转型</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/09/14/ThinkingInJava_3-%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6/" rel="prev" title="访问权限控制">
+                  <i class="fa fa-chevron-left"></i> 访问权限控制
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/11/03/ThinkingInJava_5-%E5%A4%9A%E6%80%81/" rel="next" title="多态">
+                  多态 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

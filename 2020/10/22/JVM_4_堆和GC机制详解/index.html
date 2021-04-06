@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="判断对象是否存活引用计数算法这个算法的基本思路是在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。缺点是很难解决相互引用的问题。 可达性分析算法这个算法的基本思路就是通过一系列称为GC Roots的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为引用链（Referenc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="堆和GC机制详解">
+<meta property="og:url" content="http://example.com/2020/10/22/JVM_4_%E5%A0%86%E5%92%8CGC%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="判断对象是否存活引用计数算法这个算法的基本思路是在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。缺点是很难解决相互引用的问题。 可达性分析算法这个算法的基本思路就是通过一系列称为GC Roots的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为引用链（Referenc">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/4F298DE591394B6292668AD14294F44D?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/65B5E13D0FEA4EC18C684BEB001CDA3B?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/B94C5BB4C2634B6390C4B444D8C479E0?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/1C37BBB211D14481B0C0C306C145FACB?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/328AD4087CBF459AB49245AE068D1591?method=download&shareKey=c12388736e3e797b8fdfff416014620f">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/5214359FE9244F41B34291EE78ECBEE0?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/9C89E6B5EA164088A146D51217786EB4?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/E76BD08BA9414367A70C9105FC0563CC?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/453EA62ED0204792BF8DE87130AC212B?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/0E85D593141642F187A03DEA2A7B90A5?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/CC1C82BF4DD44D6CB622A5C7D2CCFE03?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/DF730D31E66441AE8FE7F7261607D853?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/530CA05CC05E4FBBA857766C76C506B3?method=download&shareKey=97d2a387c0336917eccc84825ec0ee6f">
+<meta property="article:published_time" content="2020-10-22T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-03-02T05:41:38.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="堆">
+<meta property="article:tag" content="GC机制">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/4F298DE591394B6292668AD14294F44D?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+
+
+<link rel="canonical" href="http://example.com/2020/10/22/JVM_4_%E5%A0%86%E5%92%8CGC%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>堆和GC机制详解 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E5%AF%B9%E8%B1%A1%E6%98%AF%E5%90%A6%E5%AD%98%E6%B4%BB"><span class="nav-number">1.</span> <span class="nav-text">判断对象是否存活</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E7%AE%97%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">引用计数算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E7%AE%97%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">可达性分析算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8"><span class="nav-number">1.3.</span> <span class="nav-text">可达性分析与四种引用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">垃圾收集算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4%E7%AE%97%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">标记-清除算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%87%E8%AE%B0-%E6%95%B4%E7%90%86%E7%AE%97%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">标记-整理算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E7%AE%97%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">复制算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E4%BB%A3%E6%94%B6%E9%9B%86%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">分代收集机制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%9A%84%E5%90%8D%E8%AF%8D%E5%AE%9A%E4%B9%89%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">关于垃圾收集的名词定义：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B0%E7%94%9F%E4%BB%A3%E5%92%8C%E8%80%81%E5%B9%B4%E4%BB%A3-%E4%BB%A5%E5%8F%8A-Minor-GC%E5%92%8CFull-GC"><span class="nav-number">3.2.</span> <span class="nav-text">新生代和老年代 以及 Minor GC和Full GC</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HotSpot%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95%E7%9B%B8%E5%85%B3%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">HotSpot收集算法相关原理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%B9%E8%8A%82%E7%82%B9%E6%9E%9A%E4%B8%BE%E4%B8%8E-OopMap"><span class="nav-number">4.1.</span> <span class="nav-text">根节点枚举与 OopMap</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Safepoint"><span class="nav-number">4.2.</span> <span class="nav-text">Safepoint</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Safe-Region"><span class="nav-number">4.3.</span> <span class="nav-text">Safe Region</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Remembered-Set%EF%BC%88%E8%AE%B0%E5%BF%86%E9%9B%86%EF%BC%89%E4%BB%A5%E5%8F%8A%E5%85%B6%E5%AE%9E%E7%8E%B0-Card-Table-%E5%8D%A1%E8%A1%A8"><span class="nav-number">4.4.</span> <span class="nav-text">Remembered Set（记忆集）以及其实现 Card Table (卡表)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B9%8B-Tri-color-Marking"><span class="nav-number">4.5.</span> <span class="nav-text">可达性分析之 Tri-color Marking</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">经典垃圾收集器</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8VM%E5%8F%82%E6%95%B0"><span class="nav-number">5.1.</span> <span class="nav-text">常用VM参数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%B2%E8%A1%8C%E7%BB%84%E5%90%88"><span class="nav-number">5.2.</span> <span class="nav-text">串行组合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%9E%E5%90%90%E9%87%8F%E4%BC%98%E5%85%88%E7%BB%84%E5%90%88"><span class="nav-number">5.3.</span> <span class="nav-text">吞吐量优先组合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E6%97%B6%E9%97%B4%E4%BC%98%E5%85%88%E7%BB%84%E5%90%88"><span class="nav-number">5.4.</span> <span class="nav-text">响应时间优先组合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#G1-Garbage-First"><span class="nav-number">5.5.</span> <span class="nav-text">G1 (Garbage First)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E4%B8%8E%E5%9B%9E%E6%94%B6%E7%AD%96%E7%95%A5"><span class="nav-number">6.</span> <span class="nav-text">内存分配与回收策略</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E4%BC%98%E5%85%88%E5%9C%A8Eden%E5%88%86%E9%85%8D"><span class="nav-number">6.1.</span> <span class="nav-text">对象优先在Eden分配</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%A7%E5%AF%B9%E8%B1%A1%E7%9B%B4%E6%8E%A5%E6%99%8B%E5%8D%87%E5%88%B0%E8%80%81%E5%B9%B4%E4%BB%A3"><span class="nav-number">6.2.</span> <span class="nav-text">大对象直接晋升到老年代</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%95%BF%E6%9C%9F%E5%AD%98%E6%B4%BB%E7%9A%84%E5%AF%B9%E8%B1%A1%E6%99%8B%E5%8D%87%E5%88%B0%E8%80%81%E5%B9%B4%E4%BB%A3"><span class="nav-number">6.3.</span> <span class="nav-text">长期存活的对象晋升到老年代</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%AF%B9%E8%B1%A1%E5%B9%B4%E9%BE%84%E5%88%A4%E5%AE%9A"><span class="nav-number">6.4.</span> <span class="nav-text">动态对象年龄判定</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D%E6%8B%85%E4%BF%9D"><span class="nav-number">6.5.</span> <span class="nav-text">空间分配担保</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9A%E5%AD%90%E7%BA%BF%E7%A8%8B%E5%A0%86%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E4%B8%8D%E4%BC%9A%E8%AE%A9%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%BB%88%E6%AD%A2"><span class="nav-number">6.6.</span> <span class="nav-text">补充：子线程堆内存溢出不会让主线程终止</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/22/JVM_4_%E5%A0%86%E5%92%8CGC%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          堆和GC机制详解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-10-22 19:25:15" itemprop="dateCreated datePublished" datetime="2020-10-22T19:25:15+08:00">2020-10-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-02 13:41:38" itemprop="dateModified" datetime="2021-03-02T13:41:38+08:00">2021-03-02</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>28k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>50 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h4 id="判断对象是否存活"><a href="#判断对象是否存活" class="headerlink" title="判断对象是否存活"></a>判断对象是否存活</h4><h5 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h5><p>这个算法的基本思路是在对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加一；当引用失效时，计数器值就减一；任何时刻计数器为零的对象就是不可能再被使用的。<strong>缺点是很难解决相互引用的问题</strong>。</p>
+<h5 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h5><p>这个算法的基本思路就是通过一系列称为<code>GC Roots</code>的根对象作为起始节点集，从这些节点开始，根据引用关系向下搜索，搜索过程所走过的路径称为<code>引用链（Reference Chain）</code>，如果某个对象到GC Roots间没有任何引用链相连， 或者用图论的话来说就是从GC Roots到这个对象不可达时，则证明此对象是不可能再被使用的。</p>
+<span id="more"></span>
+<p>Java选用的是可达性分析算法，在Java技术体系里面，固定可作为GC Roots的对象包括以下几种：</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 在虚拟机栈（栈帧中的本地变量表）中引用的对象，譬如各个线程被调用的方法堆栈中使用到的<br>参数、局部变量、临时变量等。 </li>
+<li><input checked="" disabled="" type="checkbox"> 在本地方法栈中JNI（即通常所说的Native方法）引用的对象。</li>
+<li><input checked="" disabled="" type="checkbox"> 在方法区中类静态属性引用的对象，譬如Java类的引用类型静态变量。 </li>
+<li><input checked="" disabled="" type="checkbox"> 在方法区中常量引用的对象，譬如字符串常量池（StringTable）里的引用或声明为final的常量。</li>
+<li><input checked="" disabled="" type="checkbox"> 所有被同步锁（synchronized关键字）持有的对象。 </li>
+<li><input checked="" disabled="" type="checkbox"> Java虚拟机内部的引用，如基本数据类型对应的Class对象，一些常驻的异常对象（比如<br>NullPointExcepiton、OutOfMemoryError）等，还有系统类加载器。 </li>
+<li><input checked="" disabled="" type="checkbox"> 反映Java虚拟机内部情况的JMXBean、JVMTI中注册的回调、本地代码缓存等。</li>
+</ul>
+<blockquote>
+<p>关于GC Roots到底是对象还是对象的引用问题，R大的回答是：<code>所谓“GC roots”，或者说tracing GC的“根集合”，就是一组必须活跃的引用。注意，是一组必须活跃的引用，不是对象。</code>（见参考7）而很多地方包括都理解成对象，我的想法是皆可，因为引用代表了对象的地址，理解成引用的确更直观，下面的叙述并没有严格区分到底是对象还是指向对象的引用。</p>
+</blockquote>
+<h5 id="可达性分析与四种引用"><a href="#可达性分析与四种引用" class="headerlink" title="可达性分析与四种引用"></a>可达性分析与四种引用</h5><p>由于篇幅过长，进行了拆分，见 <a target="_blank" rel="noopener" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/">可达性分析与四种引用类型</a>。</p>
+<h4 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h4><h5 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h5><p><img src="https://note.youdao.com/yws/api/personal/file/4F298DE591394B6292668AD14294F44D?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<ol>
+<li>标记：标记垃圾；</li>
+<li>清除：对垃圾进行释放，即把标记为垃圾的起始结束地址记录到<code>空闲列表(Free List)</code>中，记录上哪些内存块是可用的，在分配的时候从列表中找到一块足够大的空间划分给对象实例。</li>
+</ol>
+<ul>
+<li>优点：速度快，只需要记录垃圾对象的起始结束地址；</li>
+<li>缺点：容易产生内存碎片，空间不连续，大对象无法存放，造成内存浪费。</li>
+</ul>
+<h5 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h5><p><img src="https://note.youdao.com/yws/api/personal/file/65B5E13D0FEA4EC18C684BEB001CDA3B?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<ol>
+<li>标记：标记垃圾；</li>
+<li>整理：把所有的存活的对象都向一端移动，让内存更为连续和紧凑，然后清理掉端边界以外的内存。</li>
+</ol>
+<ul>
+<li>优点：没有内存碎片，内存连续；</li>
+<li>缺点：速度慢，需要移动大量对象。</li>
+</ul>
+<h5 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h5><p><img src="https://note.youdao.com/yws/api/personal/file/B94C5BB4C2634B6390C4B444D8C479E0?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<p>将可用内存按容量划分为大小相等的两块<code>FROM</code>和<code>TO</code>，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉，最后交换<code>FROM</code>和<code>TO</code>。</p>
+<ul>
+<li>优点：没有内存碎片；</li>
+<li>缺点：需要占用双倍内存空间，即总有50%的内存空间无法利用。但适用于对象频繁更新的场景，即每次垃圾回收时存活对象很少，这样就不需要划分给FROM和TO太多空间，例如新生代就是使用的复制算法，新生代内存默认划分为<code>80%Eden + 10%Survivor From + 10%Survivor To</code>，后面会详细介绍。</li>
+</ul>
+<h4 id="分代收集机制"><a href="#分代收集机制" class="headerlink" title="分代收集机制"></a>分代收集机制</h4><p>当前商业虚拟机的垃圾收集基本都采用“分代收集”（Generation Collection）机制，根据对象存活周期的不同将内存划分为几块。堆分为新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法。在新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用<code>复制算法</code>，只需要付出少量存活对象的复制成本就可以完成收集。而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用<code>标记-清除</code>或者<code>标记-整理</code> 算法来进行回收。</p>
+<h5 id="关于垃圾收集的名词定义："><a href="#关于垃圾收集的名词定义：" class="headerlink" title="关于垃圾收集的名词定义："></a>关于垃圾收集的名词定义：</h5><ul>
+<li>分代收集（Generation Collection）<ul>
+<li>新生代（Young Generation）</li>
+<li>老年代（Tenured/Old Generation）</li>
+<li><del>永久代（Permanent Generation）</del>（已弃用）</li>
+</ul>
+</li>
+<li>部分收集（Partial GC）：指目标不是完整收集整个Java堆的垃圾收集，其中又分为： <ul>
+<li>新生代收集（Minor GC/Young GC）：指目标只是新生代的垃圾收集</li>
+<li>老年代收集（Major GC/Old GC）：指目标只是老年代的垃圾收集。目前只有<code>CMS收集器</code>会有单独收集老年代的行为。另外请注意“Major GC”这个说法现在有点混淆，在不同资料上常有不同所指， 读者需按上下文区分到底是指老年代的收集还是整堆收集</li>
+<li>混合收集（Mixed GC）：指目标是收集整个新生代以及部分老年代的垃圾收集。目前只有G1收集器会有这种行为</li>
+</ul>
+</li>
+<li>整堆收集（Full GC）：收集整个Java堆（新生代+老年代）和方法区的垃圾收集</li>
+</ul>
+<h5 id="新生代和老年代-以及-Minor-GC和Full-GC"><a href="#新生代和老年代-以及-Minor-GC和Full-GC" class="headerlink" title="新生代和老年代 以及 Minor GC和Full GC"></a>新生代和老年代 以及 Minor GC和Full GC</h5><p><img src="https://note.youdao.com/yws/api/personal/file/1C37BBB211D14481B0C0C306C145FACB?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<ol>
+<li><p>新生代分区</p>
+<ul>
+<li>新生代分区：伊甸园（Eden） + 幸存区（Survivor From） + 幸存区（Survivor To），默认比例是8:1:1，可以通过参数<code>-XX:SurvivorRatio=ratio </code>调整，默认为8，即伊甸园的占比，其他二等分，From 和 To用于复制算法，即To要保证一直为空；</li>
+<li>新生代特点<ul>
+<li>所有的 new 操作的内存分配非常廉价：TLAB（thread-local allocation buffer） </li>
+<li>大部分对象用过即死</li>
+<li>采用复制算法，所以死亡对象的回收代价是零 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Minor GC 和 Full GC</p>
+<ul>
+<li>Minor GC 和 Full GC：第一次当Eden内存不足以放新对象时（这时幸存区为空），采用<code>复制</code>算法，将Eden区所有存活的对象复制到幸存区To，让幸存的对象分代年龄+1，然后交换From和To的位置（指针交换）；继续放对象，当第二次Eden内存不足时，将Eden和幸存区From所有存活的对象复制到幸存区To，让幸存的对象分代年龄再+1，然后交换From和To的位置（指针交换）；当分代年龄达到限制时（默认15）幸存区的对象会晋升到老年代，或者<code>大对象直接进入老年代</code>，这个对象的大小阈值可通过参数<code>-XX:PretenureSizeThreshold=size</code>设置（只对Serial和ParNew两款新生代收集器有效），或者经过<code>动态对象年龄判定</code>的对象也会晋升到老年代，或者通过<code>空间分配担保</code>机制晋升到老年代；当老年代的内存不足以放晋升新对象，就会触发Full GC，采用<code>标记-清除</code>算法或<code>标记-整理</code>算法。</li>
+<li>Minor GC 的时间远远低于 Full GC </li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>有趣的小细节：PretenureSizeThreshold默认为0，但新对象默认一律分配在Eden，大于Eden区大小时，放到老年代，这里为0的实际含义其实是Eden区的大小。</p>
+</blockquote>
+<ol start="2">
+<li><p>分代收集过程要点总结</p>
+<ul>
+<li><p>对象首先分配在伊甸园区域 </p>
+</li>
+<li><p>新生代空间不足时，触发 Minor gc，伊甸园和 幸存区From 存活的对象使用<code>复制算法</code>复制到 幸存区To 中，存活的对象年龄 +1并且交换 From To </p>
+</li>
+<li><p>Minor GC 会引发 <code>stop the world</code>（STW），暂停其它用户的线程，等垃圾回收结束，用户线程才恢复运行</p>
+</li>
+<li><p>当对象寿命超过阈值时，会晋升至老年代，最大寿命是15（对象头分配的分代年龄最大4bit）；提前晋升机制：<code>大对象直接进入</code>、<code>动态对象年龄判定</code> 和 <code>空间分配担保</code></p>
+</li>
+<li><p>当老年代空间不足，会触发 Full GC，STW的时间更长，如果Full GC后空间仍不足，会抛出<code>OutOfMemoryError: Java heap space</code></p>
+<blockquote>
+<p>有的收集器在Full GC之前会自动执行Minor GC，为什么在进行Full GC之前最好进行一次Minor GC？</p>
+<p>Garbage collecting the young generation space prior to garbage collecting the old generation space usually results in less work for the garbage collector and more objects being garbage collected since objects in the old generation space may be holding object references to objects in the young generation space. If the young generation space is not garbage collected, any object in old generation space that holds a reference to an object in young generation space cannot be garbage collected.</p>
+<p>摘自：《Java Performance》第三章</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>Minor、Full GC触发时机总结</p>
+<ul>
+<li><p>触发Minor GC(Young GC)<br>  [1]. Eden区域满了，即新创建的对象大小大于Eden所剩空间<br>  [2]. 虚拟机在进行Minor GC之前会判断老年代最大的可用连续空间是否大于新生代的所有对象总空间，即空间分配担保；<del>如果大于的话，直接执行Minor GC，如果小于，判断是否开启HandlerPromotionFailure，没有开启直接Full GC，如果开启了HanlerPromotionFailure， JVM会继续判断老年代的最大连续内存空间是否大于历次晋升到老年代对象的平均大小，如果大于会尝试进行一次Minor GC，尽管这次Minor GC是有风险的，如果小于或者HanlerPromotionFailure设置不允许冒险，则直接Full GC</del>（已弃用）<br>  [3]. 对于第二条，JDK 6 Update 24之后的规则变为只要老年代的最大连续可用连续空间大于新生代对象总大小或者历次晋升的平均大小，就会进行 Minor GC，否则将进行Full GC，即HanlerPromotionFailure参数已经被弃用了。</p>
+</li>
+<li><p>触发FullGC<br>  [1]. 老年代空间不足，例如晋升到老年代的对象大于老年代剩余内存，就会触发Full GC，一般在Full GC之前会先执行Minor GC<br>  [2]. 空间分配担保时，老年代的最大可用连续空间小于新生代对象总大小和历次晋升的平均大小，就会触发Full GC<br>  [3]. 显式调用 System.gc() 或者Heap dump时也会触发 Full GC<br>  <del>[4]. jdk1.7之前元空间内存不足也会触发Full GC</del></p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="HotSpot收集算法相关原理"><a href="#HotSpot收集算法相关原理" class="headerlink" title="HotSpot收集算法相关原理"></a>HotSpot收集算法相关原理</h4><blockquote>
+<p>原理这一部分有点晦涩难解，可以跳过，但如果你看到后面有些疑问始终难以解决，或许可以来这里找到答案。</p>
+</blockquote>
+<h5 id="根节点枚举与-OopMap"><a href="#根节点枚举与-OopMap" class="headerlink" title="根节点枚举与 OopMap"></a>根节点枚举与 OopMap</h5><p>前面提到Java使用可达性分析算法来进行GC，GC的第一步必定是找出所有的GC Roots（根节点枚举），尽管我们已经知道GC Roots大约是什么类型的对象，但想要高效的找到它们并非易事。迄今为止，所有收集器在根节点枚举这一步骤时都是必须暂停用户线程的，因此毫无疑问根节点枚举与之前提及的整理内存碎片一样会面临相似的STW的困扰。</p>
+<ul>
+<li><p>根节点枚举为什么要STW?<br>避免出现在根节点枚举时根节点集合的对象引用关系还在不断变化的情况，否则结果准确性也就无法保证。这是导致垃圾收集过程必须停顿所有用户线程的其中一个重要原因，即使是号称停顿时间可控，或者（几乎）不会发生停顿的CMS、G1、 ZGC等收集器，枚举根节点时也是必须要停顿的。</p>
+</li>
+<li><p>保守式垃圾收集和准确式垃圾收集?  见参考[4]<br>调用栈里的引用类型数据是GC的根集合的重要组成部分；找出栈上的引用是GC的根枚举（root enumeration）中不可或缺的一环，如果JVM选择不记录任何这种类型的数据，那么它就无法区分内存里某个位置上的数据到底应该解读为引用类型还是整型还是别的什么。这种条件下，实现出来的GC就会是<code>保守式GC</code>。在进行GC的时候，JVM开始从一些已知位置（例如说JVM栈）开始扫描内存，扫描的时候每看到一个数字就看看它“像不像是一个指向GC堆中的指针”，这里会涉及上下边界检查、对齐检查之类的。保守式GC的好处是相对来说实现简单些，而且可以方便的用在对GC没有特别支持的编程语言里提供自动内存管理功能，但不准确。<br>与保守式GC相对的是<code>准确式GC</code>，要实现这样的GC，JVM就要能够判断出所有位置上的数据是不是指向GC堆里的引用，其中一种方案就是从外部记录下类型信息，存成映射表，现在三种主流的高性能JVM都是这样做的。其中，HotSpot把这样的数据结构叫做<code>OopMap</code>（Ordinary object pointer Map）。</p>
+</li>
+</ul>
+<ul>
+<li><p>为什么需要OopMap？它的优点？</p>
+<ul>
+<li>为什么需要OopMap<br>垃圾收集时，收集线程会对栈上的内存进行扫描，看看哪些位置存储了 Reference 类型。如果发现某个位置确实存的是 Reference 类型，就意味着它所引用的对象这一次不能被回收。但问题是，栈上的本地变量表里面只有一部分数据是 Reference 类型的（它们是我们所需要的），那些非 Reference 类型的数据对我们而言毫无用处，但我们还是不得不对整个栈全部扫描一遍，这是对时间和资源的一种浪费。OopMap是一种数据结构，HotSpot会在类加载动作完成时把对象内什么偏移量上是什么类型的数据计算出来，也会在特定的位置记录下栈里和寄存器里哪些位置是引用，最终会存在本地代码（Native Code）中。这样收集器在扫描时就可以直接找OopMap去得知这些信息了，并不需要真正一个不漏地从方法区等GC Roots开始查找。</li>
+<li>OopMap优点<ul>
+<li>高效：正如上述所言，借助OopMap可以大大提高扫描的速度（空间换速度）；</li>
+<li>准确式垃圾收集：相对于全部扫描再判断时的“误差”，因为OopMap是在类加载时计算出的，它是完全准确的，所以可以实现准确式垃圾收集。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>OopMap越多越好吗？<br>可能导致引用关系变化——即导致OopMap内容变化的指令非常多，如果为每一条指令都生成对应的OopMap（范围就是相邻的使引用关系变化的指令），那将会需要大量的额外存储空间（空间换速度），这样垃圾收集伴随而来的空间成本就会非常高。所以HotSpot只在“特定的位置”记录了这些信息，这些位置被称为<code>安全点（Safepoint）</code>，即安全点一定是OopMap存放的位置，或者说因为这里有OopMap，所以是Safepoint。</p>
+</li>
+</ul>
+<h5 id="Safepoint"><a href="#Safepoint" class="headerlink" title="Safepoint"></a>Safepoint</h5><ul>
+<li><p>安全点的定义<br>“A point in program where the state of execution is known by the VM”，即代码中VM能够准确知道执行状态的位置，换而言之，正是因为这里有最近一次的OopMap，所以VM能够准确知道执行状态。</p>
+</li>
+<li><p>安全点（OopMap）位置的选取？<br>主要在：</p>
+<ol>
+<li>循环的末尾；</li>
+<li>方法临返回前，调用方法的call指令后；</li>
+<li>可能抛异常的位置。</li>
+</ol>
+</li>
+<li><p>在GC触发时，如何让所有线程到最近的安全点停下？  </p>
+<ul>
+<li><del><code>抢先式中断 （Preemptive Suspension）</code>：抢先式中断不需要线程的执行代码主动去配合，在垃圾收集发生时，系统首先把所有用户线程全部中断，如果发现有用户线程中断的地方不在安全点上，就恢复这条线程执行，让它一会再重新中断，直到跑到安全点上。现在几乎没有虚拟机实现采用抢先式中断来暂停线程响应GC事件。</del></li>
+<li><code>主动式中断（Voluntary Suspension）</code>：当垃圾收集需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志位，各个线程执行过程时会不停地主动去轮询这个标志，一旦发现中断标志为真时就自己在最近的安全点上主动中断挂起。<code>轮询标志的地方和安全点是重合的</code>，另外还要加上所有创建对象和其他需要在Java堆上分配内存的地方，这是为了检查是否即将要发生垃圾收集，避免没有足够内存分配新对象。</li>
+</ul>
+</li>
+</ul>
+<h5 id="Safe-Region"><a href="#Safe-Region" class="headerlink" title="Safe Region"></a>Safe Region</h5><ul>
+<li><p>线程处于Sleep状态或者Blocked状态时怎么办？<br>这时候线程无法响应虚拟机的中断请求，不能再走到安全的地方去中断挂起自己，虚拟机也显然不可能持续等待线程重新被激活分配处理器时间。那么这时就不安全了吗？答案恰恰相反，这时非常安全，甚至不是安全点，得叫安全区。<br>其实上述两种情况归属于线程在执行<code>native函数</code>，当线程在执行 Native 方法时，此时线程在执行JVM管理之外的代码，根本就不能对JVM的执行状态做任何修改，因而JVM要进入 Safepoint 时不需要关心它。所以也可以把正在执行 native函数 的线程看作“已经进入了Safepoint”，或者把这种情况叫做“在Safe Region里”。当线程要离开安全区域时，它要检查虚拟机是否已经完成了根节点枚举（或者垃圾收集过程中其他需要暂停用户线程的阶段），如果完成了，那线程就当作没事发生过，继续执行；否则它就必须一直等待，直到收到可以离开安全区域的信号。</p>
+</li>
+<li><p>通过 Safepoint 检查保证 Safe Region 的安全性<br><code>JVM外部要对JVM执行状态做修改必须要通过JNI（Java Native Interface）</code>，所有能修改JVM执行状态的JNI函数在入口处都有Safepoint检查，一旦JVM已经发出通知说此时线程已经到达了Safepoint，那么外部想要通过JNI修改JVM状态的程序就会在这些检查的地方停下来，即在Safepoint时不会允许任何对JVM执行状态的修改。</p>
+</li>
+</ul>
+<h5 id="Remembered-Set（记忆集）以及其实现-Card-Table-卡表"><a href="#Remembered-Set（记忆集）以及其实现-Card-Table-卡表" class="headerlink" title="Remembered Set（记忆集）以及其实现 Card Table (卡表)"></a>Remembered Set（记忆集）以及其实现 Card Table (卡表)</h5><p>记忆集是一种用于记录从<code>非收集区域指向收集区域</code>的指针集合的抽象数据结构。典型应用为解决对象跨代引用所带来的问题。</p>
+<ul>
+<li>记忆集常见的三种精度：<ul>
+<li>字长精度：每个记录精确到一个机器字长（就是处理器的寻址位数，如常见的32位或64位，这个精度决定了机器访问物理内存地址的指针长度），该字包含跨代指针。</li>
+<li>对象精度：每个记录精确到一个对象，该对象里有字段含有跨代指针。</li>
+<li>卡精度：每个记录精确到一块内存区域，该区域内有对象含有跨代指针。</li>
+</ul>
+</li>
+</ul>
+<p>而<strong>卡表就是记忆集的一种具体实现</strong>，它定义了记忆集的记录精度为卡精度、与堆内存的映射关系等，具体而言，卡表中的每个记录精确到一块内存区域，该区域内有对象含有跨代（区域）指针。记忆集或者卡表最主要的作用是<strong>缩减部分收集（partial collection, G1收集器）时GC Roots的扫描范围</strong>。</p>
+<ul>
+<li><p>使用记忆集为什么可以缩减部分收集时GC Roots的扫描范围？<br>在回答这个问题之前，我们必须要弄清楚为什么在Minor GC时，老年代中的跨代引用（即老年代中引用新生代的对象）被归为GC Roots?<br>因为分代式GC是一种部分收集的做法。<code>在执行部分收集时，从GC堆的非收集部分指向收集部分的引用，也必须作为GC roots的一部分</code>。具体到分两代的分代式GC来说，如果第0代叫做young gen，第1代叫做old gen，那么如果有minor GC/young GC只收集young gen里的垃圾，则young gen属于“收集部分”，而old gen属于“非收集部分”，那么从old gen指向young gen的引用就必须作为minor GC/young GC的GC roots的一部分。<code>所以年轻代GC的GCRoots可以看作是基础GC Roots中指向年轻代对象的那些引用（一个子集），加上老年代中的跨代引用。</code><br>所以在部分收集时，我们没有必要对非收集区进行全盘扫描，只需要按图索骥，通过记忆集去找GC Roots就行，这大大提高了扫描效率。</p>
+</li>
+<li><p>HotSpot中的卡表<br>卡表最简单的形式可以只是一个字节数组。HotSpot正是这么做的，字节数组的每一个元素都对应着其标识的内存区域中一块特定大小的内存块，这个内存块被称作<code>“卡页”（Card Page）</code>。一般来说，卡页大小都是以2的N次幂的字节数，HotSpot中使用的卡页是2的9次幂，即512字节。一个卡页的内存中通常包含不止一个对象，只要卡页内有一个（或更多）对象的字段存在着跨代指针，那就将对应卡表的数组元素的值标识为1，并称这个元素变脏，没有则标识为0。在垃圾收集发生时，只要筛选出卡表中的脏卡，就能轻易得出哪些卡页内存块中包含跨代指针，把它们加入GC Roots中一并扫描。</p>
+</li>
+<li><p>如何维护卡表？<br>  当有本区域对象引用了其他分代区域中对象时（这里《深入理解Java虚拟机》书上写反了），其对应的卡表元素就应该变脏，变脏时间点原则上应该发生在引用类型字段赋值的那一刻。但问题是如何变脏，即如何在对象赋值的那一刻去更新维护卡表呢？假如是解释执行的字节码，那相对好处理，虚拟机负责每条字节码指令的执行，有充分的介入空间；但在编译执行的场景中呢？经过即时编译后的代码已经是纯粹的机器指令流了，这就必须找到一个在机器码层面的手段，把维护卡表的动作放到每一个赋值操作之中。<br>  在HotSpot虚拟机里是通过<code>写屏障（Write Barrier）</code>技术维护卡表状态的。在赋值前的部分的写屏障叫作<code>写前屏障（Pre-Write Barrier）</code>，在赋值后的则叫作<code>写后屏障（Post-Write Barrier）</code>，写屏障是一个异步操作，不会立即更新，会把待更新的卡表指令放入脏卡队列，等待后续线程 concurrent refinement threads 更新卡表。</p>
+</li>
+</ul>
+<blockquote>
+<p>注意：这个“写屏障”以及后面在低延迟收集器中会提到的“读屏障”与并发编程里volatile型变量中为了保证可见性和有序性的读、写屏障不同，不要混淆。</p>
+</blockquote>
+<ul>
+<li>卡表在高并发场景下的<code>伪共享问题</code><br>伪共享是处理并发底层细节时一种经常需要考虑的问题，因为CPU直接到内存读取数据很慢，所以现代中央处理器的缓存系统中是以缓存行（Cache Line）为单位存储的，即先将内存中的数据缓存到缓存行里。而在并发的场景下，每个线程占用一个CPU（核心），当多个CPU要访问同一个数据时，就意味着会产生多个数据备份，因为每个CPU都有一个数据备份（缓存行），所以规定在同一缓存行的数据，只要其中一个CPU对缓存行的数据进行了修改，那么其他CPU（线程）同一缓存行必须失效，如果这个数据恰好都缓存到同一个缓存行了，就会彼此影响（写回、无效化或者同步）而导致性能降低，这就是伪共享问题。<br>一种简单的解决方案是不采用无条件的写屏障，而是先检查卡表标记，只有当该卡表元素未被标记过时才将其标记为变脏，在JDK 7之后，HotSpot虚拟机增加了一个新的参数<code>-XX：+UseCondCardMark</code>，用来决定是否开启卡表更新的条件判断。开启会增加一次额外判断的开销，但能够避免伪共享问题，两者各有性能损耗，是否打开要根据应用实际运行情况来进行测试权衡。<blockquote>
+<p>值得一提的是关于伪共享问题有一个经典的案例，在原子累加器<code>LongAdder</code>的源码中为了避免伪共享问题，使用的方法是通过注解<code>@sun.misc.Contended</code>为缓存数据增加一个128字节的Padding，因为一个缓存行64个字节，增加128个字节必定使他们不在同一缓存行。</p>
+</blockquote>
+</li>
+</ul>
+<h5 id="可达性分析之-Tri-color-Marking"><a href="#可达性分析之-Tri-color-Marking" class="headerlink" title="可达性分析之 Tri-color Marking"></a>可达性分析之 Tri-color Marking</h5><p>在根节点枚举这个步骤中，由于GC Roots相比起整个Java堆中全部的对象毕竟还算是极少数，且在各种优化技巧（如OopMap）的加持下，它带来的停顿已经是非常短暂且相对固定（不随堆容量而增长）的了。可从GC Roots再继续往下遍历对象图，这一步骤的停顿时间就必定会与Java堆容量直接成正比例关系了：堆越大，存储的对象越多，对象图结构越复杂，要标记更多对象而产生的停顿时间自然就更长。这对与延迟敏感的用户显然是不可承受的，那么可否进行<code>并发标记</code>？我们先从不并发的标记开始看起，借助三色标记（Tri-color Marking）作为工具辅助推导，把对象标记成下面三种</p>
+<ul>
+<li>白色：表示对象尚未被垃圾收集器访问过。显然在可达性分析刚刚开始的阶段，所有的对象都是白色的，<strong>若在分析结束的阶段，仍然是白色的对象，即代表不可达</strong>。 </li>
+<li>灰色：表示对象已经被垃圾收集器访问过，但这个对象上至少存在一个引用还没有被扫描过。<strong>灰色只是黑色和白色的分界线，或者说是扫描的一个中间状态，在扫描完成后，一定不存在灰色的对象，只剩黑白了</strong>。</li>
+<li>黑色：表示对象已经被垃圾收集器访问过，且这个对象的所有引用都已经扫描过。黑色的对象代表已经扫描过，它是安全存活的，如果有其他对象引用指向了黑色对象，无须重新扫描一遍。黑色对象不可能直接（不经过灰色对象）指向某个白色对象，即<strong>被黑色对象指向的对象要么是灰色中间状态，要么是黑色最终状态</strong>。</li>
+</ul>
+<p>在不并发标记的过程中显然没有任何问题，因为对象之间的引用不变（快照），当并发标记时，就会出现问题了，这时用户线程也在执行，很可能改变了引用关系，这样可能出现两种后果：</p>
+<ul>
+<li><code>产生浮动垃圾（错标）</code>：即把原本消亡的对象错误标记为存活（删除了指向它的引用，但JVM不知道），这不是好事，但其实是可以容忍的，只不过产生了一点逃过本次收集的浮动垃圾而已，下次收集清理掉就好。</li>
+<li><code>对象消失（漏标）</code>：即标记漏掉了原本存活的对象（新增了指向它的引用，但JVM不知道），这些对象会被垃圾回收，这就是非常致命的后果了，程序肯定会因此发生错误。</li>
+</ul>
+<p>Wilson于1994年在理论上证明了，当且仅当以下两个条件同时满足时，会产生“对象消失”的问题： </p>
+<ol>
+<li>赋值器插入了一条或多条从黑色对象到白色对象W的新引用；</li>
+<li>赋值器删除了全部从灰色对象到该白色对象W的直接或间接引用；</li>
+</ol>
+<p>因为黑色对象不会再被扫描，所以即使插入了新引用，不会从黑色扫描到对象W，如果本来W就没有灰色对象指向它，那么不用管，W本应该被回收，只是新增了一个指向垃圾的引用（或者说这种情况很难出现）；但如果W此前有灰色对象引用，并且被用户线程全部删掉了，这个时候就出问题了，本应该被标记为存活的对象就被当成了垃圾，会被回收。</p>
+<p>因此，我们要解决并发扫描时的对象消失问题，只需破坏这两个条件的任意一个即可。由此分别产生了两种解决方案：</p>
+<ol>
+<li><code>增量更新（Incremental Update）</code><br>增量更新要破坏的是第一个条件，当黑色对象插入新的指向白色对象的引用关系时，就将这个新插入的引用记录下来（通过写屏障），等并发扫描结束之后，再以这些记录过的引用关系中的黑色对象为根，重新扫描一次。这可以简化理解为，黑色对象一旦新插入了指向白色对象的引用之后，它就变回灰色对象了。</li>
+<li><code>原始快照（Snapshot At The Beginning， SATB）</code><br>原始快照要破坏的是第二个条件，当灰色对象要删除指向白色对象的引用关系时，就将这个要删除的引用记录下来（通过写屏障），在并发扫描结束之后，再以这些记录过的引用关系中的灰色对象为根，重新扫描一次。这也可以简化理解为，无论引用关系删除与否，都会按照刚刚开始扫描那一刻的对象图快照来进行搜索。</li>
+</ol>
+<p>CMS是基于增量更新来做并发标记的，G1、Shenandoah则是用原始快照来实现。</p>
+<h4 id="经典垃圾收集器"><a href="#经典垃圾收集器" class="headerlink" title="经典垃圾收集器"></a>经典垃圾收集器</h4><h5 id="常用VM参数"><a href="#常用VM参数" class="headerlink" title="常用VM参数"></a>常用VM参数</h5><table>
+<thead>
+<tr>
+<th align="center">含义</th>
+<th>参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">堆初始大小</td>
+<td>-Xms</td>
+</tr>
+<tr>
+<td align="center">堆最大大小</td>
+<td>-Xmx 或 -XX：MaxHeapSize=size</td>
+</tr>
+<tr>
+<td align="center">新生代大小</td>
+<td>-Xmn 或 (-XX:NewSize=size + -XX:MaxNewSize=size)指定范围</td>
+</tr>
+<tr>
+<td align="center">幸存区比例</td>
+<td>-XX:SurvivorRatio=ratio</td>
+</tr>
+<tr>
+<td align="center">动态调整幸存区比例（仅适用于Parallel Scavenge收集器)</td>
+<td>-XX:InitialSurvivorRatio=ratio 和 -XX:+UseAdaptiveSizePolicy</td>
+</tr>
+<tr>
+<td align="center">晋升阈值（仅第一次有效，以后会根据历代晋升平均值）</td>
+<td>-XX:MaxTenuringThreshold=threshold</td>
+</tr>
+<tr>
+<td align="center">打印晋升详情</td>
+<td>-XX:+PrintTenuringDistribution</td>
+</tr>
+<tr>
+<td align="center">大于设置值的对象直接分配在老年代（只对Serial和ParNew两款新生代收集器有效）</td>
+<td>-XX:PretenureSizeThreshold=size</td>
+</tr>
+<tr>
+<td align="center">打印GC详情</td>
+<td>-XX:+PrintGCDetails -verbose:gc</td>
+</tr>
+<tr>
+<td align="center">禁用显式的垃圾回收</td>
+<td>-XX:+DisableExplicitGC</td>
+</tr>
+<tr>
+<td align="center">FullGC前MinorGC（仅适用于Serial Old/PS MarkSweep老年代收集器）</td>
+<td>-XX:+ScavengeBeforeFullGC</td>
+</tr>
+<tr>
+<td align="center">命令窗口打印本地虚拟机 GC 的各项参数信息</td>
+<td>java -XX:+PrintFlagsFinal -version | findstr “GC”</td>
+</tr>
+</tbody></table>
+<p><img src="https://note.youdao.com/yws/api/personal/file/328AD4087CBF459AB49245AE068D1591?method=download&shareKey=c12388736e3e797b8fdfff416014620f"></p>
+<p>HotSpot虚拟机中经典的垃圾收集器如上图，看着挺多，其实目前可用或者常用的经典组合就下面4种了，其中G1是目前最主流的垃圾收集器，并从jdk9开始成为HotSpot虚拟机默认的垃圾收集器。</p>
+<h5 id="串行组合"><a href="#串行组合" class="headerlink" title="串行组合"></a>串行组合</h5><ul>
+<li>组合：Serial + Serial Old (PS MarkSweep)，开启参数：<code>-XX:+UseSerialGC = Serial + SerialOld</code></li>
+<li>优点：单线程，简单而高效，额外消耗内存最小</li>
+<li>适用场景：堆内存较小的场景，例如个人电脑和部分微服务场景</li>
+</ul>
+<p><img src="https://note.youdao.com/yws/api/personal/file/5214359FE9244F41B34291EE78ECBEE0?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<h5 id="吞吐量优先组合"><a href="#吞吐量优先组合" class="headerlink" title="吞吐量优先组合"></a>吞吐量优先组合</h5><p>$$<br>Throughput  = \frac{Run \  code \ time}{Run \ code \ time \  + GC \ time}<br>$$</p>
+<ul>
+<li><p>Parallel Scavenge + Paralledl Old，开启参数： <code>-XX:+UseParallelGC  -XX:+UseParallelOldGC</code>，jdk1.8默认开启</p>
+</li>
+<li><p>Parallel Scavenge收集器提供了两个参数用于精确控制吞吐量：</p>
+<ul>
+<li><code>-XX:GCTimeRatio=ratioInt</code> ，GC_time_ratio = 1 / (1 + ratioInt)，例如 ratioInt = 19, GC_time_ratio = 1/(1+19) = 5%；</li>
+<li><code>-XX:MaxGCPauseMillis=ms</code> , 垃圾收集停顿时间缩短是以牺牲吞吐量和新生代空间为代价换取的，即时间越小、新生代就设置的越小，但这也直接导致垃圾收集发生得更频繁，原来10秒收集一次、每次停顿100毫秒，现在变成5秒收集一次、每次停顿70毫秒，停顿时间的确在下降，但吞吐量也降下来了。</li>
+</ul>
+</li>
+<li><p><code>-XX：+UseAdaptiveSizePolicy</code>，当这个参数被激活之后，就不需要人工指定新生代的大小（-Xmn）、Eden与Survivor区的比例（-XX：SurvivorRatio）、晋升老年代对象大小（-XX：PretenureSizeThreshold）等细节参数了，虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数以提供最合适的停顿时间或者最大的吞吐量。这种调节方式称为垃圾收集的自适应的调节策略（GC Ergonomics）。</p>
+</li>
+<li><p><code>-XX:ParallelGCThreads=n</code>，设置垃圾回收并行线程的个数，默认情况下，当 CPU 数量小于8， ParallelGCThreads 的值等于 CPU 数量，当 CPU 数量大于 8 时，则使用公式：ParallelGCThreads = 8 + ((N - 8) * 5/8) = 3 +（（5 * CPU）/ 8），这个参数只要是并行垃圾收集器都可以使用。</p>
+<p>  <img src="https://note.youdao.com/yws/api/personal/file/9C89E6B5EA164088A146D51217786EB4?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+</li>
+</ul>
+<h5 id="响应时间优先组合"><a href="#响应时间优先组合" class="headerlink" title="响应时间优先组合"></a>响应时间优先组合</h5><ul>
+<li><p>ParNew + CMS (Serial Old作为后备)，开启参数：<code>-XX:+UseConcMarkSweepGC -XX:+UseParNewGC ~ SerialOld</code> ，开启CMS后若不指定新生代垃圾收集器则默认开启ParNew</p>
+</li>
+<li><p>CMS特点</p>
+<ul>
+<li>基于标记-清除算法</li>
+<li>第一个<code>并发（并发标记、并发清理阶段）</code>的垃圾收集器，低停顿，非并发的在GC时必须暂停用户线程</li>
+<li><code>-XX:ParallelGCThreads=n ~ -XX:ConcGCThreads=threads</code> ，设置垃圾回收并行的线程个数为（n + 3）/ 4），n默认等于CPU个数；但并发的线程数一般设置为并行线程数的1/4。</li>
+</ul>
+</li>
+<li><p>CMS的工作过程</p>
+<ol>
+<li>初始标记 (initial mark)：<code>需要STW</code>，初始标记仅仅只是标记一下GCRoots能直接关联到的对象，速度很快；</li>
+<li><code>并发标记</code> (concurrent mark)：从GC Roots直接的关联对象开始遍历整个对象图的过程，也就是进行可达性分析，这个过程耗时较长但是不需要停顿用户线程，可以与垃圾收集线程一起并发运行；</li>
+<li>重新标记 (remark)：<code>需要STW</code>，是为了修正并发标记期间因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，是通过<code>增量更新</code>算法实现的，要扫描所有的GC Roots包括新生代，所以这个阶段的停顿时间通常会比初始标记阶段稍长一些，但也远比并发标记阶段的时间短；如果重新标记的时间过长，还可以通过设置开启参数<code>-XX:+CMSScavengeBeforeRemark</code>，在重新标记前清理新生代垃圾，减轻重新标记的压力，但清理新生代也需要耗费时间，具体权衡视情况而定。</li>
+<li><code>并发清理</code> (concurrent sweep)：清理删除掉标记阶段判断的已经死亡的对象，因为是基于标记-清除算法，不需要移动存活对象，所以这个阶段也是可以与用户线程同时并发的。</li>
+</ol>
+<p>  <img src="https://note.youdao.com/yws/api/personal/file/E76BD08BA9414367A70C9105FC0563CC?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+</li>
+<li><p>CMS的三个缺点</p>
+<ol>
+<li>占用处理器资源<br>CMS默认启动的回收线程数是（处理器核心数量 +3）/4，也就是说，如果处理器核心数很大，并发回收时垃圾收集线程只占用大约1/4的处理器运算资源，并且会随着处理器核心数量的增加而下降。但是当处理器核心数量很少时， CMS对用户程序的影响就可能变得很大。如果应用本来的处理器负载就很高，还要分出一半的运算能力去执行收集器线程，就可能导致用户程序的执行速度忽然大幅降低。</li>
+<li>产生浮动垃圾和无奈的 Serial Old 备案<br>在CMS的并发清理阶段，用户线程是还在继续运行的并会产生浮动垃圾占用内存，并且这一部分浮动垃圾出现在标记之后，CMS无法在当次回收它们，只好等待下次再回收它们。因此CMS收集器不能像其他收集器那样等待到老年代几乎完全被填满了再进行收集，必须预留一部分空间供并发清理时的程序运作使用。可以通过设置参数<code>-XX:CMSInitiatingOccupancyFraction=percent</code>，预留 percent% 的老年代空间给浮动垃圾，也意味着一旦老年代达到 (100-percent)% 的空间就要触发Full GC，如果在实际应用中老年代增长并不是太快，可以适当调高这个参数的值来提高CMS的触发百分比，降低内存回收频率，获取更好的性能，但这个参数设置的太高又面临另一种风险：要是CMS运行期间预留的内存无法满足程序分配新对象的需要，就会出现一次“并发失败”（Concurrent Mode Failure），这时候虚拟机将不得不启动后备预案：冻结用户线程的执行，临时启用<code>Serial Old</code>收集器来重新进行老年代的垃圾收集， 但这样停顿时间就很长了。所以参数设置得太高将会很容易导致大量的并发失败产生，性能反而降低，用户应在生产环境中根据实际应用情况来权衡设置。</li>
+<li>产生内存碎片<br>因为CMS是一款基于“标记-清除”算法实现的收集器，所以会产生内存碎片，当内存碎片过多时，将会给大对象分配带来很大麻烦，往往会出现老年代还有很多剩余空间，但就是无法找到足够大的连续空间来分配当前对象，而不得不提前触发一次Full GC的情况。</li>
+</ol>
+</li>
+</ul>
+<h5 id="G1-Garbage-First"><a href="#G1-Garbage-First" class="headerlink" title="G1 (Garbage First)"></a>G1 (Garbage First)</h5><ul>
+<li><p>开启参数：<code>-XX:+UseG1GC</code></p>
+</li>
+<li><p>G1特点</p>
+<ul>
+<li><p>“停顿时间模型”（PausePrediction Model）的收集器<br>停顿时间模型的意思是能够支持指定在一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间大概率不超过N毫秒这样的目标。在G1收集器出现之前的所有其他收集器，包括CMS在内，垃圾收集的目标范围要么是整个新生代（Minor GC），要么就是整个老年代（Major GC），再要么就是整个Java堆（Full GC）。而G1跳出了这个樊篱，它可以面向堆内存任何部分来组成<code>回收集（Collection Set，简称CSet）</code>进行回收，衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多，回收收益最大，这就是G1收集器的<code>Mixed GC</code>模式。</p>
+</li>
+<li><p>基于<code>Region</code>的内存布局<br>G1不再坚持固定大小以及固定数量的分代区域划分，而是把连续的Java堆划分为多个大小相等的独立区域（Region），<code>每一个Region都可以根据需要，扮演新生代的Eden空间、Survivor空间或者老年代空间</code>。虽然G1仍然保留新生代和老年代的概念，但新生代和老年代不再是固定的了，它们都是一系列区域（不需要连续）的动态集合。G1收集器之所以能建立可预测的停顿时间模型，是因为它将Region作为单次回收的最小单元，即每次收集到的内存空间都是Region大小的整数倍，这样可以有计划地避免在整个Java堆中进行全区域的垃圾收集。<br>Region中还有一类特殊的<code>Humongous</code>区域，专门用来存储大对象。G1认为只要大小超过了一个Region容量一半的对象即可判定为大对象。每个Region的大小可以通过参数<code>-XX：G1HeapRegionSize</code>设定，取值范围为1MB～32MB，且应为2的N次幂。而对于那些超过了整个Region容量的超级大对象， 将会被存放在N个连续的Humongous Region之中，G1的大多数行为都把Humongous Region作为老年代的一部分来进行看待。</p>
+<p>  <img src="https://note.youdao.com/yws/api/personal/file/453EA62ED0204792BF8DE87130AC212B?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+</li>
+<li><p>Garbage First 优先收集<br>G1将Region作为单次回收的最小单元，即每次收集到的内存空间都是Region大小的整数倍，这样可以有计划地避免在整个Java堆中进行全区域的垃圾收集，也正因为此，G1能建立可预测的停顿时间模型。更具体的处理思路是让G1收集器去跟踪各个Region里面的垃圾堆积的“价值”大小，价值即回收所获得的空间大小以及回收所需时间的经验值，然后在后台维护一个优先级列表，每次根据用户设定允许的收集停顿时间（使用参数<code>-XX：MaxGCPauseMillis</code>指定，默认值是200毫秒），优先处理回收价值收益最大的那些Region（Mixed GC），这也就是“Garbage First”名字的由来。这种使用Region划分内存空间，以及具有优先级的区域回收方式，保证了G1收集器在有限的时间内获取尽可能高的收集效率。</p>
+</li>
+</ul>
+</li>
+<li><p>适用场景</p>
+<ul>
+<li>同时注重吞吐量（Throughput）和低延迟（Low latency），默认的暂停目标是 200 ms </li>
+<li>超大堆内存，会将堆划分为多个大小相等的 Region </li>
+<li><strong>整体上是 标记-整理 算法，两个区域之间是 复制算法</strong></li>
+</ul>
+</li>
+<li><p>G1实现的难点</p>
+<ol>
+<li>跨代引用：记忆集和卡表<br>前面原理部分我们已经介绍过，为了解决跨代引用的问题，使用记忆集（卡表）可以缩小 Young GC 时 GC Roots 的扫描范围，但在G1收集器上记忆集的应用其实要复杂很多。与前面不同的是，<strong>G1维护的是一个双向的卡表结构（卡表是“我指向谁”，这种结构还记录了“谁指向我”）</strong>。首先跟之前一样，每个<code>Region记录有一个卡表，卡表记录了本Region对其他Region的引用</code>，不同的是<code>它的每个Region还维护有自己的记忆集，这些记忆集会记录下别的Region指向自己的指针</code>，并标记这些指针分别在哪些卡页的范围之内，这些记忆集在存储结构的本质上是一种哈希表，Key是别的Region的起始地址，Value是一个集合，里面存储的元素是卡表的索引号。这种“双向”的卡表结构比原来的卡表实现起来更复杂，同时由于Region数量比传统收集器的分代数量明显要多得多，因此G1收集器要比其他的传统垃圾收集器有着更高的内存占用负担。根据经验，G1至少要耗费大约相当于Java堆容量10%至20%的额外内存来维持收集器工作。<br><img src="https://note.youdao.com/yws/api/personal/file/0E85D593141642F187A03DEA2A7B90A5?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></li>
+<li>并发阶段的问题<ul>
+<li>引用关系改变造成“对象消失”：CMS收集器采用增量更新算法实现，而G1收集器则是通过原始快照（SATB）算法来实现的。</li>
+<li>为新生对象分配空间：程序要继续运行就肯定会持续有新对象被创建，G1为每一个Region设计了两个名为<code>TAMS（Top at Mark Start）</code>的指针，把Region中的一部分空间划分出来用于并发回收过程中的新对象分配，并发回收时新分配的对象地址都必须要在这两个指针位置以上。G1收集器默认在这个地址以上的对象是被隐式标记过的，即默认它们是存活的，不纳入回收范围。与CMS中 的“Concurrent Mode Failure”失败会导致 Full GC 类似，如果内存回收的速度赶不上内存分配的速度，G1收集器也要被迫冻结用户线程执行，导致 Full GC 而产生长时间的 STW。</li>
+</ul>
+</li>
+<li>建立可靠的停顿预测模型<br>G1收集器的停顿预测模型是以<code>衰减均值（Decaying Average）</code>为理论基础来实现的，在垃圾收集过程中，G1收集器会记录每个Region的回收耗时、每个Region记忆集里的脏卡数量等各个可测量的步骤花费的成本，并分析得出平均值、标准偏差、置信度等统计信息。</li>
+</ol>
+</li>
+<li><p>G1的工作过程 </p>
+<blockquote>
+<p>关于G1工作详细过程，建议查阅参考[9]，英文好的同学可以直接参考论文，参考[13]有下载链接。</p>
+</blockquote>
+<ol>
+<li>初始标记（Initial Marking）：需要STW，仅仅只是标记一下GC Roots能直接关联到的对象，耗时很短，并且<code>修改TAMS指针的值</code>，让下一阶段用户线程并发运行时，能正确地在可用的Region中分配新对象。<code>该阶段是在进行Young GC的时候同步完成的，没有额外的停顿</code>。 </li>
+<li>并发标记（Concurrent Marking）：从GC Root开始对堆中对象进行可达性分析，递归扫描整个堆里的对象图，找出要回收的对象，这阶段耗时较长，但可与用户程序并发执行。当对象图扫描完成以后，还要重新处理SATB记录下的在并发时有引用变动的对象。</li>
+<li>最终标记（Final Marking）：需要STW，对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留下来的最后那少量的SATB记录。</li>
+<li>筛选回收（Live Data Counting and Evacuation）：需要STW。负责更新Region的统计数据，对各个Region的回收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划，可以自由选择任意多个Region 构成回收集（Young GC or Mixed GC），然后把决定回收的那一部分Region的存活对象复制到空的Region中，再清理掉整个旧Region的全部空间（<code>标记-整理和复制算法都有运用</code>）。这里的操作涉及存活对象的移动，是必须STW，由多条收集器线程并行完成的。</li>
+</ol>
+<p>  <img src="https://note.youdao.com/yws/api/personal/file/CC1C82BF4DD44D6CB622A5C7D2CCFE03?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<p>  接下来我借助论文里的图简要介绍一下其各个阶段工作原理：<br>  <img src="https://note.youdao.com/yws/api/personal/file/DF730D31E66441AE8FE7F7261607D853?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<p>  首先上图中的A B C分别代表初始标记、最终标记、筛选回收阶段，A-B的过渡为并发标记阶段；</p>
+<ul>
+<li>横条代表一个 region，深色代表已使用区域，白色代表未使用区域，维护有两个指针 bottom 和 top，bottom 始终在区域的开始，top 作为已使用区域和未使用区域的分界线；</li>
+<li>每个区域维护有两个map，用于并发标记结果的记录，分别为 <code>preBitmap</code> 和 <code>nextBitmap</code>，preBitmap 记录的是上一轮并发标记后的结果，nextBitmap 记录的是将要或正在进行的这一轮并发标记的结果，主要就是标记哪些对象是垃圾，哪些是有用的对象。</li>
+<li>每个区域维护有两个指针，分别为 <code>prevTAMS</code> 和 <code>nextTAMS</code>，这两个指针的作用为作为<strong>本轮并发标记阶段与上轮相比GC线程新增工作范围的分界线和产生新对象的分界线</strong>。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><strong>初始标记阶段 A</strong>：STW，此时刚开始使用这一区域，即 prevBitmap 为空，此时令 prevTAMS 指向 bottom，nextTAMS 指向 top，代表本次并发标记阶段与上轮（为空）相比GC线程新增工作范围为 [prevTAMS - nextTAMS]。</li>
+<li><strong>并发标记阶段 A-B</strong>：在并发标记阶段，GC线程工作在 [bottom - nextTAMS]，也就是 [prevTAMS - nextTAMS]，在扫描对象利用三色标记原理进行可达性分析的过程中同时记录更新 nextBitmap，此时由于用户线程也在并发运行，所以会产生新对象，而产生的的新对象规定放在 [nextTAMS - top]，即新增对象 top 后移，所以用户线程的工作范围为 [bottom - top ] ，而且这部分新增的对象默认存活，不进行GC。注意并发标记阶段最后会处理SATB。</li>
+<li><strong>最终标记阶段 B</strong>：STW，由于是 STW 的，所以该阶段对应的图是并发标记阶段完成后的图，因为虽然并发标记阶段最后会处理SATB，但仍是并发处理的，用户线程仍会遗留下来少量的SATB记录，最后进行一个短暂的 STW 处理少量的SATB。</li>
+<li><strong>筛选回收阶段 C</strong>：STW, 这阶段会根据 nextBitmap 和停顿预测模型对各个Region的回收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划，可以自由选择任意多个Region 构成回收集（Young GC or Mixed GC）。这阶段代表一轮GC的结束，会进行一些变量的交换，交换 nextBitmap 和 prevBitmap，方便下一轮GC标记时直接从 prevBitmap 中判断上一轮存活的对象；交换 prevTAMS 和 nextTAMS，使 prevTAMS 指向本轮新对象的分界线，而在下轮初始标记（D）时会把 nextTAMS 指向 top，这也就是上文中所说的“修改TAMS指针的值”，所以下轮 GC线程的工作范围为 [bottom - nextTAMS]，相比第一轮新增的工作范围为 [prevTAMS - nextTAMS]。</li>
+</ol>
+<ul>
+<li>G1 回收阶段<br>  三阶段循环回收：<ol>
+<li>Young Collection</li>
+<li>Young Collection + Concurrent Mark</li>
+<li>Mixed Collection</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://note.youdao.com/yws/api/personal/file/530CA05CC05E4FBBA857766C76C506B3?method=download&shareKey=97d2a387c0336917eccc84825ec0ee6f" alt="image"></p>
+<ul>
+<li><p>G1 调优（updating）</p>
+<ul>
+<li>JDK 8u20 字符串去重<br>  将所有新分配的字符串放入一个队列，当新生代回收时，G1并发检查是否有字符串重复，如果它们值一样，让它们引用同一个 char[]。注意，与 String.intern() 不一样，String.intern() 关注的是字符串对象，而字符串去重关注的是 char[]。<ul>
+<li>开启参数：<code>-XX:+UseStringDeduplication</code></li>
+<li>优点：节省大量内存 </li>
+<li>缺点：略微多占用了 cpu 时间，新生代回收时间略微增加<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">&quot;hello&quot;</span>); <span class="comment">// char[]&#123;&#x27;h&#x27;,&#x27;e&#x27;,&#x27;l&#x27;,&#x27;l&#x27;,&#x27;o&#x27;&#125; </span></span><br><span class="line">String s2 = <span class="keyword">new</span> String(<span class="string">&quot;hello&quot;</span>); <span class="comment">// char[]&#123;&#x27;h&#x27;,&#x27;e&#x27;,&#x27;l&#x27;,&#x27;l&#x27;,&#x27;o&#x27;&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>JDK 8u40 并发标记类卸载<br>所有对象都经过并发标记后，就能知道哪些类不再被使用，当一个类的所有的实例都被回收掉并且类所在的类加载器的所有类都不再使用，则卸载它所加载的所有类。<br>开启参数：<code>-XX:+ClassUnloadingWithConcurrentMark</code>，默认启用。</li>
+<li>JDK 8u60 回收巨型对象<br>一个对象大于 region 的一半时，称之为巨型对象，G1 不会对巨型对象进行拷贝；回收时被优先考虑；G1会跟踪老年代所有 incoming 引用（老年代到巨型对象的引用），老年代 incoming 引用数为0的巨型对象就可以在新生代垃圾回收时处理掉。</li>
+<li>JDK 9 并发标记起始时间的调整<br>并发标记必须在堆空间占满前完成，否则 Mixed GC 退化为 Full GC；jdk9 之前需要使用<code>-XX:InitiatingHeapOccupancyPercent</code>，而在JDK 9 及其之后可以自动进行数据采样并动态调整，其中<code>-XX:InitiatingHeapOccupancyPercent</code>仅用来设置初始值。</li>
+<li>最新的更新请查阅：<a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/15/gctuning/introduction-garbage-collection-tuning.html#GUID-326EB4CF-8C8C-4267-8355-21AB04F0D304">HotSpot Virtual Machine Garbage Collection Tuning Guide</a></li>
+</ul>
+</li>
+<li><p>讨论：低延迟还是高吞吐？<br>  毫无疑问，可以由用户指定期望的停顿时间是G1收集器很强大的一个功能，设置不同的期望停顿时间，可使得G1在不同应用场景中取得关注吞吐量和关注延迟之间的最佳平衡。不过这里设置的“期望值”必须是符合实际的，不能异想天开，如果我们把停顿时间调得非常低，譬如设置为二十毫秒，很可能出现的结果就是由于停顿目标时间太短，导致每次选出来的回收集只占堆内存很小的一部分，收集器收集的速度逐渐跟不上分配器分配的速度，导致垃圾慢慢堆积，最终占满堆引发Full GC反而降低性能，所以通常把期望停顿时间设置为一两百毫秒或者两三百毫秒会是比较合理的。</p>
+</li>
+<li><p>讨论：G1也会产生浮动垃圾吗?<br>显然是的，只要是并发标记的收集器，增量复制和SATB算法都会产生浮动垃圾，而且SATB还会产生更多的浮动垃圾，但 G1 不需要像 CMS 那样 remark，再走一遍 root trace 这种相当耗时的流程。而且 CMS 在清理阶段用的是 标记-清除算法 所以可以和用户线程并发执行，但这一阶段用户线程产生的浮动垃圾是在标记阶段之后，所以必须等到下一轮 GC 才能回收，即产生了无法处理的浮动垃圾，而 G1 由于在筛选回收阶段STW，所以不存在这种问题。</p>
+</li>
+</ul>
+<h4 id="内存分配与回收策略"><a href="#内存分配与回收策略" class="headerlink" title="内存分配与回收策略"></a>内存分配与回收策略</h4><blockquote>
+<p>详情建议查阅《深入理解Java虚拟机》</p>
+</blockquote>
+<h5 id="对象优先在Eden分配"><a href="#对象优先在Eden分配" class="headerlink" title="对象优先在Eden分配"></a>对象优先在Eden分配</h5><p>大多数情况下，对象优先在新生代Eden区中分配。当Eden区没有足够空间进行分配时，虚拟机将发起一次Minor GC。</p>
+<h5 id="大对象直接晋升到老年代"><a href="#大对象直接晋升到老年代" class="headerlink" title="大对象直接晋升到老年代"></a>大对象直接晋升到老年代</h5><p>大对象就是指需要大量连续内存空间的Java对象，HotSpot虚拟机提供了<code>-XX：PretenureSizeThreshold</code>参数（只对Serial和ParNew两款新生代收集器有效，默认是Eden区大小），指定大于该设置值的对象直接在老年代分配，这样做的目的就是避免在Eden区及两个Survivor区之间来回复制，产生大量的内存复制操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  演示大对象直接进入老年代</span></span><br><span class="line"><span class="comment"> *  -Xms20M -Xmx20M -Xmn10M -XX:SurvivorRatio=8 -XX:+UseSerialGC -XX:+PrintGCDetails -verbose:gc</span></span><br><span class="line"><span class="comment"> *  -XX:PretenureSizeThreshold=size  （只对Serial和ParNew两款新生代收集器有效）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestHugeObject</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _1MB = <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _7MB = <span class="number">7</span> * _1MB;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _8MB = <span class="number">8</span> * _1MB;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        ArrayList&lt;<span class="keyword">byte</span>[]&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 7MB时默认分配在新生代，会先触发Minor GC，GC后有足够空间放入，所以在新生代；</span></span><br><span class="line">        list.add(<span class="keyword">new</span> <span class="keyword">byte</span>[_7MB]); <span class="comment">// 触发Minor GC</span></span><br><span class="line">        <span class="comment">// 当大于等于 PretenureSizeThreshold 设置的大小（默认Eden大小8MB）会直接晋升到老年代，所以可以看到这一步根本就不会发生Minor GC</span></span><br><span class="line">        list.add(<span class="keyword">new</span> <span class="keyword">byte</span>[_8MB]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [DefNew: 2186K-&gt;752K(9216K), 0.0022800 secs] 2186K-&gt;752K(19456K), 0.0024603 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] </span></span><br><span class="line"><span class="comment">Heap</span></span><br><span class="line"><span class="comment"> def new generation   total 9216K, used 8166K [0x00000000fec00000, 0x00000000ff600000, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">  eden space 8192K,  90% used [0x00000000fec00000, 0x00000000ff33d8c0, 0x00000000ff400000)</span></span><br><span class="line"><span class="comment">  from space 1024K,  73% used [0x00000000ff500000, 0x00000000ff5bc040, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">  to   space 1024K,   0% used [0x00000000ff400000, 0x00000000ff400000, 0x00000000ff500000)</span></span><br><span class="line"><span class="comment"> tenured generation   total 10240K, used 8192K [0x00000000ff600000, 0x0000000100000000, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">   the space 10240K,  80% used [0x00000000ff600000, 0x00000000ffe00010, 0x00000000ffe00200, 0x0000000100000000)</span></span><br><span class="line"><span class="comment"> Metaspace       used 3300K, capacity 4496K, committed 4864K, reserved 1056768K</span></span><br><span class="line"><span class="comment">  class space    used 359K, capacity 388K, committed 512K, reserved 1048576K</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="长期存活的对象晋升到老年代"><a href="#长期存活的对象晋升到老年代" class="headerlink" title="长期存活的对象晋升到老年代"></a>长期存活的对象晋升到老年代</h5><p>虚拟机给每个对象定义了一个对象分代年龄（Age）计数器，存储在对象头中。对象通常在Eden区里诞生，如果经过第一次 Minor GC后仍然存活，并且能被Survivor容纳的话，该对象会被移动到Survivor空间中，并且将其对象年龄设为1岁。对象在Survivor区中每熬过一次Minor GC，年龄就增加1岁，当它的年龄增加到一定程度（默认为15，最大也是15），就会被晋升到老年代中。对象晋升老年代的年龄阈值，可以通过参数<code>-XX：MaxTenuringThreshold</code>设置。</p>
+<h5 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h5><p>如果在Survivor空间中相同年龄所有对象大小的总和大于 Survivor空间的一半，年龄大于或等于该年龄（年龄不包括0）的对象就可以直接进入老年代，无须等到<code>-XX：MaxTenuringThreshold</code>中要求的年龄。</p>
+<h5 id="空间分配担保"><a href="#空间分配担保" class="headerlink" title="空间分配担保"></a>空间分配担保</h5><ol>
+<li>在发生Minor GC之前，虚拟机必须先检查老年代最大可用的连续空间是否大于新生代所有对象总空间或者历次晋升的平均大小，如果这个条件成立，那这一次Minor GC可以确保是安全的，就会进行 Minor GC，否则将进行Full GC。</li>
+<li>在Minor GC的过程中，如果存活对象大于Survivor区的大小，但小于老年代大小，则会直接从Eden晋升到老年代；否则继续待在Eden。这个情况注意跟上面大对象直接进入老年代区分，空间分配担保机制是在Minor GC的过程中出现的，而大对象直接晋升根本不会出现Minor GC。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 演示第二种情况</span></span><br><span class="line"><span class="comment"> * VM参数：-verbose:gc -XX:+UseSerialGC -Xms20M -Xmx20M -Xmn10M -XX:SurvivorRatio=8 -XX:+PrintGCDetails</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestSpaceAllocationGuarantee</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _1MB = <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] allocation1, allocation2, allocation3, allocation4;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1. 幸存区放不下但老年代放得下，直接进入老年代</span></span><br><span class="line">        case1();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 2. 幸存区放不下老年代也放不下，继续待在Eden</span></span><br><span class="line"><span class="comment">//        case2();</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">case1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] allocation1, allocation2, allocation3;</span><br><span class="line"></span><br><span class="line">        allocation1 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">2</span> * _1MB];</span><br><span class="line">        allocation2 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">2</span> * _1MB];</span><br><span class="line">        <span class="comment">// 出现一次Minor GC，因为 allocation1,2 幸存区放不下，所以直接通过空间分配担保晋升到老年代</span></span><br><span class="line">        allocation3 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">4</span> * _1MB];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">        [GC (Allocation Failure) [DefNew: 6282K-&gt;751K(9216K), 0.0045570 secs] 6282K-&gt;4847K(19456K), 0.0046229 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] </span></span><br><span class="line"><span class="comment">        Heap</span></span><br><span class="line"><span class="comment">         def new generation   total 9216K, used 4929K [0x00000000fec00000, 0x00000000ff600000, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">          eden space 8192K,  51% used [0x00000000fec00000, 0x00000000ff014930, 0x00000000ff400000)</span></span><br><span class="line"><span class="comment">          from space 1024K,  73% used [0x00000000ff500000, 0x00000000ff5bbdf0, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">          to   space 1024K,   0% used [0x00000000ff400000, 0x00000000ff400000, 0x00000000ff500000)</span></span><br><span class="line"><span class="comment">         tenured generation   total 10240K, used 4096K [0x00000000ff600000, 0x0000000100000000, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">           the space 10240K,  40% used [0x00000000ff600000, 0x00000000ffa00020, 0x00000000ffa00200, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">         Metaspace       used 3299K, capacity 4496K, committed 4864K, reserved 1056768K</span></span><br><span class="line"><span class="comment">          class space    used 359K, capacity 388K, committed 512K, reserved 1048576K</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">case2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] allocation1, allocation2, allocation3;</span><br><span class="line"></span><br><span class="line">        allocation1 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">7</span> * _1MB]; <span class="comment">// 触发Minor GC后，1放入Eden</span></span><br><span class="line">        allocation2 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">7</span> * _1MB]; <span class="comment">// 触发Minor GC后，1放入老年代，2放入Eden</span></span><br><span class="line">        allocation3 = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1</span> * _1MB]; <span class="comment">// 触发Minor GC后，2无法放入老年代，继续待在Eden，3放入Eden</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">        [GC (Allocation Failure) [DefNew: 2186K-&gt;723K(9216K), 0.0042852 secs] 2186K-&gt;723K(19456K), 0.0043497 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">        [GC (Allocation Failure) [DefNew: 8055K-&gt;3K(9216K), 0.0063891 secs] 8055K-&gt;7777K(19456K), 0.0064312 secs] [Times: user=0.00 sys=0.00, real=0.01 secs]</span></span><br><span class="line"><span class="comment">        [GC (Allocation Failure) [DefNew: 7254K-&gt;7254K(9216K), 0.0000231 secs][Tenured: 7774K-&gt;7774K(10240K), 0.0033296 secs] 15028K-&gt;14946K(19456K), [Metaspace: 3292K-&gt;3292K(1056768K)], 0.0034365 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">        Heap</span></span><br><span class="line"><span class="comment">         def new generation   total 9216K, used 7554K [0x00000000fec00000, 0x00000000ff600000, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">          eden space 8192K,  92% used [0x00000000fec00000, 0x00000000ff360878, 0x00000000ff400000)</span></span><br><span class="line"><span class="comment">          from space 1024K,   0% used [0x00000000ff400000, 0x00000000ff400000, 0x00000000ff500000)</span></span><br><span class="line"><span class="comment">          to   space 1024K,   0% used [0x00000000ff500000, 0x00000000ff500000, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">         tenured generation   total 10240K, used 8798K [0x00000000ff600000, 0x0000000100000000, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">           the space 10240K,  85% used [0x00000000ff600000, 0x00000000ffe97960, 0x00000000ffe97a00, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">         Metaspace       used 3299K, capacity 4496K, committed 4864K, reserved 1056768K</span></span><br><span class="line"><span class="comment">          class space    used 359K, capacity 388K, committed 512K, reserved 1048576K</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="补充：子线程堆内存溢出不会让主线程终止"><a href="#补充：子线程堆内存溢出不会让主线程终止" class="headerlink" title="补充：子线程堆内存溢出不会让主线程终止"></a>补充：子线程堆内存溢出不会让主线程终止</h5><p>正确理解上面那句话，首先要正确理解异常，子线程内存溢出抛出的异常跟所有其他的异常其实是一样的，所以不会让主线程停止运行，而主线程的堆状态是跟子线程抛出异常时相同的，因为它们共用堆内存，看程序运行结束的堆状态信息也能体现这一点。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.itcast.jvm.t2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  演示子线程堆内存溢出不会让主线程终止</span></span><br><span class="line"><span class="comment"> *  -Xms20M -Xmx20M -Xmn10M -XX:SurvivorRatio=8 -XX:+UseSerialGC -XX:+PrintGCDetails -verbose:gc</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestException</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _1MB = <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _8MB = <span class="number">8</span> * <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] allocation1,allocation2;</span><br><span class="line">            allocation1 = <span class="keyword">new</span> <span class="keyword">byte</span>[_8MB]; <span class="comment">// 直接晋升到老年代</span></span><br><span class="line">            allocation2 = <span class="keyword">new</span> <span class="keyword">byte</span>[_8MB]; <span class="comment">// 触发Minor GC + Full GC</span></span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;sleep....&quot;</span>);</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;我还在正常运行...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">sleep....</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [DefNew: 4187K-&gt;957K(9216K), 0.0022872 secs][Tenured: 8192K-&gt;9147K(10240K), 0.0035342 secs] 12379K-&gt;9147K(19456K), [Metaspace: 4206K-&gt;4206K(1056768K)], 0.0059234 secs] [Times: user=0.01 sys=0.00, real=0.01 secs]</span></span><br><span class="line"><span class="comment">[Full GC (Allocation Failure) [Tenured: 9147K-&gt;9091K(10240K), 0.0028015 secs] 9147K-&gt;9091K(19456K), [Metaspace: 4206K-&gt;4206K(1056768K)], 0.0028539 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">// 异常在子线程发生，子线程停止运行，但主线程仍然正常运行</span></span><br><span class="line"><span class="comment">Exception in thread &quot;Thread-0&quot; java.lang.OutOfMemoryError: Java heap space</span></span><br><span class="line"><span class="comment">	at cn.itcast.jvm.t2.TestException.lambda$main$0(TestException.java:23)</span></span><br><span class="line"><span class="comment">	at cn.itcast.jvm.t2.TestException$$Lambda$1/1989780873.run(Unknown Source)</span></span><br><span class="line"><span class="comment">	at java.lang.Thread.run(Thread.java:748)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">我还在正常运行...</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 最终堆状态，因为还没有GC发生，所以老年代没变，新生代加了一点主线程的东西</span></span><br><span class="line"><span class="comment">Heap</span></span><br><span class="line"><span class="comment"> def new generation   total 9216K, used 1320K [0x00000000fec00000, 0x00000000ff600000, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">  eden space 8192K,  16% used [0x00000000fec00000, 0x00000000fed4a288, 0x00000000ff400000)</span></span><br><span class="line"><span class="comment">  from space 1024K,   0% used [0x00000000ff500000, 0x00000000ff500000, 0x00000000ff600000)</span></span><br><span class="line"><span class="comment">  to   space 1024K,   0% used [0x00000000ff400000, 0x00000000ff400000, 0x00000000ff500000)</span></span><br><span class="line"><span class="comment"> tenured generation   total 10240K, used 9091K [0x00000000ff600000, 0x0000000100000000, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">   the space 10240K,  88% used [0x00000000ff600000, 0x00000000ffee0c78, 0x00000000ffee0e00, 0x0000000100000000)</span></span><br><span class="line"><span class="comment"> Metaspace       used 4725K, capacity 4804K, committed 4992K, reserved 1056768K</span></span><br><span class="line"><span class="comment">  class space    used 526K, capacity 560K, committed 640K, reserved 1048576K</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>参考：</p>
+<ol>
+<li>《深入理解Java虚拟机》第三版.</li>
+<li><a target="_blank" rel="noopener" href="https://www.itheima.com/">黑马程序员课程</a></li>
+<li><a target="_blank" rel="noopener" href="https://droidyue.com/blog/2014/10/12/understanding-weakreference-in-java/index.html">译文：理解Java中的弱引用</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.iteye.com/blog/rednaxelafx-1044951">找出栈上的指针/引用</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/29268019/answer/43762165">现代JVM中的Safe Region和Safe Point到底是如何定义和划分的? - RednaxelaFX的回答 - 知乎</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/389362829/answer/1235454900">Java中的GCRoots到底有哪些?年轻代gc和老年代gc的GCRoots是如何区分的？ - gokenu的回答 - 知乎</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/53613423/answer/135743258">java的gc为什么要分代？ - RednaxelaFX的回答 - 知乎</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dengq/p/13687534.html">JVM参数之ParallelGCThreads</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/thisiswhy/p/12388638.html">面试官问我G1回收器怎么知道你是什么时候的垃圾？</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/37028283/answer/1409952873">关于CMS、G1垃圾回收器的重新标记、最终标记疑惑? - 山海关在哪的回答 - 知乎</a></li>
+<li><a target="_blank" rel="noopener" href="https://hllvm-group.iteye.com/group/topic/44529">HotSpot VM讨论：关于incremental update与SATB的一点理解</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/71058481">CMS 与 G1 垃圾收集器的思考 (1) - ZeaTalk的文章 - 知乎</a> </li>
+<li><a target="_blank" rel="noopener" href="http://cs.williams.edu/~dbarowy/cs334s18/assets/p37-detlefs.pdf">Detlefs, David, et al. “Garbage-first garbage collection.” Proceedings of the 4th international symposium on Memory management. 2004.</a></li>
+</ol>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A0%86/" rel="tag"><i class="fa fa-tag"></i> 堆</a>
+              <a href="/tags/GC%E6%9C%BA%E5%88%B6/" rel="tag"><i class="fa fa-tag"></i> GC机制</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/09/25/JVM_3_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E4%B9%8B%E7%9B%B4%E6%8E%A5%E5%86%85%E5%AD%98/" rel="prev" title="Java内存结构之直接内存">
+                  <i class="fa fa-chevron-left"></i> Java内存结构之直接内存
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/" rel="next" title="可达性分析与四种引用类型">
+                  可达性分析与四种引用类型 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

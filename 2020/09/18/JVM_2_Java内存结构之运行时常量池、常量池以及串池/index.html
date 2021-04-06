@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="运行时常量池 注：上图的“常量池”有误，应该是“运行时常量池”">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java内存结构之运行时常量池、常量池以及串池">
+<meta property="og:url" content="http://example.com/2020/09/18/JVM_2_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E4%B9%8B%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0%E3%80%81%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%A5%E5%8F%8A%E4%B8%B2%E6%B1%A0/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="运行时常量池 注：上图的“常量池”有误，应该是“运行时常量池”">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/2ADDAAA9C4B5467B9C0B4B304E0CE8EC?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+<meta property="article:published_time" content="2020-09-18T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-03-02T13:28:30.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="运行时常量池">
+<meta property="article:tag" content="常量池">
+<meta property="article:tag" content="串池">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/2ADDAAA9C4B5467B9C0B4B304E0CE8EC?method=download&shareKey=d55375734274aff6748d28b843d9b790">
+
+
+<link rel="canonical" href="http://example.com/2020/09/18/JVM_2_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E4%B9%8B%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0%E3%80%81%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%A5%E5%8F%8A%E4%B8%B2%E6%B1%A0/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>Java内存结构之运行时常量池、常量池以及串池 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text">运行时常量池</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#StringTable-%E4%B8%B2%E6%B1%A0"><span class="nav-number">1.0.1.</span> <span class="nav-text">StringTable(串池)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StringTable%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98"><span class="nav-number">1.0.2.</span> <span class="nav-text">StringTable性能调优</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/09/18/JVM_2_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E4%B9%8B%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0%E3%80%81%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%A5%E5%8F%8A%E4%B8%B2%E6%B1%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java内存结构之运行时常量池、常量池以及串池
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-09-18 19:25:15" itemprop="dateCreated datePublished" datetime="2020-09-18T19:25:15+08:00">2020-09-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-02 21:28:30" itemprop="dateModified" datetime="2021-03-02T21:28:30+08:00">2021-03-02</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>12k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>23 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h3><p><img src="https://note.youdao.com/yws/api/personal/file/2ADDAAA9C4B5467B9C0B4B304E0CE8EC?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
+<center>注：上图的“常量池”有误，应该是“运行时常量池”</center>
+<span id="more"></span>
+
+<p>运行时常量池与常量池：Class文件即字节码文件中除了有类的基本信息（版本、字段、方法、接口等描述信息），类方法定义，还有一项信息是<code>常量池表（Constant Pool Table）</code>，也简称为常量池，用于存放编译期生成的各种字面量与符号引用，类方法定义中的虚拟机指令将通过常量池来执行，这部分内容将在类加载后存放到方法区的<code>运行时常量池</code>中。</p>
+<ul>
+<li>常量池：就是一张表，虚拟机指令根据这张常量表找到要执行的类名、方法名、参数类型、字面量等信息；</li>
+<li>运行时常量池：常量池是*.class 文件中的，当该类被加载，它的常量池信息就会放入<code>运行时常量池</code>，并把里面的符号地址变为真实地址。运行时常量池相对于Class文件常量池的另外一个重要特征是具备动态性，Java语言并不要求常量一定只有编译期才能产生，也就是说，并非预置入Class文件中常量池的内容才能进入方法区运行时常量池，运行期间也可以将新的常量放入池中，这种特性被开发人员利用得比较多的便是String类的<code>intern()</code>方法；</li>
+<li>既然运行时常量池是方法区的一部分，自然受到方法区内存的限制，当运行时常量池无法再申请到内存时会抛出<code>OutOfMemoryError</code>异常。</li>
+</ul>
+<p>我们以下面代码为例看一下二进制字节码文件中包含什么信息：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 二进制字节码（类基本信息、常量池、以及包含了虚拟机指令的类方法定义）</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先编译一下进入到字节码文件所在的路径中，<code>javap -v HelloWorld.class</code>反编译字节码，显示反编译后字节码的详细信息如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">Classfile &#x2F;D:&#x2F;java&#x2F;IdeaProjects&#x2F;jvm&#x2F;out&#x2F;production&#x2F;jvm&#x2F;cn&#x2F;itcast&#x2F;jvm&#x2F;t5&#x2F;HelloWorld.class</span><br><span class="line">  Last modified 2020年9月8日; size 567 bytes</span><br><span class="line">  MD5 checksum 8efebdac91aa496515fa1c161184e354</span><br><span class="line">  Compiled from &quot;HelloWorld.java&quot;</span><br><span class="line">public class cn.itcast.jvm.t5.HelloWorld</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: (0x0021) ACC_PUBLIC, ACC_SUPER</span><br><span class="line">  this_class: #5                          &#x2F;&#x2F; cn&#x2F;itcast&#x2F;jvm&#x2F;t5&#x2F;HelloWorld</span><br><span class="line">  super_class: #6                         &#x2F;&#x2F; java&#x2F;lang&#x2F;Object</span><br><span class="line">  interfaces: 0, fields: 0, methods: 2, attributes: 1</span><br><span class="line">  --------------------------------以上是类的基本信息-----------------------------------------</span><br><span class="line">Constant pool:</span><br><span class="line">   #1 &#x3D; Methodref          #6.#20         &#x2F;&#x2F; java&#x2F;lang&#x2F;Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 &#x3D; Fieldref           #21.#22        &#x2F;&#x2F; java&#x2F;lang&#x2F;System.out:Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">   #3 &#x3D; String             #23            &#x2F;&#x2F; hello world</span><br><span class="line">   #4 &#x3D; Methodref          #24.#25        &#x2F;&#x2F; java&#x2F;io&#x2F;PrintStream.println:(Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">   #5 &#x3D; Class              #26            &#x2F;&#x2F; cn&#x2F;itcast&#x2F;jvm&#x2F;t5&#x2F;HelloWorld</span><br><span class="line">   #6 &#x3D; Class              #27            &#x2F;&#x2F; java&#x2F;lang&#x2F;Object</span><br><span class="line">   #7 &#x3D; Utf8               &lt;init&gt;</span><br><span class="line">   #8 &#x3D; Utf8               ()V</span><br><span class="line">   #9 &#x3D; Utf8               Code</span><br><span class="line">  #10 &#x3D; Utf8               LineNumberTable</span><br><span class="line">  #11 &#x3D; Utf8               LocalVariableTable</span><br><span class="line">  #12 &#x3D; Utf8               this</span><br><span class="line">  #13 &#x3D; Utf8               Lcn&#x2F;itcast&#x2F;jvm&#x2F;t5&#x2F;HelloWorld;</span><br><span class="line">  #14 &#x3D; Utf8               main</span><br><span class="line">  #15 &#x3D; Utf8               ([Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">  #16 &#x3D; Utf8               args</span><br><span class="line">  #17 &#x3D; Utf8               [Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">  #18 &#x3D; Utf8               SourceFile</span><br><span class="line">  #19 &#x3D; Utf8               HelloWorld.java</span><br><span class="line">  #20 &#x3D; NameAndType        #7:#8          &#x2F;&#x2F; &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">  #21 &#x3D; Class              #28            &#x2F;&#x2F; java&#x2F;lang&#x2F;System</span><br><span class="line">  #22 &#x3D; NameAndType        #29:#30        &#x2F;&#x2F; out:Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">  #23 &#x3D; Utf8               hello world</span><br><span class="line">  #24 &#x3D; Class              #31            &#x2F;&#x2F; java&#x2F;io&#x2F;PrintStream</span><br><span class="line">  #25 &#x3D; NameAndType        #32:#33        &#x2F;&#x2F; println:(Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">  #26 &#x3D; Utf8               cn&#x2F;itcast&#x2F;jvm&#x2F;t5&#x2F;HelloWorld</span><br><span class="line">  #27 &#x3D; Utf8               java&#x2F;lang&#x2F;Object</span><br><span class="line">  #28 &#x3D; Utf8               java&#x2F;lang&#x2F;System</span><br><span class="line">  #29 &#x3D; Utf8               out</span><br><span class="line">  #30 &#x3D; Utf8               Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">  #31 &#x3D; Utf8               java&#x2F;io&#x2F;PrintStream</span><br><span class="line">  #32 &#x3D; Utf8               println</span><br><span class="line">  #33 &#x3D; Utf8               (Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">  --------------------------------以上是类的常量池------------------------------------------</span><br><span class="line">&#123;</span><br><span class="line">  public cn.itcast.jvm.t5.HelloWorld(); &#x2F;&#x2F; 默认构造方法</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: (0x0001) ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack&#x3D;1, locals&#x3D;1, args_size&#x3D;1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  &#x2F;&#x2F; Method java&#x2F;lang&#x2F;Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 4: 0</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0       5     0  this   Lcn&#x2F;itcast&#x2F;jvm&#x2F;t5&#x2F;HelloWorld;</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]); &#x2F;&#x2F; main方法，方法里面就包含了虚拟机指令</span><br><span class="line">    descriptor: ([Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">    flags: (0x0009) ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack&#x3D;2, locals&#x3D;1, args_size&#x3D;1</span><br><span class="line">         0: getstatic     #2                  &#x2F;&#x2F; Field java&#x2F;lang&#x2F;System.out:Ljava&#x2F;io&#x2F;PrintStream; ----（#2）通过查常量表获取System.out静态变量</span><br><span class="line">         3: ldc           #3                     &#x2F;&#x2F; String hello world ----（#3）加载一个String参数</span><br><span class="line">         5: invokevirtual #4                &#x2F;&#x2F; Method java&#x2F;io&#x2F;PrintStream.println:(Ljava&#x2F;lang&#x2F;String;)V ----（#4）虚方法调用，调用println()</span><br><span class="line">         8: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line">        line 7: 8</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0       9     0  args   [Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">&#125;</span><br><span class="line">--------------------------------以上是类的方法定义-----------------------------------------</span><br><span class="line">SourceFile: &quot;HelloWorld.java&quot;</span><br></pre></td></tr></table></figure>
+<h5 id="StringTable-串池"><a href="#StringTable-串池" class="headerlink" title="StringTable(串池)"></a>StringTable(串池)</h5><p>运行时常量池里有一个重要的组成部分——<code>StringTable</code>，也叫作“串池”，如上图所示，在jdk1.7之后串池被放到了堆中，原因是由于字符串被频繁的使用，放在堆中可以方便高效的进行垃圾回收，而在运行时常量池（方法区)，垃圾回收的条件苛刻，不能及时地进行垃圾回收，从而会占用大量的内存。但在逻辑和分析上仍然可以把串池当做运行时常量池的一部分。</p>
+<p><strong>StringTable特性</strong> ：</p>
+<ul>
+<li>常量池中的字符串仅是符号，第一次用到时才变为对象; </li>
+<li>利用串池的机制，来避免重复创建字符串对象； </li>
+<li>字符串变量拼接的原理是 StringBuilder（1.8，线程不安全的，所以比StringBuffer速度快）； </li>
+<li>在jdk1.8后，串池被放在堆中，所以串池中的对象也跟堆中的对象一样，可以垃圾回收；</li>
+<li>字符串常量拼接的原理是编译期优化时可以使用 intern 方法，主动将串池中还没有的字符串对象放入串池 <ul>
+<li>1.8及之后  将这个字符串对象尝试放入串池，如果有则并不会放入，如果没有则放入串池， 会把串池中的对象返回（以下不做特殊说明，都指的是在1.8之后的环境中） </li>
+<li>1.7及之前  将这个字符串对象尝试放入串池，如果有则并不会放入，如果没有会把此对象复制一份，放入串池，会把串池中的对象返回</li>
+</ul>
+</li>
+</ul>
+<p>关于串池的一些经典例题：<br>例题1：关于字符串变量拼接和字符串常量拼接</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    String s1 = <span class="string">&quot;a&quot;</span>;</span><br><span class="line">    String s2 = <span class="string">&quot;b&quot;</span>;</span><br><span class="line">    String s3 = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line">    String s4 = s1 + s2;</span><br><span class="line">    String s5 = <span class="string">&quot;a&quot;</span> + <span class="string">&quot;b&quot;</span>;</span><br><span class="line">    </span><br><span class="line"><span class="comment">// 问，下列输出的结果如何</span></span><br><span class="line">    System.out.println(s3 == s4);  <span class="comment">// false</span></span><br><span class="line">    System.out.println(s3 == s5);  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<p>相信这个大家都会但不一定能深刻理解为什么是这样。我们还是从常量池看起，编译之后的字节码包含如下信息，我们只关心常量池和main方法定义（其中的虚拟机指令）：</p>
+<ul>
+<li>显然常量池里有 a b ab，常量池中的信息，都会被加载到运行时常量池(或串池)中， 这时 a b ab 都是常量池中的符号，还没有变为 java 字符串对象，看main方法定义中的指令， <code>ldc #2 </code>会把 a 符号变为 “a” 字符串对象，然后<code>astore_1</code>存到slot1即s1中，<code> ldc #3</code> 会把 b 符号变为 “b” 字符串对象，<code> ldc #4</code> 会把 ab 符号变为 “ab” 字符串对象…</li>
+<li>接来下9-27就是字符串拼接的过程，实际上调用了new StringBuilder().append(“a”).append(“b”).toString()这一系列方法，所以s4是在堆中新建的对象，而s3是串池中的对象，显然s3!=s4。</li>
+<li>再往后看执行到s5时，直接<code>ldc  #4 </code>，然后<code>astore 5</code>存到slot5即s5中，可以看出这跟前面s3是一模一样的，所以s3==s5。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line">Constant pool:</span><br><span class="line">   #1 &#x3D; Methodref          #12.#36        &#x2F;&#x2F; java&#x2F;lang&#x2F;Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 &#x3D; String             #37            &#x2F;&#x2F; a</span><br><span class="line">   #3 &#x3D; String             #38            &#x2F;&#x2F; b</span><br><span class="line">   #4 &#x3D; String             #39            &#x2F;&#x2F; ab</span><br><span class="line">   #5 &#x3D; Class              #40            &#x2F;&#x2F; java&#x2F;lang&#x2F;StringBuilder</span><br><span class="line">   #6 &#x3D; Methodref          #5.#36         &#x2F;&#x2F; java&#x2F;lang&#x2F;StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #7 &#x3D; Methodref          #5.#41         &#x2F;&#x2F; java&#x2F;lang&#x2F;StringBuilder.append:(Ljava&#x2F;lang&#x2F;String;)Ljava&#x2F;lang&#x2F;StringBuilder;</span><br><span class="line">   #8 &#x3D; Methodref          #5.#42         &#x2F;&#x2F; java&#x2F;lang&#x2F;StringBuilder.toString:()Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">   #9 &#x3D; Fieldref           #43.#44        &#x2F;&#x2F; java&#x2F;lang&#x2F;System.out:Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">  #10 &#x3D; Methodref          #45.#46        &#x2F;&#x2F; java&#x2F;io&#x2F;PrintStream.println:(Z)V</span><br><span class="line">  #11 &#x3D; Class              #47            &#x2F;&#x2F; cn&#x2F;itcast&#x2F;jvm&#x2F;t1&#x2F;stringtable&#x2F;Demo1_22</span><br><span class="line">  #12 &#x3D; Class              #48            &#x2F;&#x2F; java&#x2F;lang&#x2F;Object</span><br><span class="line">  #13 &#x3D; Utf8               &lt;init&gt;</span><br><span class="line">  #14 &#x3D; Utf8               ()V</span><br><span class="line">  #15 &#x3D; Utf8               Code</span><br><span class="line">  #16 &#x3D; Utf8               LineNumberTable</span><br><span class="line">  #17 &#x3D; Utf8               LocalVariableTable</span><br><span class="line">  #18 &#x3D; Utf8               this</span><br><span class="line">  #19 &#x3D; Utf8               Lcn&#x2F;itcast&#x2F;jvm&#x2F;t1&#x2F;stringtable&#x2F;Demo1_22;</span><br><span class="line">  #20 &#x3D; Utf8               main</span><br><span class="line">  #21 &#x3D; Utf8               ([Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">  #22 &#x3D; Utf8               args</span><br><span class="line">  #23 &#x3D; Utf8               [Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">  #24 &#x3D; Utf8               s1</span><br><span class="line">  #25 &#x3D; Utf8               Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">  #26 &#x3D; Utf8               s2</span><br><span class="line">  #27 &#x3D; Utf8               s3</span><br><span class="line">  #28 &#x3D; Utf8               s4</span><br><span class="line">  #29 &#x3D; Utf8               s5</span><br><span class="line">  #30 &#x3D; Utf8               StackMapTable</span><br><span class="line">  #31 &#x3D; Class              #23            &#x2F;&#x2F; &quot;[Ljava&#x2F;lang&#x2F;String;&quot;</span><br><span class="line">  #32 &#x3D; Class              #49            &#x2F;&#x2F; java&#x2F;lang&#x2F;String</span><br><span class="line">  #33 &#x3D; Class              #50            &#x2F;&#x2F; java&#x2F;io&#x2F;PrintStream</span><br><span class="line">  #34 &#x3D; Utf8               SourceFile</span><br><span class="line">  #35 &#x3D; Utf8               Demo1_22.java</span><br><span class="line">  #36 &#x3D; NameAndType        #13:#14        &#x2F;&#x2F; &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">  #37 &#x3D; Utf8               a</span><br><span class="line">  #38 &#x3D; Utf8               b</span><br><span class="line">  #39 &#x3D; Utf8               ab</span><br><span class="line">  #40 &#x3D; Utf8               java&#x2F;lang&#x2F;StringBuilder</span><br><span class="line">  #41 &#x3D; NameAndType        #51:#52        &#x2F;&#x2F; append:(Ljava&#x2F;lang&#x2F;String;)Ljava&#x2F;lang&#x2F;StringBuilder;</span><br><span class="line">  #42 &#x3D; NameAndType        #53:#54        &#x2F;&#x2F; toString:()Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">  #43 &#x3D; Class              #55            &#x2F;&#x2F; java&#x2F;lang&#x2F;System</span><br><span class="line">  #44 &#x3D; NameAndType        #56:#57        &#x2F;&#x2F; out:Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">  #45 &#x3D; Class              #50            &#x2F;&#x2F; java&#x2F;io&#x2F;PrintStream</span><br><span class="line">  #46 &#x3D; NameAndType        #58:#59        &#x2F;&#x2F; println:(Z)V</span><br><span class="line">  #47 &#x3D; Utf8               cn&#x2F;itcast&#x2F;jvm&#x2F;t1&#x2F;stringtable&#x2F;Demo1_22</span><br><span class="line">  #48 &#x3D; Utf8               java&#x2F;lang&#x2F;Object</span><br><span class="line">  #49 &#x3D; Utf8               java&#x2F;lang&#x2F;String</span><br><span class="line">  #50 &#x3D; Utf8               java&#x2F;io&#x2F;PrintStream</span><br><span class="line">  #51 &#x3D; Utf8               append</span><br><span class="line">  #52 &#x3D; Utf8               (Ljava&#x2F;lang&#x2F;String;)Ljava&#x2F;lang&#x2F;StringBuilder;</span><br><span class="line">  #53 &#x3D; Utf8               toString</span><br><span class="line">  #54 &#x3D; Utf8               ()Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">  #55 &#x3D; Utf8               java&#x2F;lang&#x2F;System</span><br><span class="line">  #56 &#x3D; Utf8               out</span><br><span class="line">  #57 &#x3D; Utf8               Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">  #58 &#x3D; Utf8               println</span><br><span class="line">  #59 &#x3D; Utf8               (Z)V</span><br><span class="line">  </span><br><span class="line">  &#123;</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    descriptor: ([Ljava&#x2F;lang&#x2F;String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack&#x3D;3, locals&#x3D;6, args_size&#x3D;1</span><br><span class="line">         0: ldc           #2                  &#x2F;&#x2F; String a</span><br><span class="line">         2: astore_1</span><br><span class="line">         3: ldc           #3                  &#x2F;&#x2F; String b</span><br><span class="line">         5: astore_2</span><br><span class="line">         6: ldc           #4                  &#x2F;&#x2F; String ab</span><br><span class="line">         8: astore_3</span><br><span class="line">         9: new           #5                  &#x2F;&#x2F; class java&#x2F;lang&#x2F;StringBuilder</span><br><span class="line">        12: dup</span><br><span class="line">        13: invokespecial #6                  &#x2F;&#x2F; Method java&#x2F;lang&#x2F;StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        16: aload_1</span><br><span class="line">        17: invokevirtual #7                  &#x2F;&#x2F; Method java&#x2F;lang&#x2F;StringBuilder.append:(Ljava&#x2F;lang&#x2F;String;)Ljava&#x2F;lang&#x2F;StringBuilder;</span><br><span class="line">        20: aload_2</span><br><span class="line">        21: invokevirtual #7                  &#x2F;&#x2F; Method java&#x2F;lang&#x2F;StringBuilder.append:(Ljava&#x2F;lang&#x2F;String;)Ljava&#x2F;lang&#x2F;StringBuilder;</span><br><span class="line">        24: invokevirtual #8                  &#x2F;&#x2F; Method java&#x2F;lang&#x2F;StringBuilder.toString:()Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">        27: astore        4</span><br><span class="line">        29: ldc           #4                  &#x2F;&#x2F; String ab</span><br><span class="line">        31: astore        5</span><br><span class="line">        33: getstatic     #9                  &#x2F;&#x2F; Field java&#x2F;lang&#x2F;System.out:Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">        36: aload_3</span><br><span class="line">        37: aload         4</span><br><span class="line">        39: if_acmpne     46</span><br><span class="line">        42: iconst_1</span><br><span class="line">        43: goto          47</span><br><span class="line">        46: iconst_0</span><br><span class="line">        47: invokevirtual #10                 &#x2F;&#x2F; Method java&#x2F;io&#x2F;PrintStream.println:(Z)V</span><br><span class="line">        50: getstatic     #9                  &#x2F;&#x2F; Field java&#x2F;lang&#x2F;System.out:Ljava&#x2F;io&#x2F;PrintStream;</span><br><span class="line">        53: aload_3</span><br><span class="line">        54: aload         5</span><br><span class="line">        56: if_acmpne     63</span><br><span class="line">        59: iconst_1</span><br><span class="line">        60: goto          64</span><br><span class="line">        63: iconst_0</span><br><span class="line">        64: invokevirtual #10                 &#x2F;&#x2F; Method java&#x2F;io&#x2F;PrintStream.println:(Z)V</span><br><span class="line">        67: return</span><br><span class="line">        LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0      68     0  args   [Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">            3      65     1    s1   Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">            6      62     2    s2   Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">            9      59     3    s3   Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">           29      39     4    s4   Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">           33      35     5    s5   Ljava&#x2F;lang&#x2F;String;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>例题2：关于 intern()<br><strong>case1：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">String s = <span class="keyword">new</span> String(<span class="string">&quot;a&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;b&quot;</span>);</span><br><span class="line"><span class="comment">// 注意：上面代码是属于字符串变量的拼接，其内部仍然是调用的是StringBuilder().append(&quot;a&quot;).append(&quot;b&quot;).toString()这一系列方法，而常量池中存在 a b， 但不存在ab; </span></span><br><span class="line"><span class="comment">// 此时堆：[ new String(&quot;a&quot;),  new String(&quot;b&quot;),  new String(&quot;ab&quot;)]; 现在“ab&quot;仅存在堆中，不存在串池中;</span></span><br><span class="line"><span class="comment">// 此时StringTable： [&quot;a&quot;, &quot;b&quot;] ;</span></span><br><span class="line"> </span><br><span class="line">String s2 = s.intern(); </span><br><span class="line"><span class="comment">// 可以调用intern()方法将这个字符串对象尝试放入串池，如果有则不会放入，如果没有则放入串池(...)，最后总会把串池中的对象返回;</span></span><br><span class="line"><span class="comment">// s.intern()后StringTable：[&quot;a&quot;, &quot;b&quot;, &quot;ab&quot;];</span></span><br><span class="line"></span><br><span class="line">String x = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// jdk1.8</span></span><br><span class="line">System.out.println( s2 == x); <span class="comment">// true</span></span><br><span class="line">System.out.println( s == x ); <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// jdk1.6</span></span><br><span class="line">System.out.println( s2 == x); <span class="comment">// true</span></span><br><span class="line">System.out.println( s == x ); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>在jdk1.8及之后，调用intern()方法将这个字符串对象s尝试放入串池，显然没有则放入串池，最后把放入串池中的对象即s返回；因为s2是返回的串池中的对象，肯定与x相同；s是放入串池的对象，所以s也与x相同。<br>在jdk1.7及之前，调用intern()方法将这个字符串对象s尝试放入串池，显然没有则复制一份新的对象，把新的对象放入串池，最后把放入串池中的对象即新对象返回；因为s2是返回的串池中的对象，肯定与x相同；因为放入串池的对象是一个复制s的新对象，所以s与x地址不相同。<br><strong>case2</strong>:   </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">String x = <span class="string">&quot;ab&quot;</span>;</span><br><span class="line">String s = <span class="keyword">new</span> String(<span class="string">&quot;a&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;b&quot;</span>);</span><br><span class="line"><span class="comment">// 此时堆：[ new String(&quot;a&quot;),  new String(&quot;b&quot;),  new String(&quot;ab&quot;)];</span></span><br><span class="line"><span class="comment">// 此时StringTable： [&quot;a&quot;, &quot;b&quot;, &quot;ab&quot;] ;</span></span><br><span class="line"> </span><br><span class="line">String s2 = s.intern(); </span><br><span class="line"><span class="comment">// 可以调用intern()方法将这个字符串对象尝试放入串池，如果有则不会放入，如果没有则放入串池(...)，最后总会把串池中的对象返回;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// jdk1.8</span></span><br><span class="line">System.out.println( s2 == x); <span class="comment">// true</span></span><br><span class="line">System.out.println( s == x ); <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// jdk1.6</span></span><br><span class="line">System.out.println( s2 == x); <span class="comment">// true</span></span><br><span class="line">System.out.println( s == x ); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>因为这里在intern()之前，串池中已经存在字符串对象”ab”，所以并没有放入串池，返回的都是之前串池的对象即x，这在jdk1.6和1.8中是一样的，所以s2==x，s是堆中的对象显然不等于x。<br><strong>other cases:</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这种情况在编译后常量池中已经有a，jvm会在串池自己新建a对象,并不是堆中的a</span></span><br><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">System.out.println(s1.intern() == s1); <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 这种情况因为编译后常量池中没有bc，所以jvm不会自己在串池新建bc对象，</span></span><br><span class="line"><span class="comment">// 当第一次调用intern()时，会把s2放入串池，所以s2.intern()==s2</span></span><br><span class="line">String s2 = <span class="keyword">new</span> String(<span class="string">&quot;b&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;c&quot;</span>);</span><br><span class="line">System.out.println(s2.intern() == s2); <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 这种情况在编译后常量池中已经有de，jvm会自己在串池新建de对象，并不是堆中的de,</span></span><br><span class="line"><span class="comment">// 所以s5是返回的串池中的对象，而s3,s4都是堆中的对象，所以不相等</span></span><br><span class="line">String s3 = <span class="keyword">new</span> String(<span class="string">&quot;de&quot;</span>);</span><br><span class="line">String s4 = <span class="keyword">new</span> String(<span class="string">&quot;d&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;e&quot;</span>);</span><br><span class="line">String s5 = s4.intern();</span><br><span class="line">System.out.println(s5 == s3); <span class="comment">// false</span></span><br><span class="line">System.out.println(s5 == s4); <span class="comment">// false</span></span><br><span class="line">System.out.println(s3.intern() == s4.intern()); <span class="comment">// true;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="StringTable性能调优"><a href="#StringTable性能调优" class="headerlink" title="StringTable性能调优"></a>StringTable性能调优</h5><ul>
+<li>StringTable实质上是一个hashtable，可以通过参数<code>-XX:StringTableSize=size</code>设置哈希表的桶个数，默认是60013，一般来说桶个数越大占用的内存越大，但存取速度会越快；</li>
+<li>适时调用intern()方法入池会节约内存，避免堆中存在大量意义重复（地址不同）的对象。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0/" rel="tag"><i class="fa fa-tag"></i> 运行时常量池</a>
+              <a href="/tags/%E5%B8%B8%E9%87%8F%E6%B1%A0/" rel="tag"><i class="fa fa-tag"></i> 常量池</a>
+              <a href="/tags/%E4%B8%B2%E6%B1%A0/" rel="tag"><i class="fa fa-tag"></i> 串池</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/09/15/JVM_1_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0/" rel="prev" title="Java内存结构概述">
+                  <i class="fa fa-chevron-left"></i> Java内存结构概述
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/09/25/JVM_3_Java%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84%E4%B9%8B%E7%9B%B4%E6%8E%A5%E5%86%85%E5%AD%98/" rel="next" title="Java内存结构之直接内存">
+                  Java内存结构之直接内存 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="流的分类输入流 和 输出流划分输入&#x2F;输出流时是从程序运行所在内存的角度来考虑的  输入流：数据从外部设备往内存输入 输出流：数据从内存往外部设备输出  字节流 和 字符流字节流和字符流的用法几乎完全一样，区别在于字节流和字符流所操作的数据单元不同——字节流操作的数据单元是8位的字节，而字符流操作的数据单元是16位的字符。 字节流主要由InputStream和OutputStream作为基类，而字符">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 输入输出体系">
+<meta property="og:url" content="http://example.com/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="流的分类输入流 和 输出流划分输入&#x2F;输出流时是从程序运行所在内存的角度来考虑的  输入流：数据从外部设备往内存输入 输出流：数据从内存往外部设备输出  字节流 和 字符流字节流和字符流的用法几乎完全一样，区别在于字节流和字符流所操作的数据单元不同——字节流操作的数据单元是8位的字节，而字符流操作的数据单元是16位的字符。 字节流主要由InputStream和OutputStream作为基类，而字符">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/8B63E8C29EB84230B50E4E6F8740F8FF?method=download&shareKey=f80e10d10c708416f380f175e2c36b7f">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/4F02D2A6E3E34FD3927AB2D79E852EF6?method=download&shareKey=6d78244160adcfe6eaba032159cfeb34">
+<meta property="article:published_time" content="2019-03-22T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-01-25T14:27:36.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="IO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/8B63E8C29EB84230B50E4E6F8740F8FF?method=download&shareKey=f80e10d10c708416f380f175e2c36b7f">
+
+
+<link rel="canonical" href="http://example.com/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>Java 输入输出体系 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">流的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E6%B5%81-%E5%92%8C-%E8%BE%93%E5%87%BA%E6%B5%81"><span class="nav-number">1.1.</span> <span class="nav-text">输入流 和 输出流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E6%B5%81-%E5%92%8C-%E5%AD%97%E7%AC%A6%E6%B5%81"><span class="nav-number">1.2.</span> <span class="nav-text">字节流 和 字符流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E6%B5%81-%E5%92%8C-%E5%A4%84%E7%90%86%E6%B5%81"><span class="nav-number">1.3.</span> <span class="nav-text">节点流 和 处理流</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E6%B5%81%E4%BD%93%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">输入输出流体系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%9F%BA%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">抽象基类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E6%B5%81-%E5%8A%A0%E9%BB%91%E7%9A%84"><span class="nav-number">2.2.</span> <span class="nav-text">节点流(加黑的)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%B5%81-%E9%99%A4%E4%BA%86%E8%8A%82%E7%82%B9%E6%B5%81%EF%BC%8C%E5%85%B6%E4%BB%96%E7%9A%84%E5%9F%BA%E6%9C%AC%E9%83%BD%E6%98%AF%E5%A4%84%E7%90%86%E6%B5%81"><span class="nav-number">2.3.</span> <span class="nav-text">处理流(除了节点流，其他的基本都是处理流)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E6%B5%81%E5%92%8C%E7%BC%93%E5%86%B2%E6%B5%81%E6%90%AD%E9%85%8D%EF%BC%88%E5%B8%B8%E7%94%A8%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">转换流和缓冲流搭配（常用）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E6%B5%81"><span class="nav-number">2.5.</span> <span class="nav-text">对象流</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 输入输出体系
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-03-22 19:25:15" itemprop="dateCreated datePublished" datetime="2019-03-22T19:25:15+08:00">2019-03-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-25 22:27:36" itemprop="dateModified" datetime="2021-01-25T22:27:36+08:00">2021-01-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="流的分类"><a href="#流的分类" class="headerlink" title="流的分类"></a>流的分类</h2><h3 id="输入流-和-输出流"><a href="#输入流-和-输出流" class="headerlink" title="输入流 和 输出流"></a>输入流 和 输出流</h3><p>划分输入/输出流时是从程序运行所在内存的角度来考虑的</p>
+<ul>
+<li>输入流：数据从外部设备往内存输入</li>
+<li>输出流：数据从内存往外部设备输出</li>
+</ul>
+<h3 id="字节流-和-字符流"><a href="#字节流-和-字符流" class="headerlink" title="字节流 和 字符流"></a>字节流 和 字符流</h3><p>字节流和字符流的用法几乎完全一样，区别在于字节流和字符流所操作的数据单元不同——字节流操作的数据单元是<code>8位的字节</code>，而字符流操作的数据单元是<code>16位的字符</code>。</p>
+<p>字节流主要由InputStream和OutputStream作为基类，而字符流则主要由Reader和Writer作为基类。</p>
+<h3 id="节点流-和-处理流"><a href="#节点流-和-处理流" class="headerlink" title="节点流 和 处理流"></a>节点流 和 处理流</h3><ul>
+<li>节点流：可以从/向一个特定的IO设备（如磁盘、网络）读/写数据的流，称为节点流，节点流也被称为低级流（Low Level Stream）。</li>
+<li>处理流：处理流则用于对一个已存在的流进行连接或封装，通过封装后的流来实现数据读/写功能。处理流也被称为高级流或包装流。<span id="more"></span></li>
+</ul>
+<h2 id="输入输出流体系"><a href="#输入输出流体系" class="headerlink" title="输入输出流体系"></a>输入输出流体系</h2><p><img src="https://note.youdao.com/yws/api/personal/file/8B63E8C29EB84230B50E4E6F8740F8FF?method=download&shareKey=f80e10d10c708416f380f175e2c36b7f" alt="image"></p>
+<h3 id="抽象基类"><a href="#抽象基类" class="headerlink" title="抽象基类"></a>抽象基类</h3><ul>
+<li><code>InputStream / Reader</code>：所有输入流的基类，前者是字节输入流，后者是字符输入流。</li>
+<li><code>OutputStream / Writer</code>：所有输出流的基类，前者是字节输出流，后者是字符输出流。</li>
+<li><code>FilterInputStream / FilterReader</code></li>
+<li><code>FilterOutputStream / FilterWriter</code></li>
+</ul>
+<h3 id="节点流-加黑的"><a href="#节点流-加黑的" class="headerlink" title="节点流(加黑的)"></a>节点流(加黑的)</h3><p>必须与指定的物理节点关联</p>
+<ul>
+<li>访问文件</li>
+<li>访问数组</li>
+<li>访问管道：用于实现进程之间通信功能的</li>
+<li>访问字符串</li>
+</ul>
+<p>访问文件示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> chapter18;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FileInputStreamTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// 创建字节输入流，关联物理节点（一个文件）</span></span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="string">&quot;.\\src\\chapter18\\FileInputStreamTest.java&quot;</span>);</span><br><span class="line">        <span class="comment">// 创建一个 1024 字节的数组“竹筒”</span></span><br><span class="line">        <span class="keyword">byte</span>[] bbuf = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</span><br><span class="line">        <span class="comment">// 用以保存实际读取的字节数</span></span><br><span class="line">        <span class="keyword">int</span> hasread = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> ((hasread = fis.read(bbuf)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 取出竹筒中的字节，将字节数组转换成字符串打印输出</span></span><br><span class="line">            System.out.println(<span class="keyword">new</span> String(bbuf, <span class="number">0</span>, hasread));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 关闭文件输入流</span></span><br><span class="line">        fis.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">把代码再输出一遍</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="处理流-除了节点流，其他的基本都是处理流"><a href="#处理流-除了节点流，其他的基本都是处理流" class="headerlink" title="处理流(除了节点流，其他的基本都是处理流)"></a>处理流(除了节点流，其他的基本都是处理流)</h3><p>通过使用处理流，Java程序无须理会输入/输出节点是磁盘、网络还是其他的输入/输出设备，程序只要将这些节点流包装成处理流，就可以使用相同的输入/输出代码来读写不同的输入/输出设备的数据。</p>
+<p><img src="https://note.youdao.com/yws/api/personal/file/4F02D2A6E3E34FD3927AB2D79E852EF6?method=download&shareKey=6d78244160adcfe6eaba032159cfeb34" alt="image"></p>
+<p>使用处理流时的典型思路是，使用处理流来包装节点流，程序通过处理流来执行输入/输出功能，让节点流与底层的I/O设备、文件交互。</p>
+<p>处理流包装节点流示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BufferedReaderTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// 创建字节输入流，关联物理节点（一个文件）</span></span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="string">&quot;.\\src\\chapter18\\BufferedReaderTest.java&quot;</span>);</span><br><span class="line">        BufferedInputStream bis = <span class="keyword">new</span> BufferedInputStream(fis);</span><br><span class="line">        <span class="comment">// 创建一个 1024 字节的数组“竹筒”</span></span><br><span class="line">        <span class="keyword">byte</span>[] bbuf = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</span><br><span class="line">        <span class="comment">// 用以保存实际读取的字节数</span></span><br><span class="line">        <span class="keyword">int</span> hasread = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> ((hasread = bis.read(bbuf)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 取出竹筒中的字节，将字节数组转换成字符串打印输出</span></span><br><span class="line">            System.out.println(<span class="keyword">new</span> String(bbuf, <span class="number">0</span>, hasread));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 关闭文件输入流</span></span><br><span class="line">        bis.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">把代码再输出一遍</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>从前面的代码可以看出，程序使用处理流非常简单，通常只需要在创建处理流时传入一个节点流作为构造器参数即可，这样创建的处理流就是包装了该节点流的处理流，当然上面的例子没有很好地体现处理流的好处，有些处理流定义了很方便的方法，可以使我们的输入输出操作变得更加快捷。还有一点是，在使用处理流包装了底层节点流之后，关闭输入/输出流资源时，只要关闭最上层的处理流即可。关闭最上层的处理流时，系统会自动关闭被该处理流包装的节点流。</p>
+<h3 id="转换流和缓冲流搭配（常用）"><a href="#转换流和缓冲流搭配（常用）" class="headerlink" title="转换流和缓冲流搭配（常用）"></a>转换流和缓冲流搭配（常用）</h3><p>这两个转换流用于实现将字节流转换成字符流，其中InputStreamReader将字节输入流转换成字符输入流，OutputStreamWriter将字节输出流转换成字符输出流。</p>
+<p>从键盘读入示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> chapter18;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.BufferedReader;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStreamReader;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BuffererReadTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// 新建转换流，System.in 是读取控制台输入的字节流，转换成字符流</span></span><br><span class="line">        InputStreamReader inputStreamReader = <span class="keyword">new</span> InputStreamReader(System.in);</span><br><span class="line">        <span class="comment">// 转换成缓冲流</span></span><br><span class="line">        BufferedReader bufferedReader = <span class="keyword">new</span> BufferedReader(inputStreamReader);</span><br><span class="line">        String[] s = <span class="keyword">new</span> String[<span class="number">1</span>];</span><br><span class="line">        s[<span class="number">0</span>] = <span class="string">&quot;1&quot;</span>;</span><br><span class="line">        <span class="keyword">while</span> (!s[<span class="number">0</span>].equals(<span class="string">&quot;0&quot;</span>)) &#123;</span><br><span class="line">            s = bufferedReader.readLine().split(<span class="string">&quot; &quot;</span>);</span><br><span class="line">            System.out.println(Arrays.toString(s));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">1 2 3</span></span><br><span class="line"><span class="comment">[1, 2, 3]</span></span><br><span class="line"><span class="comment">4 5 6</span></span><br><span class="line"><span class="comment">[4, 5, 6]</span></span><br><span class="line"><span class="comment">7 8 9</span></span><br><span class="line"><span class="comment">[7, 8, 9]</span></span><br><span class="line"><span class="comment">0 1 2</span></span><br><span class="line"><span class="comment">[0, 1, 2]</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>由于BufferedReader具有一个readLine()方法，可以非常方便地一次读入一行内容，所以经常把读取文本内容的输入流包装成BufferedReader，用来方便地读取输入流的文本内容。</p>
+<h3 id="对象流"><a href="#对象流" class="headerlink" title="对象流"></a>对象流</h3><ul>
+<li>ObjectOutputStream: 用于对象序列化</li>
+<li>ObjectInputStream：用于对象反序列化</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/IO/" rel="tag"><i class="fa fa-tag"></i> IO</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/03/05/ThinkingInJava_12_%E6%95%B0%E7%BB%84/" rel="prev" title="数组">
+                  <i class="fa fa-chevron-left"></i> 数组
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/" rel="next" title="对于数据结构的理解">
+                  对于数据结构的理解 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="Monitor 原理在介绍 Monitor 之前，需要了解一下对象头的知识，建议阅读HotSpot虚拟机对象头。 32位虚拟机对象头Mark Word： Monitor 被翻译为监视器或管程，每个 Java 对象都可以关联一个 Monitor 对象，如果使用 synchronized 给对象上锁（注意，必须是重量级）之后，该对象头的 Mark Word 就被设置为指向 Monitor 对象的指针">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized 原理（Monitor、轻量级锁、锁重入、锁膨胀、重量级锁、自旋优化、偏向锁、锁消除、锁粗化）">
+<meta property="og:url" content="http://example.com/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="Monitor 原理在介绍 Monitor 之前，需要了解一下对象头的知识，建议阅读HotSpot虚拟机对象头。 32位虚拟机对象头Mark Word： Monitor 被翻译为监视器或管程，每个 Java 对象都可以关联一个 Monitor 对象，如果使用 synchronized 给对象上锁（注意，必须是重量级）之后，该对象头的 Mark Word 就被设置为指向 Monitor 对象的指针">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/75DAE2F6DB5A4AE7B4AB4811CD9FC73C?method=download&shareKey=362bf3e98cf5735cf687f90350a87435">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/72E0FCAFB86D445AB04E2666D93C9B74?method=download&shareKey=a689d6da74b5eec0d59f27adf79b1d30">
+<meta property="article:published_time" content="2020-05-05T04:06:21.000Z">
+<meta property="article:modified_time" content="2021-03-29T12:25:14.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="Monitor">
+<meta property="article:tag" content="轻量级锁">
+<meta property="article:tag" content="锁重入">
+<meta property="article:tag" content="锁膨胀">
+<meta property="article:tag" content="重量级锁">
+<meta property="article:tag" content="自旋优化">
+<meta property="article:tag" content="偏向锁">
+<meta property="article:tag" content="锁消除">
+<meta property="article:tag" content="锁粗化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/75DAE2F6DB5A4AE7B4AB4811CD9FC73C?method=download&shareKey=362bf3e98cf5735cf687f90350a87435">
+
+
+<link rel="canonical" href="http://example.com/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>synchronized 原理（Monitor、轻量级锁、锁重入、锁膨胀、重量级锁、自旋优化、偏向锁、锁消除、锁粗化） | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Monitor-%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">Monitor 原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81%E4%B8%8E%E9%94%81%E9%87%8D%E5%85%A5"><span class="nav-number">2.</span> <span class="nav-text">轻量级锁与锁重入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81%E5%8A%A0%E9%94%81%E6%B5%81%E7%A8%8B"><span class="nav-number">2.1.</span> <span class="nav-text">轻量级锁加锁流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81%E8%A7%A3%E9%94%81%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.</span> <span class="nav-text">轻量级锁解锁流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81%E5%88%B0%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81%EF%BC%88%E9%94%81%E8%86%A8%E8%83%80%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">轻量级锁到重量级锁（锁膨胀）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81%E5%8A%A0%E9%94%81%E6%B5%81%E7%A8%8B"><span class="nav-number">3.0.1.</span> <span class="nav-text">重量级锁加锁流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81%E8%A7%A3%E9%94%81%E6%B5%81%E7%A8%8B"><span class="nav-number">3.0.2.</span> <span class="nav-text">重量级锁解锁流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E9%87%8F%E9%94%81%E7%9A%84%E8%87%AA%E6%97%8B%E4%BC%98%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">重量锁的自旋优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E9%94%81"><span class="nav-number">5.</span> <span class="nav-text">偏向锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E7%8A%B6%E6%80%81"><span class="nav-number">5.1.</span> <span class="nav-text">偏向状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E9%94%81%E6%92%A4%E9%94%80"><span class="nav-number">5.2.</span> <span class="nav-text">偏向锁撤销</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E5%AF%B9%E8%B1%A1-hashCode"><span class="nav-number">5.2.1.</span> <span class="nav-text">调用对象 hashCode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E5%AE%83%E7%BA%BF%E7%A8%8B%E4%BD%BF%E7%94%A8%E5%AF%B9%E8%B1%A1"><span class="nav-number">5.2.2.</span> <span class="nav-text">其它线程使用对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E7%94%A8-wait-notify"><span class="nav-number">5.2.3.</span> <span class="nav-text">调用 wait&#x2F;notify</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E9%87%8D%E5%81%8F%E5%90%91"><span class="nav-number">5.3.</span> <span class="nav-text">批量重偏向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E6%92%A4%E9%94%80"><span class="nav-number">5.4.</span> <span class="nav-text">批量撤销</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E6%B6%88%E9%99%A4"><span class="nav-number">6.</span> <span class="nav-text">锁消除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E7%B2%97%E5%8C%96"><span class="nav-number">7.</span> <span class="nav-text">锁粗化</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          synchronized 原理（Monitor、轻量级锁、锁重入、锁膨胀、重量级锁、自旋优化、偏向锁、锁消除、锁粗化）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-05 12:06:21" itemprop="dateCreated datePublished" datetime="2020-05-05T12:06:21+08:00">2020-05-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:25:14" itemprop="dateModified" datetime="2021-03-29T20:25:14+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Monitor-原理"><a href="#Monitor-原理" class="headerlink" title="Monitor 原理"></a>Monitor 原理</h2><p>在介绍 Monitor 之前，需要了解一下对象头的知识，建议阅读<a target="_blank" rel="noopener" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/11/01/JVM_6_HotSpot%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E8%B1%A1/">HotSpot虚拟机对象头</a>。</p>
+<p>32位虚拟机对象头Mark Word：<br><img src="https://note.youdao.com/yws/api/personal/file/75DAE2F6DB5A4AE7B4AB4811CD9FC73C?method=download&shareKey=362bf3e98cf5735cf687f90350a87435" alt="image"></p>
+<p>Monitor 被翻译为监视器或<strong>管程</strong>，每个 Java 对象都可以关联一个 Monitor 对象，如果使用 synchronized 给对象上锁（注意，必须是重量级）之后，该对象头的 Mark Word 就被设置为指向 Monitor 对象的指针 + “10” 重量级锁标志。</p>
+<span id="more"></span>
+
+<p>Monitor 结构如下：<br><img src="https://note.youdao.com/yws/api/personal/file/72E0FCAFB86D445AB04E2666D93C9B74?method=download&shareKey=a689d6da74b5eec0d59f27adf79b1d30" alt="image"></p>
+<ul>
+<li>刚开始的时候 Monitor 中 Owner 为 null； </li>
+<li>当 Thread-2 执行 synchronized(obj) 就会将obj 关联的 Monitor 的所有者 Owner 置为 Thread-2，Monitor 中只能有一个 Owner ；</li>
+<li>在 Thread-2 持有锁的过程中，如果 Thread-3，Thread-4，Thread-5 也来执行 synchronized(obj)，就会进入 EntryList 陷入 BLOCKED 状态； </li>
+<li>Thread-2 执行完同步代码块的内容，然后唤醒 EntryList 中等待的线程来竞争锁（notifyAll），竞争时是非公平的；</li>
+<li>图中 WaitSet 中的 Thread-0，Thread-1 是之前获得过锁，但条件不满足进入 WAITING 状态的线程，后面讲 wait-notify 时会分析。</li>
+</ul>
+<blockquote>
+<p>注意：synchronized 必须是进入同一个对象的 monitor 才有上述的效果，不加 synchronized 的对象不会关联监视器，不遵从以上规则。</p>
+</blockquote>
+<h2 id="轻量级锁与锁重入"><a href="#轻量级锁与锁重入" class="headerlink" title="轻量级锁与锁重入"></a>轻量级锁与锁重入</h2><h3 id="轻量级锁加锁流程"><a href="#轻量级锁加锁流程" class="headerlink" title="轻量级锁加锁流程"></a>轻量级锁加锁流程</h3><p>一旦对象被 synchronized 锁住后，假如后续多个线程执行到 synchronized 处，当还没有线程对对象加锁时，此时第一个尝试加锁的线程会优先使用轻量级锁，第一个线程会先在栈中新建一个锁记录对象（Lock Record），包含：<strong>锁记录的地址和指向锁对象的引用</strong>。此时会进行 cas 操作，将锁记录对象地址与被锁住的对象的 markword 互换，第一次肯定会 cas 成功，所以对象头中的 markword 有了指向锁记录的地址和状态 00，表示由该线程给对象加锁，并且是轻量级锁，注意此时并没有关联 Monitor。当然如果这时同一线程中再次对该对象进行加锁（同一线程中有多个针对同一对象的 synchronized 方法或代码块），会 cas 失败（因为此时对象头的 Mark Word 存的是锁记录的地址，并且标志位为 00），这时因为是同一线程，进入<strong>锁重入机制</strong>，即再添加一条锁记录作为重入的计数，并且这个锁记录的地址为 null。</p>
+<p>但如果是其他的线程在此时对该对象尝试进行加锁，也会 cas 失败，并进入<strong>锁膨胀</strong>阶段，膨胀成重量级锁，此时 Monitor 就登场了，下面介绍。</p>
+<ul>
+<li>所以cas 失败，有两种情况<ul>
+<li>如果是自己执行了 synchronized 锁重入，那么再添加一条 Lock Record 作为重入的计数；</li>
+<li>如果是其它线程已经持有了该 Object 的轻量级锁，这时表明有竞争，进入锁膨胀过程。</li>
+</ul>
+</li>
+</ul>
+<h3 id="轻量级锁解锁流程"><a href="#轻量级锁解锁流程" class="headerlink" title="轻量级锁解锁流程"></a>轻量级锁解锁流程</h3><ul>
+<li>当退出 synchronized 代码块（解锁时）如果有取值为 null 的锁记录，表示有重入，这时重置锁记录，表示重入计数减一</li>
+<li>当退出 synchronized代码块（解锁时）锁记录的值不为 null，这时使用 cas 将 Mark Word 的值恢复给对象头<ul>
+<li>成功，则解锁成功</li>
+<li>失败，说明轻量级锁进行了锁膨胀已经升级为重量级锁，进入重量级锁解锁流程。</li>
+</ul>
+</li>
+</ul>
+<h2 id="轻量级锁到重量级锁（锁膨胀）"><a href="#轻量级锁到重量级锁（锁膨胀）" class="headerlink" title="轻量级锁到重量级锁（锁膨胀）"></a>轻量级锁到重量级锁（锁膨胀）</h2><h4 id="重量级锁加锁流程"><a href="#重量级锁加锁流程" class="headerlink" title="重量级锁加锁流程"></a>重量级锁加锁流程</h4><p>如果在尝试加轻量级锁的过程中，cas操作无法成功，这时是第二种情况即有其它线程已经为此对象加上了轻量级锁（有竞争），这时会先进行<code>自旋</code>，即竞争的线程先进行自旋，等自旋多次之后仍然无法cas成功时才会进行锁膨胀，将轻量级锁变为重量级锁。</p>
+<p>具体流程是：尝试在 jvm 里找到一个 Monitor 对象与 obj 关联，并将 obj 对象头 MarkWord 的前 30 位指向 Monitor 对象，让 Monitor 的 owner 指向当前持有锁的线程，然后 markword 状态标志位也会改变成相应的值（10），现在这个加入的线程以及后来的线程执行到 synchronized(obj) 时先检查锁住的对象关联的 Monitor 有没有主人（Owner），如果有则只能进入 Moniter 对象的 Entrylist 列表等待（等待线程为 BLOCKED 状态），等待持锁线程释放锁。</p>
+<h4 id="重量级锁解锁流程"><a href="#重量级锁解锁流程" class="headerlink" title="重量级锁解锁流程"></a>重量级锁解锁流程</h4><p>当前锁住对象的线程退出同步块解锁时，首先使用 cas 将 Mark Word 的值恢复给对象头，这时会失败，进入重量级解锁流程。即按照被锁对象中存储的 Monitor 地址找到 Monitor 对象，将当前锁记录中存储的 MarkWord 交给 Monitor，设置 owner 为 null，唤醒 EntryList 中 BLOCKED 的线程。</p>
+<h2 id="重量锁的自旋优化"><a href="#重量锁的自旋优化" class="headerlink" title="重量锁的自旋优化"></a>重量锁的自旋优化</h2><p>重量级锁竞争的时候，也可以使用自旋来进行优化（所有自旋优化会出现在轻量级锁升级成重量级锁的过程中，也会出现在重量级锁的竞争过程中），如果当前线程自旋成功（即这时候持锁线程已经退出了同步块，释放了锁），这时当前线程就可以避免阻塞，因为挂起线程和恢复线程的操作都需要转入内核态完成，会比较费时。</p>
+<p>但要注意：</p>
+<ul>
+<li>自旋会占用 CPU 时间，单核 CPU 自旋就是浪费，多核 CPU 自旋才能发挥优势。 </li>
+<li>在 Java 6 之后自旋锁是自适应的并且强制开启，比如线程刚刚的一次自旋操作成功过，那么认为这次自旋成功的可能性会高，就多自旋几次；反之就少自旋甚至不自旋，总之比较智能。</li>
+</ul>
+<h2 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h2><p>轻量级锁在没有竞争时（就自己这个线程），每次重入仍然需要执行 CAS 操作。Java 6 中引入了偏向锁来做进一步优化：只有第一次使用 CAS 将线程 ID 设置到对象的 markword 头，之后发现这个线程 ID 是自己的就表示没有竞争，不用重新 CAS。以后只要不发生竞争，这个对象就归该线程所有。</p>
+<blockquote>
+<p>如果说轻量级锁是在无竞争的情况下使用 CAS 操作去消除同步使用的互斥量，那偏向锁就是在无竞争的情况下把整个同步都消除掉，连 CAS 操作都不去做了。注意它们两个的前提都是无竞争。</p>
+</blockquote>
+<h3 id="偏向状态"><a href="#偏向状态" class="headerlink" title="偏向状态"></a>偏向状态</h3><p>一个对象创建时：</p>
+<ul>
+<li>如果开启了偏向锁（默认开启），那么对象创建后，markword 值为 0x05 即最后 3 位为 101，这时它的 thread ID、epoch、age 都为 0</li>
+<li>偏向锁是默认是延迟的，不会在程序启动时立即生效，如果想避免延迟，可以加 VM 参数 <code>X:BiasedLockingStartupDelay=0</code> 来禁用延迟 </li>
+<li>如果没有开启偏向锁，那么对象创建后，markword 值为 0x01 即最后 3 位为 001，这时它的 hashcode、 age 都为 0，第一次用到 hashcode 时才会赋值</li>
+</ul>
+<p>测试:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 测试偏向锁的延时</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Dog d = <span class="keyword">new</span> Dog();</span><br><span class="line">        log.debug(ClassLayout.parseInstance(d).toPrintable());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">4000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        log.debug(ClassLayout.parseInstance(<span class="keyword">new</span> Dog()).toPrintable());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*小端格式：低字节在低地址</span></span><br><span class="line"><span class="comment">    // 刚开始它的 thread、epoch、age 都为 0</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           01 00 00 00 (00000001【001】 00000000 00000000 00000000) (1)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           00 00 00 00 (00000000       00000000 00000000 00000000) (0)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    // 存在延迟</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           05 00 00 00 (00000101【101】 00000000 00000000 00000000) (5)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           00 00 00 00 (00000000       00000000 00000000 00000000) (0)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 测试偏向锁</span></span><br><span class="line">    <span class="comment">// 2.1 -XX:BiasedLockingStartupDelay=0 // 关闭延时</span></span><br><span class="line">    <span class="comment">// 2.2 -XX:-UseBiasedLocking           // 禁用偏向锁</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Dog d = <span class="keyword">new</span> Dog();</span><br><span class="line">        ClassLayout classLayout = ClassLayout.parseInstance(d);</span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;synchronized 前&quot;</span>);</span><br><span class="line">                System.out.println(classLayout.toPrintable());</span><br><span class="line"></span><br><span class="line">                <span class="keyword">synchronized</span> (d) &#123;</span><br><span class="line">                    log.debug(<span class="string">&quot;synchronized 中&quot;</span>);</span><br><span class="line">                    System.out.println(classLayout.toPrintable());</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                log.debug(<span class="string">&quot;synchronized 后&quot;</span>);</span><br><span class="line">                System.out.println(classLayout.toPrintable());</span><br><span class="line">            &#125;, <span class="string">&quot;t1&quot;</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    2.1 输出：</span></span><br><span class="line"><span class="comment">    21:01:54.538 c.TestBiased [t1] - synchronized 前</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           05 00 00 00 (00000101 00000000 00000000 00000000) (5)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    21:01:54.546 c.TestBiased [t1] - synchronized 中</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           05 b0 90 b8 (00000101 10110000 10010000 10111000) (-1198477307)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           03 02 00 00 (00000011 00000010 00000000 00000000) (515)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    21:01:54.548 c.TestBiased [t1] - synchronized 后</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           05 b0 90 b8 (00000101 10110000 10010000 10111000) (-1198477307)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           03 02 00 00 (00000011 00000010 00000000 00000000) (515)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    注意: 处于偏向锁的对象解锁后，线程 id 仍存储于对象头中</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    2.2 输出：</span></span><br><span class="line"><span class="comment">    21:13:00.584 c.TestBiased [t1] - synchronized 前</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           01 00 00 00 (00000001【无锁状态】 00000000 00000000 00000000) (1)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           00 00 00 00 (00000000           00000000 00000000 00000000) (0)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    21:13:00.589 c.TestBiased [t1] - synchronized 中</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           d8 f1 9f cc (11011000【轻量级锁】 11110001 10011111 11001100) (-861933096)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           6b 00 00 00 (01101011           00000000 00000000 00000000) (107)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    21:13:00.591 c.TestBiased [t1] - synchronized 后</span></span><br><span class="line"><span class="comment">     OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span></span><br><span class="line"><span class="comment">          0     4        (object header)                           01 00 00 00 (00000001【无锁状态】 00000000 00000000 00000000) (1)</span></span><br><span class="line"><span class="comment">          4     4        (object header)                           00 00 00 00 (00000000           00000000 00000000 00000000) (0)</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">     */</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="偏向锁撤销"><a href="#偏向锁撤销" class="headerlink" title="偏向锁撤销"></a>偏向锁撤销</h3><h4 id="调用对象-hashCode"><a href="#调用对象-hashCode" class="headerlink" title="调用对象 hashCode"></a>调用对象 hashCode</h4><p>调用了对象的 hashCode，但偏向锁的对象 MarkWord 中存储的是线程 id，如果调用 hashCode 会导致偏向锁被撤销</p>
+<ul>
+<li>轻量级锁会在锁记录中记录 hashCode </li>
+<li>重量级锁会在 Monitor 中记录 hashCode</li>
+</ul>
+<h4 id="其它线程使用对象"><a href="#其它线程使用对象" class="headerlink" title="其它线程使用对象"></a>其它线程使用对象</h4><p>当有其它线程使用偏向锁对象时，会将偏向锁升级为轻量级锁，注意这里的情况具体是对象已经先偏向了线程 t1 并且现在不存在竞争，即偏向的线程 t1 已经执行结束，这个时候其他线程 t2  再来对偏向锁对象加锁会升级为轻量级锁。</p>
+<h4 id="调用-wait-notify"><a href="#调用-wait-notify" class="headerlink" title="调用 wait/notify"></a>调用 wait/notify</h4><p>因为 wait/notify 是只有重量级锁才有的操作，所以调用加锁对象的 wait/notify 会升级为重量级锁。</p>
+<h3 id="批量重偏向"><a href="#批量重偏向" class="headerlink" title="批量重偏向"></a>批量重偏向</h3><p>如果对象被多个线程访问，但并没有竞争，这时偏向了线程 T1 的对象仍有机会重新偏向 T2，重偏向会重置对象的 Thread ID。</p>
+<p>当撤销偏向锁阈值超过 20 次后，jvm 会这样觉得，我是不是偏向错了呢，于是会在给这些后续对象加锁时重新偏向至加锁线程。</p>
+<h3 id="批量撤销"><a href="#批量撤销" class="headerlink" title="批量撤销"></a>批量撤销</h3><p>当撤销偏向锁阈值超过 40 次后，jvm 会这样觉得，自己确实偏向错了，根本就不该偏向。于是整个类的所有对象都会变为不可偏向的，新建的对象也是不可偏向的。</p>
+<h2 id="锁消除"><a href="#锁消除" class="headerlink" title="锁消除"></a>锁消除</h2><p>在<a target="_blank" rel="noopener" href="https://saltedfishust.github.io/saltedfishust.github.io/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/#more">JVM-运行期（晚期）优化</a>中的逃逸分析时我们在此探讨了这个问题，如果判断到一段代码中，在堆上的所有数据都不会逃逸出去被其他线程访问到，那就可以把它们当作栈上数据对待，认为它们是线程私有的，同步加锁自然就无须再进行。</p>
+<h2 id="锁粗化"><a href="#锁粗化" class="headerlink" title="锁粗化"></a>锁粗化</h2><p>我们在编写代码的时候，总是推荐将同步块的作用范围限制得尽量小——只在共享数据的实际作用域中才进行同步，这样是为了使得需要同步的操作数量尽可能变少。多数情况下，上面的原则都是正确的，但是如果一系列的连续操作都对同一个对象反复加锁和解锁，甚至加锁操作是出现在循环体之中的，那即使没有线程竞争，频繁地进行互斥同步操作也会导致不必要的性能损耗，所以可以进行锁粗化。 </p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Monitor/" rel="tag"><i class="fa fa-tag"></i> Monitor</a>
+              <a href="/tags/%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 轻量级锁</a>
+              <a href="/tags/%E9%94%81%E9%87%8D%E5%85%A5/" rel="tag"><i class="fa fa-tag"></i> 锁重入</a>
+              <a href="/tags/%E9%94%81%E8%86%A8%E8%83%80/" rel="tag"><i class="fa fa-tag"></i> 锁膨胀</a>
+              <a href="/tags/%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 重量级锁</a>
+              <a href="/tags/%E8%87%AA%E6%97%8B%E4%BC%98%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i> 自旋优化</a>
+              <a href="/tags/%E5%81%8F%E5%90%91%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 偏向锁</a>
+              <a href="/tags/%E9%94%81%E6%B6%88%E9%99%A4/" rel="tag"><i class="fa fa-tag"></i> 锁消除</a>
+              <a href="/tags/%E9%94%81%E7%B2%97%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i> 锁粗化</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/04/18/C6_%E5%8F%98%E9%87%8F%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%88%86%E6%9E%90/" rel="prev" title="变量的线程安全分析">
+                  <i class="fa fa-chevron-left"></i> 变量的线程安全分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/05/15/C8_wait&notify%E5%8E%9F%E7%90%86/" rel="next" title="wait & notify 原理">
+                  wait & notify 原理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

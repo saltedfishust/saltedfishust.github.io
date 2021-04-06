@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="这三个关键词的场景及其作用有重叠，容易混淆，简单整理了一下：    关键字与应用场景 数据 方法 类    static 与对象无关，与类有关，只加载一次 与对象无关，与类有关 内部类才能被static修饰   final 可以继承访问，不可修改，不同对象可能不同 可访问，不可继承（重写、覆盖） 不允许继承，所有方法都隐式是final的，对于数据没有限制   private 不可以访问，更不能修改">
+<meta property="og:type" content="article">
+<meta property="og:title" content="static、final 和 private">
+<meta property="og:url" content="http://example.com/2018/11/22/%E5%9F%BA%E7%A1%80_static&final&private/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="这三个关键词的场景及其作用有重叠，容易混淆，简单整理了一下：    关键字与应用场景 数据 方法 类    static 与对象无关，与类有关，只加载一次 与对象无关，与类有关 内部类才能被static修饰   final 可以继承访问，不可修改，不同对象可能不同 可访问，不可继承（重写、覆盖） 不允许继承，所有方法都隐式是final的，对于数据没有限制   private 不可以访问，更不能修改">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-11-22T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-01-27T14:09:12.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="static">
+<meta property="article:tag" content="final">
+<meta property="article:tag" content="private">
+<meta property="article:tag" content="访问修饰符">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2018/11/22/%E5%9F%BA%E7%A1%80_static&final&private/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>static、final 和 private | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#static-%E4%B8%8E%E5%AF%B9%E8%B1%A1%E6%97%A0%E5%85%B3%EF%BC%8C%E4%B8%8E%E7%B1%BB%E6%9C%89%E5%85%B3"><span class="nav-number">1.</span> <span class="nav-text">static: 与对象无关，与类有关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#final-%E4%B8%8D%E5%8F%AF%E6%94%B9%E5%8F%98"><span class="nav-number">2.</span> <span class="nav-text">final:不可改变</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#final%E6%95%B0%E6%8D%AE"><span class="nav-number">2.1.</span> <span class="nav-text">final数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#final%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">final方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#final%E7%B1%BB"><span class="nav-number">2.3.</span> <span class="nav-text">final类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#private-%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90%EF%BC%8C%E9%87%8D%E7%82%B9%E5%9C%A8%E8%AE%BF%E9%97%AE"><span class="nav-number">3.</span> <span class="nav-text">private:访问权限，重点在访问</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/11/22/%E5%9F%BA%E7%A1%80_static&final&private/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          static、final 和 private
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-22 19:25:15" itemprop="dateCreated datePublished" datetime="2018-11-22T19:25:15+08:00">2018-11-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 22:09:12" itemprop="dateModified" datetime="2021-01-27T22:09:12+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>这三个关键词的场景及其作用有重叠，容易混淆，简单整理了一下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">关键字与应用场景</th>
+<th align="center">数据</th>
+<th align="center">方法</th>
+<th align="center">类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">static</td>
+<td align="center">与对象无关，与类有关，只加载一次</td>
+<td align="center">与对象无关，与类有关</td>
+<td align="center">内部类才能被static修饰</td>
+</tr>
+<tr>
+<td align="center">final</td>
+<td align="center">可以继承访问，不可修改，不同对象可能不同</td>
+<td align="center">可访问，不可继承（重写、覆盖）</td>
+<td align="center">不允许继承，所有方法都隐式是final的，对于数据没有限制</td>
+</tr>
+<tr>
+<td align="center">private</td>
+<td align="center">不可以访问，更不能修改</td>
+<td align="center">不可访问，更不能继承；final和private关键字都隐式地指定方法为是final的</td>
+<td align="center">不可以访问</td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+<h2 id="static-与对象无关，与类有关"><a href="#static-与对象无关，与类有关" class="headerlink" title="static: 与对象无关，与类有关"></a>static: 与对象无关，与类有关</h2><p>简单来讲，当声明一个事物是 static时，就意味着这个域或方法不会与包含它的那个类的任何对象实例关联在一起。所以，即使从未创建某个类的任何对象，也可以调用其 static方法或访问其 static域。通常，你必须创建一个对象，并用它来访问数据或方法。因为非static域和方法必须知道它们一起运作的特定对象。</p>
+<h2 id="final-不可改变"><a href="#final-不可改变" class="headerlink" title="final:不可改变"></a>final:不可改变</h2><p>以下讨论了final的三种情况，数据、方法和类。</p>
+<h3 id="final数据"><a href="#final数据" class="headerlink" title="final数据"></a>final数据</h3><ul>
+<li>一个永不改变的编译时常量</li>
+<li>一个在运行时被初始化的值，而你不希望它被改变<br>对于基本数据类型，即编译时不变的常量；对于引用而言，final使引用恒定不变，一旦引用被初始化指向一个对象（数组也是对象）后，就无法再把它改为指向其他的对象，但对象自身可以被修改。特殊的是，一个既是static又是final的域只占据一段不能改变的存储空间，对于对象而言，他只在装载时进行一次初始化，再次初始化对象不会改变它的值，按照惯例，既是static又是final的域（即编译期常量）将用大写表示，并使用下划线分隔各个单词。<br>示例：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Value</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Value</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.i = i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FinalData</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Random rand = <span class="keyword">new</span> Random(<span class="number">47</span>);</span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">FinalData</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Can be compile-time constant:</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> valueOne = <span class="number">9</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VALUE_TWO = <span class="number">99</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Typital public constant:</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> VALUE_THREE = <span class="number">39</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Cannot be compile-time constant:</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> i4 = rand.nextInt(<span class="number">20</span>);</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INT_5 = rand.nextInt(<span class="number">20</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Value v1 = <span class="keyword">new</span> Value(<span class="number">11</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Value v2 = <span class="keyword">new</span> Value(<span class="number">22</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Value VAL_3 = <span class="keyword">new</span> Value(<span class="number">33</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Arrays:</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span>[] a = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id + <span class="string">&quot;: &quot;</span> + <span class="string">&quot;i4 = &quot;</span> + i4 +<span class="string">&quot;, INT_5 = &quot;</span> + INT_5;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        FinalData fd1 = <span class="keyword">new</span> FinalData(<span class="string">&quot;fd1&quot;</span>);</span><br><span class="line">        <span class="comment">//! fd1.valueOne++;           //报错，valueOne是常量</span></span><br><span class="line"></span><br><span class="line">        fd1.v1 = <span class="keyword">new</span> Value(<span class="number">111</span>);      <span class="comment">//可以，v1不是final对象</span></span><br><span class="line">        <span class="comment">//！ fd1.v2 = new Value(222);</span></span><br><span class="line">        <span class="comment">//! fd1.VAL_3 = new Value(333);</span></span><br><span class="line">        <span class="comment">//! fd1.a = new int [6];      // 报错，v2、VAL_3、a是final对象，无法再指向其他对象</span></span><br><span class="line"></span><br><span class="line">        fd1.v2.i++;</span><br><span class="line">        fd1.VAL_3.i++;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; fd1.a.length; i++)</span><br><span class="line">            fd1.a[i]++;               <span class="comment">//可以，因为引用初始化指向一个对象后，无法把它改为指向其他的对象，但对象自身可以被修改。</span></span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;Creating new FinalData&quot;</span>);</span><br><span class="line">        FinalData fd2 = <span class="keyword">new</span> FinalData(<span class="string">&quot;fd2&quot;</span>);</span><br><span class="line">        FinalData fd3 = <span class="keyword">new</span> FinalData(<span class="string">&quot;fd3&quot;</span>);</span><br><span class="line">        System.out.println(fd1);</span><br><span class="line">        System.out.println(fd2);</span><br><span class="line">        System.out.println(fd3);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    Creating new FinalData</span></span><br><span class="line"><span class="comment">    fd1: i4 = 15, INT_5 = 18</span></span><br><span class="line"><span class="comment">    fd2: i4 = 13, INT_5 = 18</span></span><br><span class="line"><span class="comment">    fd3: i4 = 1, INT_5 = 18</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+从Output可以看出，分别在fd1、fd2、fd3中，i4的值是唯一的，但INT_5的值是不可以通过创建第二个FinalDate对象而加以改变的，这是因为它是static的，在装载时就已被初始化，而不是每次创建对象时初始化。</li>
+</ul>
+<h3 id="final方法"><a href="#final方法" class="headerlink" title="final方法"></a>final方法</h3><p>使用final方法只有一个原因，就是把方法锁定以防任何继承类修改它的含义。这是处于设计的考虑：想要确保在继承中使方法行为保持不变，并且不会被覆盖。</p>
+<p>final和private关键字都隐式地指定为是final的，可以为private方法添加final修饰词，但没必要，并不会有什么不同，因为无法取用private方法也就无法覆盖它。但有趣的是，似乎可以在导出类里“覆盖”private方法，编译器并不会报错，而覆盖final方法则会报错，let us have a try:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WithFinals</span> </span>&#123;</span><br><span class="line">    <span class="comment">//Identical to &quot;private&quot; alone:</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;WithFinals.f()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//Also automatically &quot;final&quot;:</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;WithFinals.g()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OverridingPrivate</span> <span class="keyword">extends</span> <span class="title">WithFinals</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate.f()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate.g()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OverridingPrivate2</span> <span class="keyword">extends</span> <span class="title">OverridingPrivate</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate2.f()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;OverridingPrivate2.g()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FinalOverridingIllusion</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        OverridingPrivate2 op2 = <span class="keyword">new</span> OverridingPrivate2();</span><br><span class="line">        op2.f();</span><br><span class="line">        op2.g();</span><br><span class="line">        <span class="comment">//向上造型</span></span><br><span class="line">        OverridingPrivate op1 = op2;</span><br><span class="line">        <span class="comment">//! op1.f();</span></span><br><span class="line">        <span class="comment">//! op1.g();  //不能调用f(),g();说明f()和g()并不是覆盖父类的方法，而是子类新的方法。</span></span><br><span class="line">        WithFinals wf = op2;</span><br><span class="line">        <span class="comment">//! wf.f();</span></span><br><span class="line">        <span class="comment">//! wf.g();  //同理</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">    OverridingPrivate2.f()</span></span><br><span class="line"><span class="comment">    OverridingPrivate2.g()</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>看来编译器骗了我，f()和g()并不是真正的覆盖，而是子类的新方法。如果某方法为 private ，它就不是基类的接口的一部分。它仅是一些隐藏于类中的程序代码，只不过是具有相同的名称而已。解决办法就是在继承的方法前加上@Override，这些方法是不是真的覆盖就原形毕露了。这也提醒我们，只有非private的方法才可以被覆盖，在导出类中对于基类中的private方法最好采用不用的名字。</p>
+<h3 id="final类"><a href="#final类" class="headerlink" title="final类"></a>final类</h3><p>定义为final类，意味着不允许继承该类，对该类的设计永远不需要做任何改动，或者出于安全的考虑，不允许它有子类。所以final类中的所有的方法都隐式的指定为final的，也可以给方法添加final修饰词，但没必要。</p>
+<h2 id="private-访问权限，重点在访问"><a href="#private-访问权限，重点在访问" class="headerlink" title="private:访问权限，重点在访问"></a>private:访问权限，重点在访问</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/static/" rel="tag"><i class="fa fa-tag"></i> static</a>
+              <a href="/tags/final/" rel="tag"><i class="fa fa-tag"></i> final</a>
+              <a href="/tags/private/" rel="tag"><i class="fa fa-tag"></i> private</a>
+              <a href="/tags/%E8%AE%BF%E9%97%AE%E4%BF%AE%E9%A5%B0%E7%AC%A6/" rel="tag"><i class="fa fa-tag"></i> 访问修饰符</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/11/20/ThinkingInJava_6-%E6%8E%A5%E5%8F%A3/" rel="prev" title="接口">
+                  <i class="fa fa-chevron-left"></i> 接口
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/12/07/ThinkingInJava_7-%E5%86%85%E9%83%A8%E7%B1%BB/" rel="next" title="内部类">
+                  内部类 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

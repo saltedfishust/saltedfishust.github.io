@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="suspend()、resume()、stop()方法已经过时，不建议使用，容易破坏同步代码块，造成线程死锁。  这些方法有些是静态方法，有些是对象方法。对于类方法不难理解，例如 sleep 和 yield，是在哪个线程执行体中调用就对哪个线程起作用。 而 join 和 wait 这种是由线程对象调用的就得注意下，其实他们都是调用了wait方法，wait方法必须在 synchronized 块里">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thread类方法之一——start、run、sleep、yield、join">
+<meta property="og:url" content="http://example.com/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="suspend()、resume()、stop()方法已经过时，不建议使用，容易破坏同步代码块，造成线程死锁。  这些方法有些是静态方法，有些是对象方法。对于类方法不难理解，例如 sleep 和 yield，是在哪个线程执行体中调用就对哪个线程起作用。 而 join 和 wait 这种是由线程对象调用的就得注意下，其实他们都是调用了wait方法，wait方法必须在 synchronized 块里">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-20T02:25:35.000Z">
+<meta property="article:modified_time" content="2021-01-27T09:43:52.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="Thread类">
+<meta property="article:tag" content="start">
+<meta property="article:tag" content="run">
+<meta property="article:tag" content="sleep">
+<meta property="article:tag" content="yield">
+<meta property="article:tag" content="join">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>Thread类方法之一——start、run、sleep、yield、join | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-start-%E5%92%8C-run"><span class="nav-number">1.</span> <span class="nav-text">1. start 和 run</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-sleep"><span class="nav-number">2.</span> <span class="nav-text">2. sleep</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-yield"><span class="nav-number">3.</span> <span class="nav-text">3. yield</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-join"><span class="nav-number">4.</span> <span class="nav-text">4. join</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Thread类方法之一——start、run、sleep、yield、join
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-20 10:25:35" itemprop="dateCreated datePublished" datetime="2020-03-20T10:25:35+08:00">2020-03-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 17:43:52" itemprop="dateModified" datetime="2021-01-27T17:43:52+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>13 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>suspend()、resume()、stop()方法已经过时，不建议使用，容易破坏同步代码块，造成线程死锁。</p>
+</blockquote>
+<p>这些方法有些是静态方法，有些是对象方法。对于类方法不难理解，例如 sleep 和 yield，是在哪个线程执行体中调用就对哪个线程起作用。</p>
+<p>而 join 和 wait 这种是由线程对象调用的就得注意下，其实他们都是调用了wait方法，wait方法必须在 synchronized 块里使用，sychronized 块一定锁住了一个对象（一般是当前对象），那么调用 wait 方法的就是当前对象（被锁住的对象，join 里是线程对象），这个时候不要犯糊涂，始终记住无论是哪个对象调用的，只要这个方法在某个线程执行体里被调用，那么它就是这个线程执行体里的一个普通成员变量调用的某个普通方法（被锁住的对象调用 wait 方法），那么 wait 所在的线程就会被阻塞。</p>
+<span id="more"></span>
+
+<h2 id="1-start-和-run"><a href="#1-start-和-run" class="headerlink" title="1. start 和 run"></a>1. start 和 run</h2><ul>
+<li>直接调用 run 是在主线程中执行了 run，没有启动新的线程</li>
+<li>使用 start 是启动新的线程，通过新的线程间接执行 run 中的代码，注意调用start方法只是让线程进入Runnable(就绪)状态，等待调度器调度（CPU分配时间片），并不意味着马上执行，只有得到CPU时间片线程才会进入Running(运行)状态。注意<code>start</code>方法只能调用一次</li>
+</ul>
+<h2 id="2-sleep"><a href="#2-sleep" class="headerlink" title="2. sleep"></a>2. sleep</h2><p>让当前正在执行的线程（写在哪个线程里哪个线程暂停）暂停一段时间，调用 sleep 会让当前线程从 Running 进入 Timed Waiting 状态（阻塞）。</p>
+<p>sleep()方法是一个类方法，有两种重载形式。</p>
+<ul>
+<li><code>static void sleep(long millis)</code>：让当前正在执行的线程暂停millis毫秒，并进入阻塞状态，该方法受到系统计时器和线程调度器的精度与准确度的影响。</li>
+<li><code>static void sleep(long millis, int nanos)</code>：让当前正在执行的线程暂停millis毫秒加nanos毫微秒，并进入阻塞状态，该方法受到系统计时器和线程调度器的精度与准确度的影响。</li>
+</ul>
+<p>当前线程调用sleep()方法进入阻塞状态后，在其睡眠时间段内，该线程不会获得执行的机会，即使系统中没有其他可执行的线程，处于sleep()中的线程也不会执行，注意睡眠结束后的线程未必会立刻得到执行，还需要等待调度器的调度。因此sleep()方法常用来暂停程序的执行以及限制cpu的使用。在使用 sleep 方法时要注意，这个方法会抛出异常，要写在 try-catch 块里。</p>
+<ul>
+<li>应用sleep限制cpu的使用</li>
+</ul>
+<p>在没有利用 cpu 来计算时，不要让<code> while(true)</code> 空转浪费 cpu，这时可以使用 <code>yield</code> 或 <code>sleep</code> 来让出 cpu 的使用权给其他程序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(<span class="keyword">true</span>) &#123; </span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Thread.sleep(<span class="number">50</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123; </span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有一个问题是sleep方法的可读性不太强，其实Java1.5后提供了<code>TimeUnit.时间单位.sleep</code>方法，这个方法可读性比较强，效果跟sleep完全相同（因为底层也是调用了sleep方法）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TimeUnit.SECONDS.sleep(<span class="number">1</span>);  <span class="comment">// sleep一秒钟</span></span><br><span class="line">Thread.sleep(<span class="number">1000</span>)          <span class="comment">// 等价</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-yield"><a href="#3-yield" class="headerlink" title="3. yield"></a>3. yield</h2><p>与sleep相同，这也是一个类方法，它也可以让当前正在执行的线程暂停，但它不会阻塞该线程，它只是让该线程从Running（运行）进入 Runnable（就绪）状态，然后让出处理器资源去调度执行其它线程。yield()只是让当前线程“暂停”一下，让系统的线程调度器重新调度一次，<code>具体的实现依赖于操作系统的任务调度器</code>，完全可能的情况是：当某个线程调用了yield()方法暂停之后，线程调度器又将其调度出来重新执行。</p>
+<ul>
+<li>在这里介绍一下线程优先级</li>
+</ul>
+<p>每个线程执行时都具有一定的优先级，优先级高的线程获得较多的执行机会，而优先级低的线程则获得较少的执行机会。每个线程默认的优先级都与创建它的父线程的优先级相同，在默认情况下，main线程具有普通优先级，由main线程创建的子线程也具有普通优先级。Thread类提供了<code>setPriority（int newPriority）</code>、<code>getPriority()</code>方法来设置和返回指定线程的优先级，其中<code>setPriority()</code>方法的参数可以是一个整数，范围是1～10之间，也可以使用Thread类的如下三个静态常量。</p>
+<ul>
+<li><input disabled="" type="checkbox"> MAX_PRIORITY ：其值是10。</li>
+<li><input disabled="" type="checkbox"> MIN_PRIORITY ：其值是1。</li>
+<li><input disabled="" type="checkbox"> NORM_PRIORITY：其值是5。</li>
+</ul>
+<p><strong>其实调度器并不是严格按照优先级调度</strong>，只是说优先级高的被调度的几率大一下，如果 cpu 比较忙，那么优先级高的线程会获得更多的时间片，但 cpu 闲时，优先级几乎没作用。例如：</p>
+<ol>
+<li>加 yield<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable task1 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;----&gt;1 &quot;</span> + count++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Runnable task2 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                Thread.yield();         <span class="comment">// 1</span></span><br><span class="line">                System.out.println(<span class="string">&quot;              ----&gt;2 &quot;</span> + count++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(task1, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line"><span class="comment">//        t1.setPriority(Thread.MIN_PRIORITY); // 2</span></span><br><span class="line"><span class="comment">//        t2.setPriority(Thread.MAX_PRIORITY);</span></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// yield让出后得到的机会少</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">----&gt;1 158521</span></span><br><span class="line"><span class="comment">----&gt;1 158522</span></span><br><span class="line"><span class="comment">----&gt;1 158523</span></span><br><span class="line"><span class="comment">----&gt;1 158524</span></span><br><span class="line"><span class="comment">              ----&gt;2 1043</span></span><br><span class="line"><span class="comment">----&gt;1 158525</span></span><br><span class="line"><span class="comment">----&gt;1 158526</span></span><br><span class="line"><span class="comment">----&gt;1 158527</span></span><br><span class="line"><span class="comment">----&gt;1 158528</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></li>
+<li>设置优先级<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable task1 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line"><span class="comment">//                Thread.yield();         // 1</span></span><br><span class="line">                System.out.println(<span class="string">&quot;----&gt;1 &quot;</span> + count++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Runnable task2 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;              ----&gt;2 &quot;</span> + count++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(task1, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line">        t1.setPriority(Thread.MIN_PRIORITY);  <span class="comment">// 2</span></span><br><span class="line">        t2.setPriority(Thread.MAX_PRIORITY);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 优先级低的得到的机会少，但他们两个之间具体什么关系依赖于调度器</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">----&gt;1 3</span></span><br><span class="line"><span class="comment">----&gt;1 4</span></span><br><span class="line"><span class="comment">----&gt;1 5</span></span><br><span class="line"><span class="comment">              ----&gt;2 49</span></span><br><span class="line"><span class="comment">              ----&gt;2 50</span></span><br><span class="line"><span class="comment">              ----&gt;2 51</span></span><br><span class="line"><span class="comment">              ----&gt;2 52</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></li>
+<li>同时yield和设置优先级<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable task1 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">               Thread.yield();         <span class="comment">// 1</span></span><br><span class="line">                System.out.println(<span class="string">&quot;----&gt;1 &quot;</span> + count++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Runnable task2 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;              ----&gt;2 &quot;</span> + count++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(task1, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>);</span><br><span class="line">        t1.setPriority(<span class="number">3</span>);                          <span class="comment">// 2</span></span><br><span class="line">        t2.setPriority(<span class="number">2</span>);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 优先级低并且yield后的得到的机会更少，但仍然会得到调度机会，他们两个之间具体什么关系依赖于调度器</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">----&gt;1 11632</span></span><br><span class="line"><span class="comment">----&gt;1 11633</span></span><br><span class="line"><span class="comment">----&gt;1 11634</span></span><br><span class="line"><span class="comment">----&gt;1 11635</span></span><br><span class="line"><span class="comment">----&gt;1 11636</span></span><br><span class="line"><span class="comment">              ----&gt;2 144</span></span><br><span class="line"><span class="comment">              ----&gt;2 145</span></span><br><span class="line"><span class="comment">              ----&gt;2 146</span></span><br><span class="line"><span class="comment">              ----&gt;2 147</span></span><br><span class="line"><span class="comment"></span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>sleep()方法和yield()方法的区别：</strong></p>
+<ol>
+<li>sleep()方法暂停当前线程后，会给其他线程执行机会，不会理会其他线程的优先级；但yield()方法<code>通常（取决于调度器）</code>给优先级相同或优先级更高的线程执行机会的概率要大一些。</li>
+<li>sleep()方法会将线程转入阻塞状态，直到经过阻塞时间才会转入就绪状态；而yield()不会将线程转入阻塞状态，它只是强制当前线程进入就绪状态。因此完全有可能某个线程调用yield()方法暂停之后，立即再次获得处理器资源被执行。</li>
+<li>sleep()方法声明抛出了InterruptedException异常，所以调用sleep()方法时要么捕捉该异常，要么显式声明抛出该异常；而yield()方法则没有声明抛出任何异常。</li>
+<li>sleep()方法比yield()方法有更好的可移植性，通常不建议使用yield()方法来控制并发线程的执行。</li>
+</ol>
+<h2 id="4-join"><a href="#4-join" class="headerlink" title="4. join"></a>4. join</h2><p>join方法是一个对象方法，当在某个程序执行体中（在哪个线程的执行体里调用，则哪个线程被阻塞）调用join()方法时，此线程将被阻塞（相当于调用了wait），Java中是由<code>Runnable</code>转到<code>Waiting</code>状态，直到被join()方法加入的线程执行完为止。join()方法内部调用了wait()方法，可以把join()理解成特殊的<code>wait(long millis)</code>方法，这个方法的millis恰好等于join的线程的执行时间。关于join的底层原理请<a target="_blank" rel="noopener" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">移步这里</a>。</p>
+<p><strong>join()方法有如下3种重载形式：</strong></p>
+<ul>
+<li><code>join()</code>：等待被join的线程执行完成。</li>
+<li><code>join(long millis)</code>：等待被join的线程的时间最长为millis毫秒。如果在millis毫秒内被join的线程还没有执行结束，则不再等待。</li>
+<li><code>join(long millis, int nanos)</code>：等待被join的线程的时间最长为millis毫秒加nanos毫微秒。</li>
+</ul>
+<p>通过下面这个例子能更加深入的理解join的作用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> r = <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        test1();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        log.debug(<span class="string">&quot;开始&quot;</span>);</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;开始&quot;</span>);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            log.debug(<span class="string">&quot;结束&quot;</span>);</span><br><span class="line">            r = <span class="number">10</span>;</span><br><span class="line">        &#125;,<span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        t1.start();</span><br><span class="line">        t1.join();   <span class="comment">// 1. 不使用join  2. 使用join</span></span><br><span class="line">        log.debug(<span class="string">&quot;结果为:&#123;&#125;&quot;</span>, r);</span><br><span class="line">        log.debug(<span class="string">&quot;结束&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 不使用join，main线程先于t1线程执行，r打印为0</span></span><br><span class="line"><span class="comment">/*Output1</span></span><br><span class="line"><span class="comment">00:47:15.208 c.Test10 [main] - 开始</span></span><br><span class="line"><span class="comment">00:47:15.309 c.Test10 [t1] - 开始</span></span><br><span class="line"><span class="comment">00:47:15.309 c.Test10 [main] - 结果为:0</span></span><br><span class="line"><span class="comment">00:47:15.311 c.Test10 [main] - 结束</span></span><br><span class="line"><span class="comment">00:47:16.315 c.Test10 [t1] - 结束</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">// 使用join，main线程阻塞等t1线程执行结束再打印r为10，此处如果用sleep也可以但不好，因为无法预测准确的时间。</span></span><br><span class="line"><span class="comment">/*Output2</span></span><br><span class="line"><span class="comment">00:43:15.128 c.Test10 [main] - 开始</span></span><br><span class="line"><span class="comment">00:43:15.216 c.Test10 [t1] - 开始</span></span><br><span class="line"><span class="comment">00:43:16.218 c.Test10 [t1] - 结束</span></span><br><span class="line"><span class="comment">00:43:16.218 c.Test10 [main] - 结果为:10</span></span><br><span class="line"><span class="comment">00:43:16.221 c.Test10 [main] - 结束</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>那么join用来干什么哪？我们可以借助join实现多线程的同步，同步和异步的概念以调用方角度来讲如下：</p>
+<ul>
+<li>需要等待结果返回，才能继续运行就是同步；   </li>
+<li>不需要等待结果返回，就能继续运行就是异步。</li>
+</ul>
+<p>例如我们要等待多个线程的执行结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestJoin</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> r = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> r1 = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> r2 = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        test();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            sleep(<span class="number">1</span>);</span><br><span class="line">            r1 = <span class="number">10</span>;</span><br><span class="line">        &#125;);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            sleep(<span class="number">2</span>);</span><br><span class="line">            r2 = <span class="number">20</span>;</span><br><span class="line">        &#125;);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        log.debug(<span class="string">&quot;join begin&quot;</span>);</span><br><span class="line">        t1.join();</span><br><span class="line">        log.debug(<span class="string">&quot;t2 join end&quot;</span>);</span><br><span class="line">        t2.join();</span><br><span class="line">        log.debug(<span class="string">&quot;t1 join end&quot;</span>);</span><br><span class="line">        <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line">        log.debug(<span class="string">&quot;r1: &#123;&#125; r2: &#123;&#125; cost: &#123;&#125;&quot;</span>, r1, r2, end - start);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">21:33:39.856 c.TestJoin [main] - join begin</span></span><br><span class="line"><span class="comment">21:33:41.864 c.TestJoin [main] - t2 join end</span></span><br><span class="line"><span class="comment">21:33:41.867 c.TestJoin [main] - t1 join end</span></span><br><span class="line"><span class="comment">21:33:41.868 c.TestJoin [main] - r1: 10 r2: 20 cost: 2014</span></span><br></pre></td></tr></table></figure>
+<p>上例我们发现，如果join多个线程，join的多个线程并行执行，则被join的线程等待的时间应该为最长线程的执行时间。如果颠倒两个 join 呢？最终都是输出相同的结果，因为如果先join t2，则t2执行结束后，t1.join就无需等待了，此时t1已经执行结束了。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Thread%E7%B1%BB/" rel="tag"><i class="fa fa-tag"></i> Thread类</a>
+              <a href="/tags/start/" rel="tag"><i class="fa fa-tag"></i> start</a>
+              <a href="/tags/run/" rel="tag"><i class="fa fa-tag"></i> run</a>
+              <a href="/tags/sleep/" rel="tag"><i class="fa fa-tag"></i> sleep</a>
+              <a href="/tags/yield/" rel="tag"><i class="fa fa-tag"></i> yield</a>
+              <a href="/tags/join/" rel="tag"><i class="fa fa-tag"></i> join</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/" rel="prev" title="Thread类里的线程状态 和 操作系统的线程状态">
+                  <i class="fa fa-chevron-left"></i> Thread类里的线程状态 和 操作系统的线程状态
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/03/25/C3_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%BA%8C/" rel="next" title="Thread类方法之二——interrupt 和两阶段终止设计模式">
+                  Thread类方法之二——interrupt 和两阶段终止设计模式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

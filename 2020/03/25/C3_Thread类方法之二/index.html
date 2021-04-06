@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="interrupt 方法打断线程 case1：打断 sleep, wait, join （阻塞）的线程 – 抛出InterruptedException异常并重置打断标记 case2：打断运行中的线程 – 打断标记变为 true  打断阻塞状态（在Java中是WAITINGorTIMED_WAITING状态）中的线程，会抛出一个InterruptedException异常，并且会重置打断标记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thread类方法之二——interrupt 和两阶段终止设计模式">
+<meta property="og:url" content="http://example.com/2020/03/25/C3_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%BA%8C/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="interrupt 方法打断线程 case1：打断 sleep, wait, join （阻塞）的线程 – 抛出InterruptedException异常并重置打断标记 case2：打断运行中的线程 – 打断标记变为 true  打断阻塞状态（在Java中是WAITINGorTIMED_WAITING状态）中的线程，会抛出一个InterruptedException异常，并且会重置打断标记。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/B123525C05A24C849F658FDB017404F5?method=download&shareKey=d2efe74c3384c0cb029b909878ba8eb7">
+<meta property="article:published_time" content="2020-03-25T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-01-27T10:05:40.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="interrupt">
+<meta property="article:tag" content="两阶段终止设计模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/B123525C05A24C849F658FDB017404F5?method=download&shareKey=d2efe74c3384c0cb029b909878ba8eb7">
+
+
+<link rel="canonical" href="http://example.com/2020/03/25/C3_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%BA%8C/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>Thread类方法之二——interrupt 和两阶段终止设计模式 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#interrupt-%E6%96%B9%E6%B3%95%E6%89%93%E6%96%AD%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">interrupt 方法打断线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E6%96%AD%E9%98%BB%E5%A1%9E%E7%8A%B6%E6%80%81%E7%9A%84%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">打断阻塞状态的线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E6%96%AD%E6%AD%A3%E5%B8%B8%E8%BF%90%E8%A1%8C%E7%9A%84%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">打断正常运行的线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#interrupt%E5%BA%94%E7%94%A8%EF%BC%9A%E5%A4%9A%E7%BA%BF%E7%A8%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E4%B8%A4%E9%98%B6%E6%AE%B5%E7%BB%88%E6%AD%A2"><span class="nav-number">2.</span> <span class="nav-text">interrupt应用：多线程设计模式之两阶段终止</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E6%80%9D%E8%B7%AF"><span class="nav-number">2.1.</span> <span class="nav-text">错误思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E9%98%B6%E6%AE%B5%E7%BB%88%E6%AD%A2%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">两阶段终止模式</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/25/C3_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%BA%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Thread类方法之二——interrupt 和两阶段终止设计模式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-25 19:25:15" itemprop="dateCreated datePublished" datetime="2020-03-25T19:25:15+08:00">2020-03-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 18:05:40" itemprop="dateModified" datetime="2021-01-27T18:05:40+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="interrupt-方法打断线程"><a href="#interrupt-方法打断线程" class="headerlink" title="interrupt 方法打断线程"></a>interrupt 方法打断线程</h2><ul>
+<li>case1：打断 sleep, wait, join （阻塞）的线程 – 抛出<code>InterruptedException</code>异常并重置打断标记</li>
+<li>case2：打断运行中的线程 – 打断标记变为 true</li>
+</ul>
+<p>打断阻塞状态（在Java中是<code>WAITING</code>or<code>TIMED_WAITING</code>状态）中的线程，会抛出一个<code>InterruptedException</code>异常，并且会重置<code>打断标记</code>。</p>
+<ul>
+<li>介绍一下打断标记</li>
+</ul>
+<p>Thread类里有一个<code>isInterrupted</code>方法可以返回当前线程是否被打断，被打断返回<code>true</code>，否则<code>false</code>。</p>
+<span id="more"></span>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isInterrupted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> isInterrupted(<span class="keyword">false</span>); <span class="comment">// 这里的false指不会重置打断标记</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>还有一个类似的静态方法<code>interrupted</code>也可以返回当前线程是否被打断，被打断返回<code>true</code>，否则<code>false</code>，但是会重置打断标记为false。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">interrupted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> currentThread().isInterrupted(<span class="keyword">true</span>);  <span class="comment">// 这里的true指会重置打断标记</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="打断阻塞状态的线程"><a href="#打断阻塞状态的线程" class="headerlink" title="打断阻塞状态的线程"></a>打断阻塞状态的线程</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;sleep...&quot;</span>);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">5000</span>); <span class="comment">// wait, join</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;t1&quot;</span>);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        log.debug(<span class="string">&quot;interrupt&quot;</span>);</span><br><span class="line">        log.debug(<span class="string">&quot;打断标记:&#123;&#125;&quot;</span>, t1.isInterrupted()); <span class="comment">// 1</span></span><br><span class="line">        t1.interrupt();</span><br><span class="line">        log.debug(<span class="string">&quot;打断标记:&#123;&#125;&quot;</span>, t1.isInterrupted()); <span class="comment">// 2</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">22:29:08.624 c.Test11 [t1] - sleep...</span></span><br><span class="line"><span class="comment">22:29:09.621 c.Test11 [main] - interrupt</span></span><br><span class="line"><span class="comment">22:29:09.621 c.Test11 [main] - 打断标记:false</span></span><br><span class="line"><span class="comment">22:29:09.624 c.Test11 [main] - 打断标记:false</span></span><br><span class="line"><span class="comment">java.lang.InterruptedException: sleep interrupted</span></span><br><span class="line"><span class="comment">	at java.lang.Thread.sleep(Native Method)</span></span><br><span class="line"><span class="comment">	at cn.itcast.test.Test11.lambda$main$0(Test11.java:12)</span></span><br><span class="line"><span class="comment">	at java.lang.Thread.run(Thread.java:748)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>上面两个false是意义不同的，第一个代表当前线程正常运行，没有被打断；而第二个false代表线程在sleep, wait, join 中（阻塞状态）被打断，会抛出异常并将打断标记重置为false。</p>
+<h3 id="打断正常运行的线程"><a href="#打断正常运行的线程" class="headerlink" title="打断正常运行的线程"></a>打断正常运行的线程</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;isInterrupted状态： &quot;</span> + (Thread.currentThread().isInterrupted()));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        log.debug(<span class="string">&quot;interrupt&quot;</span>);</span><br><span class="line">        t1.interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">...</span></span><br><span class="line"><span class="comment">isInterrupted状态： false</span></span><br><span class="line"><span class="comment">isInterrupted状态： false</span></span><br><span class="line"><span class="comment">isInterrupted状态： false</span></span><br><span class="line"><span class="comment">22:43:30.383 c.Test12 [main] - interrupt</span></span><br><span class="line"><span class="comment">isInterrupted状态： true</span></span><br><span class="line"><span class="comment">isInterrupted状态： true</span></span><br><span class="line"><span class="comment">isInterrupted状态： true</span></span><br><span class="line"><span class="comment">...</span></span><br></pre></td></tr></table></figure>
+<p>打断后标记变为true， 但是进程并没有停止，那么这个打断到底有啥用啊？我们怎么让被打断后的进程停下来哪？我们可以借助打断标记，如果打断标记为真，就手动退出进程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="keyword">boolean</span> interrupted = Thread.currentThread().isInterrupted();</span><br><span class="line">                <span class="keyword">if</span>(interrupted) &#123;</span><br><span class="line">                    log.debug(<span class="string">&quot;被打断了, 退出循环&quot;</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;t1&quot;</span>);</span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        log.debug(<span class="string">&quot;interrupt&quot;</span>);</span><br><span class="line">        t1.interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">22:52:17.742 c.Test12 [main] - interrupt</span></span><br><span class="line"><span class="comment">22:52:17.747 c.Test12 [t1] - 被打断了, 退出循环</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="interrupt应用：多线程设计模式之两阶段终止"><a href="#interrupt应用：多线程设计模式之两阶段终止" class="headerlink" title="interrupt应用：多线程设计模式之两阶段终止"></a>interrupt应用：多线程设计模式之两阶段终止</h2><p><code>Two Phase Termination</code> :在一个线程 T1 中如何“优雅”终止线程 T2？这里的【优雅】指的是给 T2 一个料理后事的机会。</p>
+<h3 id="错误思路"><a href="#错误思路" class="headerlink" title="错误思路"></a>错误思路</h3><ul>
+<li>使用线程对象的 stop() 方法停止线程<ul>
+<li>stop 方法会真正杀死线程，如果这时线程锁住了共享资源，那么当它被杀死后就再也没有机会释放锁， 其它线程将永远无法获取锁</li>
+</ul>
+</li>
+<li>使用 System.exit(int) 方法停止线程   <ul>
+<li>目的仅是停止一个线程，但这种做法会让整个程序都停止</li>
+</ul>
+</li>
+</ul>
+<h3 id="两阶段终止模式"><a href="#两阶段终止模式" class="headerlink" title="两阶段终止模式"></a>两阶段终止模式</h3><ul>
+<li>应用场景：后台监控线程（需要设置停止选项）</li>
+<li>思路<br><img src="https://note.youdao.com/yws/api/personal/file/B123525C05A24C849F658FDB017404F5?method=download&shareKey=d2efe74c3384c0cb029b909878ba8eb7" alt="image"></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j(topic = &quot;c.TwoPhaseTermination&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test_1</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        TwoPhaseTermination_1 tpt = <span class="keyword">new</span> TwoPhaseTermination_1();</span><br><span class="line">        tpt.start();</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">3500</span>);</span><br><span class="line">        log.debug(<span class="string">&quot;停止监控&quot;</span>);</span><br><span class="line">        tpt.stop();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j(topic = &quot;c.TwoPhaseTermination&quot;)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TwoPhaseTermination_1</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 监控线程</span></span><br><span class="line">    <span class="keyword">private</span> Thread monitorThread;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动监控线程</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        monitorThread = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                Thread current = Thread.currentThread();</span><br><span class="line">                <span class="comment">// 是否被打断</span></span><br><span class="line">                <span class="keyword">if</span> (current.isInterrupted()) &#123;</span><br><span class="line">                    log.debug(<span class="string">&quot;料理后事&quot;</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);          <span class="comment">// 睡眠时被打断</span></span><br><span class="line">                    log.debug(<span class="string">&quot;执行监控记录&quot;</span>);   <span class="comment">// 正常打断</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                    <span class="comment">// 当抛出异常时，因为打断标记已经重置为 false，这里要再打断一次设置为 true</span></span><br><span class="line">                    current.interrupt();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;monitor&quot;</span>);</span><br><span class="line">        monitorThread.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 停止监控线程</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        monitorThread.interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">00:30:54.263 c.TwoPhaseTermination [monitor] - 执行监控记录</span></span><br><span class="line"><span class="comment">00:30:55.263 c.TwoPhaseTermination [monitor] - 执行监控记录</span></span><br><span class="line"><span class="comment">00:30:56.265 c.TwoPhaseTermination [monitor] - 执行监控记录</span></span><br><span class="line"><span class="comment">00:30:56.765 c.TwoPhaseTermination [main] - 停止监控</span></span><br><span class="line"><span class="comment">00:30:56.765 c.TwoPhaseTermination [monitor] - 料理后事</span></span><br><span class="line"><span class="comment">java.lang.InterruptedException: sleep interrupted</span></span><br><span class="line"><span class="comment">	at java.lang.Thread.sleep(Native Method)</span></span><br><span class="line"><span class="comment">	at cn.itcast.test.TwoPhaseTermination_1.lambda$start$0(Test_1.java:33)</span></span><br><span class="line"><span class="comment">	at java.lang.Thread.run(Thread.java:748)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>在睡眠时被打断，抛出异常并在捕获异常后，也就是 catch 块中重新设置打断标记为 true（即再来一次打断），下次循环会优雅的退出线程。正常运行时被打断，也可以优雅的退出线程。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/interrupt/" rel="tag"><i class="fa fa-tag"></i> interrupt</a>
+              <a href="/tags/%E4%B8%A4%E9%98%B6%E6%AE%B5%E7%BB%88%E6%AD%A2%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag"><i class="fa fa-tag"></i> 两阶段终止设计模式</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/" rel="prev" title="Thread类方法之一——start、run、sleep、yield、join">
+                  <i class="fa fa-chevron-left"></i> Thread类方法之一——start、run、sleep、yield、join
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/04/02/C4_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%89_setDeamon/" rel="next" title="Thread类方法之三--setDaemon">
+                  Thread类方法之三--setDaemon <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

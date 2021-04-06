@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="五种状态这是从操作系统层面来描述的。  操作系统层面--线程的生命周期（五种状态）-中文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thread类里的线程状态 和 操作系统的线程状态">
+<meta property="og:url" content="http://example.com/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="五种状态这是从操作系统层面来描述的。  操作系统层面--线程的生命周期（五种状态）-中文">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/1BA69F17AFAB416A9438E298535B16DF?method=download&shareKey=c99a0bf966172b28ffb3e4777cdfa62d">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/F670D1CB16A648B3B3608675D70E2836?method=download&shareKey=a8f05e81e9886b909d0bc17b3a58d9e7">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/B8BB38C44C5B409AAF78E3C30A2271AC?method=download&shareKey=55e2fa1e0fc8a8bd98e5d658ef347e22">
+<meta property="article:published_time" content="2020-03-10T03:25:35.000Z">
+<meta property="article:modified_time" content="2021-01-25T16:12:10.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="Thread类">
+<meta property="article:tag" content="线程状态">
+<meta property="article:tag" content="线程状态转换">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/1BA69F17AFAB416A9438E298535B16DF?method=download&shareKey=c99a0bf966172b28ffb3e4777cdfa62d">
+
+
+<link rel="canonical" href="http://example.com/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>Thread类里的线程状态 和 操作系统的线程状态 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E7%A7%8D%E7%8A%B6%E6%80%81"><span class="nav-number">1.</span> <span class="nav-text">五种状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E7%A7%8D%E7%8A%B6%E6%80%81"><span class="nav-number">2.</span> <span class="nav-text">六种状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E7%A7%8D%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.</span> <span class="nav-text">六种线程状态转换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-1-NEW-gt-RUNNABLE"><span class="nav-number">3.1.</span> <span class="nav-text">情况 1 NEW --&gt; RUNNABLE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-2-RUNNABLE-lt-gt-WAITING"><span class="nav-number">3.2.</span> <span class="nav-text">情况 2 RUNNABLE &lt;--&gt; WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-3-RUNNABLE-lt-gt-WAITING"><span class="nav-number">3.3.</span> <span class="nav-text">情况 3 RUNNABLE &lt;--&gt; WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-4-RUNNABLE-lt-gt-WAITING"><span class="nav-number">3.4.</span> <span class="nav-text">情况 4 RUNNABLE &lt;--&gt; WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-5-RUNNABLE-lt-gt-TIMED-WAITING"><span class="nav-number">3.5.</span> <span class="nav-text">情况 5 RUNNABLE &lt;--&gt; TIMED_WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-6-RUNNABLE-lt-gt-TIMED-WAITING"><span class="nav-number">3.6.</span> <span class="nav-text">情况 6 RUNNABLE &lt;--&gt; TIMED_WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-7-RUNNABLE-lt-gt-TIMED-WAITING"><span class="nav-number">3.7.</span> <span class="nav-text">情况 7 RUNNABLE &lt;--&gt; TIMED_WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-8-RUNNABLE-lt-gt-TIMED-WAITING"><span class="nav-number">3.8.</span> <span class="nav-text">情况 8 RUNNABLE &lt;--&gt; TIMED_WAITING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-9-RUNNABLE-lt-gt-BLOCKED"><span class="nav-number">3.9.</span> <span class="nav-text">情况 9 RUNNABLE &lt;--&gt; BLOCKED</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5-10-RUNNABLE-lt-gt-TERMINATED"><span class="nav-number">3.10.</span> <span class="nav-text">情况 10 RUNNABLE &lt;--&gt; TERMINATED</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Thread类里的线程状态 和 操作系统的线程状态
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-10 11:25:35" itemprop="dateCreated datePublished" datetime="2020-03-10T11:25:35+08:00">2020-03-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-26 00:12:10" itemprop="dateModified" datetime="2021-01-26T00:12:10+08:00">2021-01-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="五种状态"><a href="#五种状态" class="headerlink" title="五种状态"></a>五种状态</h2><p>这是从操作系统层面来描述的。</p>
+<p><img src="https://note.youdao.com/yws/api/personal/file/1BA69F17AFAB416A9438E298535B16DF?method=download&shareKey=c99a0bf966172b28ffb3e4777cdfa62d" alt="image"></p>
+<center>操作系统层面--线程的生命周期（五种状态）-中文</center>
+
+<p><img src="https://note.youdao.com/yws/api/personal/file/F670D1CB16A648B3B3608675D70E2836?method=download&shareKey=a8f05e81e9886b909d0bc17b3a58d9e7" alt="image"></p>
+<span id="more"></span>
+
+<center>操作系统层面--线程的生命周期（五种状态）-英文</center>
+
+<ul>
+<li><code>新建状态</code>：仅是在语言层面创建了线程对象，还未与操作系统线程关联</li>
+<li><code>可运行状态（就绪状态）</code>：指该线程已经被创建（与操作系统线程关联），可以由 CPU 调度执行</li>
+<li><code>运行状态</code>：指获取了 CPU 时间片运行中的状态，当 CPU 时间片用完，会从运行状态转换至可运行状态，会导致线程的上下文切换</li>
+<li><code>阻塞状态</code>：如果调用了阻塞 API，如 BIO 读写文件，这时该线程实际不会用到 CPU，会导致线程上下文切换，进入阻塞状态等 BIO 操作完毕，会由操作系统唤醒阻塞的线程，转换至可运行状态。与可运行状态的区别是，对阻塞状态的线程来说只要它们一直不唤醒，调度器就一直不会考虑调度它们</li>
+<li><code>终止状态（死亡状态）</code>：表示线程已经执行完毕，生命周期已经结束，不会再转换为其它状态</li>
+</ul>
+<h2 id="六种状态"><a href="#六种状态" class="headerlink" title="六种状态"></a>六种状态</h2><p>这是从 Java API 层面来描述的 根据 Thread.State 枚举，分为六种状态</p>
+<p><img src="https://note.youdao.com/yws/api/personal/file/B8BB38C44C5B409AAF78E3C30A2271AC?method=download&shareKey=55e2fa1e0fc8a8bd98e5d658ef347e22" alt="image"></p>
+<center>Java API 层面--线程的生命周期（6种状态）</center>
+
+
+<ul>
+<li><code>NEW</code> 线程刚被创建，但是还没有调用 start() 方法 </li>
+<li><code>RUNNABLE</code> 是调用了 start() 方法之后，注意，Java API 层面的 RUNNABLE 状态涵盖了 操作系统层面的 【可运行状态】、【运行状态】和【阻塞状态】（由于 BIO 导致的线程阻塞，在 Java 里无法区分，仍然认为是可运行） </li>
+<li><code>BLOCKED</code> ， <code>WAITING</code> ， <code>TIMED_WAITING</code> 都是 Java API 层面对【阻塞状态】的细分</li>
+<li><code>TERMINATED</code> 当线程代码运行结束</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j(topic = &quot;c.TestState&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestState</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// New</span></span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(<span class="string">&quot;t1&quot;</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                log.debug(<span class="string">&quot;running...&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Runnable</span></span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(<span class="string">&quot;t2&quot;</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        t2.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Terminated</span></span><br><span class="line">        Thread t3 = <span class="keyword">new</span> Thread(<span class="string">&quot;t3&quot;</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                log.debug(<span class="string">&quot;running...&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        t3.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Timed_waiting</span></span><br><span class="line">        Thread t4 = <span class="keyword">new</span> Thread(<span class="string">&quot;t4&quot;</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 这里t4先对对象上锁，t6线程就没办法加锁了，会陷入 blocked 状态</span></span><br><span class="line">                <span class="keyword">synchronized</span> (TestState.class) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000000</span>); <span class="comment">// timed_waiting</span></span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        t4.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Waiting</span></span><br><span class="line">        Thread t5 = <span class="keyword">new</span> Thread(<span class="string">&quot;t5&quot;</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    t2.join(); <span class="comment">// waiting</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        t5.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Blocked</span></span><br><span class="line">        Thread t6 = <span class="keyword">new</span> Thread(<span class="string">&quot;t6&quot;</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (TestState.class) &#123; <span class="comment">// blocked</span></span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000000</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        t6.start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">500</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        log.debug(<span class="string">&quot;t1 state &#123;&#125;&quot;</span>, t1.getState());</span><br><span class="line">        log.debug(<span class="string">&quot;t2 state &#123;&#125;&quot;</span>, t2.getState());</span><br><span class="line">        log.debug(<span class="string">&quot;t3 state &#123;&#125;&quot;</span>, t3.getState());</span><br><span class="line">        log.debug(<span class="string">&quot;t4 state &#123;&#125;&quot;</span>, t4.getState());</span><br><span class="line">        log.debug(<span class="string">&quot;t5 state &#123;&#125;&quot;</span>, t5.getState());</span><br><span class="line">        log.debug(<span class="string">&quot;t6 state &#123;&#125;&quot;</span>, t6.getState());</span><br><span class="line">        System.in.read();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">18:02:11.284 c.TestState [t3] - running...</span></span><br><span class="line"><span class="comment">18:02:11.784 c.TestState [main] - t1 state NEW</span></span><br><span class="line"><span class="comment">18:02:11.784 c.TestState [main] - t2 state RUNNABLE</span></span><br><span class="line"><span class="comment">18:02:11.784 c.TestState [main] - t3 state TERMINATED</span></span><br><span class="line"><span class="comment">18:02:11.784 c.TestState [main] - t4 state TIMED_WAITING</span></span><br><span class="line"><span class="comment">18:02:11.784 c.TestState [main] - t5 state WAITING</span></span><br><span class="line"><span class="comment">18:02:11.784 c.TestState [main] - t6 state BLOCKED</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="六种线程状态转换"><a href="#六种线程状态转换" class="headerlink" title="六种线程状态转换"></a>六种线程状态转换</h2><blockquote>
+<p>有一点需要注意，在IDEA中调试时，调试台中<code>RUNNABLE</code>显示为<code>RUNNING</code>，<code>BLOCKED</code>显示为<code>MONITOR</code>。</p>
+</blockquote>
+<p>还是上面那幅图，其中在转换线上标了1-10，即代表10种转换情况。假设有线程 <code>Thread t</code> </p>
+<h3 id="情况-1-NEW-gt-RUNNABLE"><a href="#情况-1-NEW-gt-RUNNABLE" class="headerlink" title="情况 1 NEW --&gt; RUNNABLE"></a>情况 1 <code>NEW --&gt; RUNNABLE</code></h3><ul>
+<li>当调用 <code>t.start()</code> 方法时，由 <code>NEW --&gt; RUNNABLE</code></li>
+</ul>
+<h3 id="情况-2-RUNNABLE-lt-gt-WAITING"><a href="#情况-2-RUNNABLE-lt-gt-WAITING" class="headerlink" title="情况 2 RUNNABLE &lt;--&gt; WAITING"></a>情况 2 <code>RUNNABLE &lt;--&gt; WAITING</code></h3><p><strong>t线程</strong>用 <code>synchronized(obj)</code> 获取了对象锁后 </p>
+<ul>
+<li>调用 <code>obj.wait()</code> 方法时，<strong>t 线程</strong>从 <code>RUNNABLE --&gt; WAITING</code> </li>
+<li>调用 <code>obj.notify()</code> ， <code>obj.notifyAll()</code> ， <code>t.interrupt()</code> 时<ul>
+<li>竞争锁成功，<strong>t 线程</strong>从 <code>WAITING --&gt; RUNNABLE</code> </li>
+<li>竞争锁失败，<strong>t 线程</strong>从 <code>WAITING --&gt; BLOCKED</code></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j(topic = &quot;c.TestWaitNotify&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestWaitNotify</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">static</span> Object obj = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (obj) &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;执行....&quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    obj.wait(); <span class="comment">// 让线程在obj上一直等待下去</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                log.debug(<span class="string">&quot;其它代码....&quot;</span>);  <span class="comment">//   断点3</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;t1&quot;</span>).start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (obj) &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;执行....&quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    obj.wait(); <span class="comment">// 让线程在obj上一直等待下去</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                log.debug(<span class="string">&quot;其它代码....&quot;</span>);  <span class="comment">//   断点2</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;t2&quot;</span>).start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 主线程两秒后执行</span></span><br><span class="line">        sleep(<span class="number">0.5</span>);</span><br><span class="line">        log.debug(<span class="string">&quot;唤醒 obj 上其它线程&quot;</span>);</span><br><span class="line">        <span class="keyword">synchronized</span> (obj) &#123;</span><br><span class="line">            obj.notifyAll(); <span class="comment">// 唤醒obj上所有等待线程    断点1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*Debug观察主线程、t1、t2状态:</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p><code>Debug</code>观察主线程、t1、t2状态:</p>
+<ul>
+<li>断点1执行前：主线程-<code>RUNNING</code>, t1-<code>WAITING</code>, t2-<code>WAITING</code></li>
+<li>断点1执行后：主线程-<code>RUNNING</code>, t1-<code>MONITOR</code>, t2-<code>MONITOR</code> (因为这时主线程还没执行完，还有一行)  </li>
+<li>执行到断点2，代表t2竞争到锁：t1-<code>MONITOR</code>, t2-<code>RUNNING</code></li>
+<li>执行到断点1，代表t2结束释放锁，t1竞争到锁：t1-<code>RUNNING</code></li>
+</ul>
+<p>根据调试结果我们发现其实还有一种情况为 <code>WAITING &lt;--&gt; BLOCKED</code>，即唤醒线程后竞争锁失败后线程会进入<code>WaitSet</code>等待，对应上面的<code>MONITOR</code>状态，上面并没有画出。</p>
+<h3 id="情况-3-RUNNABLE-lt-gt-WAITING"><a href="#情况-3-RUNNABLE-lt-gt-WAITING" class="headerlink" title="情况 3 RUNNABLE &lt;--&gt; WAITING"></a>情况 3 <code>RUNNABLE &lt;--&gt; WAITING</code></h3><ul>
+<li><strong>当前线程</strong>调用 <code>t.join()</code> 方法时，<strong>当前线程</strong>从 <code>RUNNABLE --&gt; WAITING</code><ul>
+<li>注意是<strong>当前线程</strong>在t线程对象的监视器上等待，这个涉及到join的原理，请看我<a target="_blank" rel="noopener" href="https://blog.csdn.net/salted___fish/article/details/107239968">另一篇讲<code>join</code>的博客</a></li>
+</ul>
+</li>
+<li><strong>t 线程</strong>运行结束，或调用了<strong>当前线程</strong>的 <code>interrupt()</code> 时，<strong>当前线程</strong>从 <code>WAITING --&gt; RUNNABLE</code></li>
+</ul>
+<h3 id="情况-4-RUNNABLE-lt-gt-WAITING"><a href="#情况-4-RUNNABLE-lt-gt-WAITING" class="headerlink" title="情况 4 RUNNABLE &lt;--&gt; WAITING"></a>情况 4 <code>RUNNABLE &lt;--&gt; WAITING</code></h3><ul>
+<li><strong>当前线程</strong>调用 <code>LockSupport.park()</code> 方法会让<strong>当前线程</strong>从 <code>RUNNABLE --&gt; WAITING</code> </li>
+<li>调用 <code>LockSupport.unpark</code>(目标线程) 或调用了<strong>目标线程</strong> 的 <code>interrupt()</code> ，会让目标线程从 <code>WAITING --&gt; RUNNABLE</code></li>
+</ul>
+<h3 id="情况-5-RUNNABLE-lt-gt-TIMED-WAITING"><a href="#情况-5-RUNNABLE-lt-gt-TIMED-WAITING" class="headerlink" title="情况 5 RUNNABLE &lt;--&gt; TIMED_WAITING"></a>情况 5 <code>RUNNABLE &lt;--&gt; TIMED_WAITING</code></h3><p><strong>t 线程</strong>用 <code>synchronized(obj)</code> 获取了对象锁后 </p>
+<ul>
+<li>调用 <code>obj.wait(long n)</code> 方法时，<strong>t 线程</strong>从 <code>RUNNABLE --&gt; TIMED_WAITING</code></li>
+<li><strong>t 线程</strong>等待时间超过了 n 毫秒，或调用 <code>obj.notify()</code> ， <code>obj.notifyAll()</code> ， <code>t.interrupt()</code> 时 <ul>
+<li>竞争锁成功，<strong>t 线程</strong>从 <code>TIMED_WAITING --&gt; RUNNABLE</code> </li>
+<li>竞争锁失败，<strong>t 线程</strong>从 <code>TIMED_WAITING --&gt; BLOCKED</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="情况-6-RUNNABLE-lt-gt-TIMED-WAITING"><a href="#情况-6-RUNNABLE-lt-gt-TIMED-WAITING" class="headerlink" title="情况 6 RUNNABLE &lt;--&gt; TIMED_WAITING"></a>情况 6 <code>RUNNABLE &lt;--&gt; TIMED_WAITING</code></h3><ul>
+<li><strong>当前线程</strong>调用 <code>t.join(long n)</code> 方法时，<strong>当前线程</strong>从 <code>RUNNABLE --&gt; TIMED_WAITING</code><ul>
+<li>注意是<strong>当前线程</strong>在t 线程对象的监视器上等待</li>
+</ul>
+</li>
+<li><strong>当前线程</strong>等待时间超过了 n 毫秒，或<strong>t 线程</strong>运行结束，或调用了<strong>当前线程</strong>的 <code>interrupt()</code> 时，<strong>当前线程</strong>从 <code>TIMED_WAITING --&gt; RUNNABLE</code></li>
+</ul>
+<h3 id="情况-7-RUNNABLE-lt-gt-TIMED-WAITING"><a href="#情况-7-RUNNABLE-lt-gt-TIMED-WAITING" class="headerlink" title="情况 7 RUNNABLE &lt;--&gt; TIMED_WAITING"></a>情况 7 <code>RUNNABLE &lt;--&gt; TIMED_WAITING</code></h3><ul>
+<li><strong>当前线程</strong>调用 <code>Thread.sleep(long n)</code> ，<strong>当前线程</strong>从 <code>RUNNABLE --&gt; TIMED_WAITING</code> </li>
+<li><strong>当前线程</strong>等待时间超过了 n 毫秒，<strong>当前线程</strong>从 <code>TIMED_WAITING --&gt; RUNNABLE</code></li>
+</ul>
+<h3 id="情况-8-RUNNABLE-lt-gt-TIMED-WAITING"><a href="#情况-8-RUNNABLE-lt-gt-TIMED-WAITING" class="headerlink" title="情况 8 RUNNABLE &lt;--&gt; TIMED_WAITING"></a>情况 8 <code>RUNNABLE &lt;--&gt; TIMED_WAITING</code></h3><ul>
+<li><strong>当前线程</strong>调用 <code>LockSupport.parkNanos(long nanos)</code> 或 <code>LockSupport.parkUntil(long millis)</code> 时，<strong>当前线程</strong>从 <code>RUNNABLE --&gt; TIMED_WAITING</code> </li>
+<li>调用 <code>LockSupport.unpark(目标线程)</code> 或调用了<strong>目标线程</strong>的 <code>interrupt()</code> ，或是等待超时，会让<strong>目标线程</strong>从 <code>TIMED_WAITING--&gt; RUNNABLE</code></li>
+</ul>
+<h3 id="情况-9-RUNNABLE-lt-gt-BLOCKED"><a href="#情况-9-RUNNABLE-lt-gt-BLOCKED" class="headerlink" title="情况 9 RUNNABLE &lt;--&gt; BLOCKED"></a>情况 9 <code>RUNNABLE &lt;--&gt; BLOCKED</code></h3><ul>
+<li><strong>t 线程</strong>用 <code>synchronized(obj)</code> 获取了对象锁时如果竞争失败，从 <code>RUNNABLE --&gt; BLOCKED</code> </li>
+<li>持 obj 锁线程的同步代码块执行完毕，会唤醒该对象上所有 <code>BLOCKED</code> 的线程重新竞争，如果其中 <strong>t 线程</strong>竞争成功，从 <code>BLOCKED --&gt; RUNNABLE</code> ，其它失败的线程仍然 <code>BLOCKED</code></li>
+</ul>
+<h3 id="情况-10-RUNNABLE-lt-gt-TERMINATED"><a href="#情况-10-RUNNABLE-lt-gt-TERMINATED" class="headerlink" title="情况 10 RUNNABLE &lt;--&gt; TERMINATED"></a>情况 10 <code>RUNNABLE &lt;--&gt; TERMINATED</code></h3><ul>
+<li>当前线程所有代码运行完毕，进入 <code>TERMINATED</code></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Thread%E7%B1%BB/" rel="tag"><i class="fa fa-tag"></i> Thread类</a>
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/" rel="tag"><i class="fa fa-tag"></i> 线程状态</a>
+              <a href="/tags/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/" rel="tag"><i class="fa fa-tag"></i> 线程状态转换</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/03/01/C0_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/" rel="prev" title="创建线程和查看线程">
+                  <i class="fa fa-chevron-left"></i> 创建线程和查看线程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/" rel="next" title="Thread类方法之一——start、run、sleep、yield、join">
+                  Thread类方法之一——start、run、sleep、yield、join <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

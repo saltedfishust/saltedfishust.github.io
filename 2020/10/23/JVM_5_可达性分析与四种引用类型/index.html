@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="四种引用常见的准确来说是五种引用，我们平时用的最多的类似“Object j &#x3D; new Object()”就是强引用，不同于强引用，其他的所有引用类型都有特定的类实现（括号里类），例如软引用是SoftReference类……其中这些非强引用都可以（或者必须）配合引用队列来使用，引用队列的好处是可以释放这些引用对象自身占用的内存空间。用终结器引用回收垃圾效率极低，而且运行代价高昂，用的不多也不建议用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="可达性分析与四种引用类型">
+<meta property="og:url" content="http://example.com/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="四种引用常见的准确来说是五种引用，我们平时用的最多的类似“Object j &#x3D; new Object()”就是强引用，不同于强引用，其他的所有引用类型都有特定的类实现（括号里类），例如软引用是SoftReference类……其中这些非强引用都可以（或者必须）配合引用队列来使用，引用队列的好处是可以释放这些引用对象自身占用的内存空间。用终结器引用回收垃圾效率极低，而且运行代价高昂，用的不多也不建议用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-23T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-03-05T08:57:46.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="可达性分析">
+<meta property="article:tag" content="四种引用类型">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>可达性分析与四种引用类型 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">四种引用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%BA%E5%BC%95%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">强引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BD%AF%E5%BC%95%E7%94%A8%EF%BC%88SoftReference%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">软引用（SoftReference）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%B1%E5%BC%95%E7%94%A8%EF%BC%88WeakReference%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">弱引用（WeakReference）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E5%BC%95%E7%94%A8%EF%BC%88PhantomReference%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">虚引用（PhantomReference）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%88%E7%BB%93%E5%99%A8%E5%BC%95%E7%94%A8%EF%BC%88FinalReference%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">终结器引用（FinalReference）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          可达性分析与四种引用类型
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-10-23 19:25:15" itemprop="dateCreated datePublished" datetime="2020-10-23T19:25:15+08:00">2020-10-23</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-05 16:57:46" itemprop="dateModified" datetime="2021-03-05T16:57:46+08:00">2021-03-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><p>常见的准确来说是五种引用，我们平时用的最多的类似“Object j = new Object()”就是强引用，不同于强引用，其他的所有引用类型都有特定的类实现（括号里类），例如软引用是<code>SoftReference</code>类……其中这些非强引用都可以（或者必须）配合<code>引用队列</code>来使用，引用队列的好处是可以释放这些引用对象自身占用的内存空间。用终结器引用回收垃圾效率极低，而且运行代价高昂，用的不多也不建议用，了解即可。<span id="more"></span></p>
+<h5 id="强引用"><a href="#强引用" class="headerlink" title="强引用"></a>强引用</h5><ul>
+<li>只要 GC Roots 到对象的强引用还存在，对象就不会被垃圾回收，换句话说，只有所有 GC Roots 对象都不通过“强引用”引用该对象，该对象才能被垃圾回收</li>
+</ul>
+<h5 id="软引用（SoftReference）"><a href="#软引用（SoftReference）" class="headerlink" title="软引用（SoftReference）"></a>软引用（<code>SoftReference</code>）</h5><ul>
+<li>仅有软引用引用该对象时，在第一次垃圾回收后，内存仍不足时会再次触发第二次垃圾回收，回收软引用对象，即内存不够会被垃圾回收</li>
+<li>可以配合引用队列来释放软引用自身</li>
+</ul>
+<h5 id="弱引用（WeakReference）"><a href="#弱引用（WeakReference）" class="headerlink" title="弱引用（WeakReference）"></a>弱引用（<code>WeakReference</code>）</h5><ul>
+<li>仅有弱引用引用该对象时，在第一次垃圾回收时，无论内存是否充足，都会回收弱引用对象 </li>
+<li>可以配合引用队列来释放弱引用自身</li>
+<li>适合弱引用的场景，往往可以搭配<code>WeakHashMap</code>来实现<blockquote>
+<p>注意：上面的“第一次、第二次垃圾回收”指的是清理到它们才算一次，即如果对象在老年代而发生的是新生代GC则不算是清理到它们。</p>
+</blockquote>
+</li>
+</ul>
+<h5 id="虚引用（PhantomReference）"><a href="#虚引用（PhantomReference）" class="headerlink" title="虚引用（PhantomReference）"></a>虚引用（<code>PhantomReference</code>）</h5><ul>
+<li>为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知</li>
+<li><strong>必须配合引用队列使用</strong>，主要配合 ByteBuffer 使用（见直接内存那一节），被引用对象byteBuffer被回收时系统会收到一个通知，然后将虚引用入队， 由 Reference Handler 线程调用虚引用相关方法释放直接内存</li>
+</ul>
+<h5 id="终结器引用（FinalReference）"><a href="#终结器引用（FinalReference）" class="headerlink" title="终结器引用（FinalReference）"></a>终结器引用（<code>FinalReference</code>）</h5><ul>
+<li>无需手动编码，但其内部必须配合引用队列使用，在垃圾回收时，当对象重写了finalize()方法，终结器引用入队（被引用对象暂时没有被回收），再由 Finalizer 线程通过终结器引用找到被引用对象并调用它的 finalize 方法，第二次 GC 时才能回收被引用对象</li>
+</ul>
+<p><strong>演示软引用</strong> ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * -Xmx20m</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _4MB = <span class="number">4</span> * <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    List&lt;<span class="keyword">byte</span>[]&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(); <span class="comment">// list作为GC root，引用byte数组保证不被垃圾回收</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        list.add(<span class="keyword">new</span> <span class="keyword">byte</span>[_4MB]);</span><br><span class="line">        System.out.println(list.size());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">1</span></span><br><span class="line"><span class="comment">2</span></span><br><span class="line"><span class="comment">3</span></span><br><span class="line"><span class="comment">4</span></span><br><span class="line"><span class="comment">Exception in thread &quot;main&quot; java.lang.OutOfMemoryError: Java heap space</span></span><br><span class="line"><span class="comment">	at cn.itcast.jvm.t2.Demo2_3.main(Demo2_3.java:20)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>设置堆内存最大为20m，上述代码必定会产生堆内存溢出，下面用软引用重新执行上述逻辑，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * -Xmx20m -verbose:gc</span></span><br><span class="line"><span class="comment"> * -verbose:gc            //在控制台输出GC情况</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _4MB = <span class="number">4</span> * <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    soft();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">soft</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// list --&gt; SoftReference --&gt; byte[]</span></span><br><span class="line"></span><br><span class="line">    List&lt;SoftReference&lt;<span class="keyword">byte</span>[]&gt;&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        SoftReference&lt;<span class="keyword">byte</span>[]&gt; ref = <span class="keyword">new</span> SoftReference&lt;&gt;(<span class="keyword">new</span> <span class="keyword">byte</span>[_4MB]);</span><br><span class="line">        list.add(ref);</span><br><span class="line">        System.out.print(list.size() + <span class="string">&quot;: &quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (SoftReference&lt;<span class="keyword">byte</span>[]&gt; s : list) &#123;</span><br><span class="line">            System.out.print(s.get()+<span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">&quot;循环结束：&quot;</span> + list.size());</span><br><span class="line">    <span class="keyword">for</span> (SoftReference&lt;<span class="keyword">byte</span>[]&gt; ref : list) &#123;</span><br><span class="line">        System.out.println(ref.get());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>list –&gt; SoftReference是强引用，SoftReference –&gt; byte[]是软引用；看一下输出发现并没有产生堆内存溢出异常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">1</span></span><br><span class="line"><span class="comment">[B@4b67cf4d</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">2</span></span><br><span class="line"><span class="comment">[B@4b67cf4d [B@7ea987ac</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">3</span></span><br><span class="line"><span class="comment">[B@4b67cf4d [B@7ea987ac [B@12a3a380</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 第四次循环，触发了一次Minor GC，Minor GC后有足够的空间放第四个对象了，看空间的变化可知，前三个对象已经存在老年代了，</span></span><br><span class="line"><span class="comment">// 所以这次Minor GC并没有清理到它们;</span></span><br><span class="line"><span class="comment">// 这里直接进入老年代是由于触发了大对象直接进入老年代的机制，而老年代空间已放不下第四个对象这时尝试Minor GC放在新生代</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 2106K-&gt;488K(6144K)] 14394K-&gt;13107K(19968K), 0.0020083 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">4</span></span><br><span class="line"><span class="comment">[B@4b67cf4d [B@7ea987ac [B@12a3a380 [B@29453f44</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 第五次循环，经过一轮 Minor GC + Full GC后发现内存依然不够，会触发第二轮Minor GC + FULL GC将软引用引用的对象清理掉，即清除了前四个对象</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) --[PSYoungGen: 4696K-&gt;4696K(6144K)] 17316K-&gt;17316K(19968K), 0.0012494 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">[Full GC (Ergonomics) [PSYoungGen: 4696K-&gt;4540K(6144K)] [ParOldGen: 12619K-&gt;12479K(13824K)] 17316K-&gt;17019K(19968K), [Metaspace: 3298K-&gt;3298K(1056768K)], 0.0042068 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) --[PSYoungGen: 4540K-&gt;4540K(6144K)] 17019K-&gt;17019K(19968K), 0.0007189 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">[Full GC (Allocation Failure) [PSYoungGen: 4540K-&gt;0K(6144K)] [ParOldGen: 12479K-&gt;617K(8704K)] 17019K-&gt;617K(14848K), [Metaspace: 3298K-&gt;3298K(1056768K)], 0.0051768 secs] [Times: user=0.02 sys=0.00, real=0.01 secs]</span></span><br><span class="line"><span class="comment">5</span></span><br><span class="line"><span class="comment">null null null null [B@5cad8086</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 所以最后清理了前四个对象，只剩最后一个对象，并没有触发内存溢出</span></span><br><span class="line"><span class="comment">循环结束：5</span></span><br><span class="line"><span class="comment">null</span></span><br><span class="line"><span class="comment">null</span></span><br><span class="line"><span class="comment">null</span></span><br><span class="line"><span class="comment">null</span></span><br><span class="line"><span class="comment">[B@5cad8086</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p><strong>配合引用队列</strong>，清除无用的软引用对象（自身，不是它引用的）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _4MB = <span class="number">4</span> * <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    List&lt;SoftReference&lt;<span class="keyword">byte</span>[]&gt;&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 引用队列</span></span><br><span class="line">    ReferenceQueue&lt;<span class="keyword">byte</span>[]&gt; queue = <span class="keyword">new</span> ReferenceQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        <span class="comment">// 关联了引用队列，当软引用所关联的 byte[]被回收时，软引用自己会加入到 queue 中去</span></span><br><span class="line">        SoftReference&lt;<span class="keyword">byte</span>[]&gt; ref = <span class="keyword">new</span> SoftReference&lt;&gt;(<span class="keyword">new</span> <span class="keyword">byte</span>[_4MB], queue);</span><br><span class="line">        list.add(ref);</span><br><span class="line">        System.out.print(list.size() + <span class="string">&quot;: &quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (SoftReference&lt;<span class="keyword">byte</span>[]&gt; s : list) &#123;</span><br><span class="line">            System.out.print(s.get()+<span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从队列中获取无用的软引用对象，并移除</span></span><br><span class="line">    Reference&lt;? extends <span class="keyword">byte</span>[]&gt; poll = queue.poll();</span><br><span class="line">    <span class="keyword">while</span>( poll != <span class="keyword">null</span>) &#123;</span><br><span class="line">        list.remove(poll);</span><br><span class="line">        poll = queue.poll();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">&quot;===========================&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (SoftReference&lt;<span class="keyword">byte</span>[]&gt; reference : list) &#123;</span><br><span class="line">        System.out.println(reference.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">1: [B@4b67cf4d</span></span><br><span class="line"><span class="comment">2: [B@4b67cf4d [B@7ea987ac</span></span><br><span class="line"><span class="comment">3: [B@4b67cf4d [B@7ea987ac [B@12a3a380</span></span><br><span class="line"><span class="comment">4: [B@4b67cf4d [B@7ea987ac [B@12a3a380 [B@29453f44</span></span><br><span class="line"><span class="comment">5: null null null null [B@5cad8086</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 清除了前四个无用的引用（null值）</span></span><br><span class="line"><span class="comment">===========================</span></span><br><span class="line"><span class="comment">[B@5cad8086</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p><strong>演示弱引用</strong>：list –&gt; WeakReference是强引用，WeakReference –&gt; byte[]是弱引用；看一下输出发现并没有产生堆内存溢出异常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * -Xmx20m -verbose:gc</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> _4MB = <span class="number">4</span> * <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//  list --&gt; WeakReference --&gt; byte[]</span></span><br><span class="line">    List&lt;WeakReference&lt;<span class="keyword">byte</span>[]&gt;&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        WeakReference&lt;<span class="keyword">byte</span>[]&gt; ref = <span class="keyword">new</span> WeakReference&lt;&gt;(<span class="keyword">new</span> <span class="keyword">byte</span>[_4MB]);</span><br><span class="line">        list.add(ref);</span><br><span class="line">        System.out.print(list.size() + <span class="string">&quot;: &quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (WeakReference&lt;<span class="keyword">byte</span>[]&gt; w : list) &#123;</span><br><span class="line">            System.out.print(w.get()+<span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">&quot;循环结束：&quot;</span> + list.size());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">1: [B@4b67cf4d</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">2: [B@4b67cf4d [B@7ea987ac</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">3: [B@4b67cf4d [B@7ea987ac [B@12a3a380</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 第四次循环，触发了一次Minor GC，Minor GC后有足够的空间放第四个对象了，看空间的变化可知，前三个对象已经存在老年代了，</span></span><br><span class="line"><span class="comment">// 所以这次Minor GC并没有清理到它们;</span></span><br><span class="line"><span class="comment">// 这里直接进入老年代是由于触发了大对象直接进入老年代的机制，而老年代空间已放不下第四个对象这时尝试Minor GC放在新生代</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 2124K-&gt;488K(6144K)] 14412K-&gt;13107K(19968K), 0.0012306 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">4: [B@4b67cf4d [B@7ea987ac [B@12a3a380 [B@29453f44</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 第五次循环，可以看到这里Minor GC清理了一个弱引用指向的对象，因为这个对象在新生代里，</span></span><br><span class="line"><span class="comment">// 而其他三个后续的Minor GC也是如此，只清理了新生代里弱引用指向的对象</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 4696K-&gt;488K(6144K)] 17316K-&gt;13107K(19968K), 0.0008366 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">5: [B@4b67cf4d [B@7ea987ac [B@12a3a380 null [B@5cad8086</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 4696K-&gt;504K(6144K)] 17315K-&gt;13147K(19968K), 0.0007592 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">6: [B@4b67cf4d [B@7ea987ac [B@12a3a380 null null [B@6e0be858</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 4823K-&gt;440K(6144K)] 17467K-&gt;13083K(19968K), 0.0014858 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">7: [B@4b67cf4d [B@7ea987ac [B@12a3a380 null null null [B@61bbe9ba</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 4645K-&gt;472K(6144K)] 17289K-&gt;13123K(19968K), 0.0010290 secs] [Times: user=0.05 sys=0.00, real=0.02 secs]</span></span><br><span class="line"><span class="comment">8: [B@4b67cf4d [B@7ea987ac [B@12a3a380 null null null null [B@610455d6</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 4677K-&gt;488K(5120K)] 17329K-&gt;13139K(18944K), 0.0011730 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">9: [B@4b67cf4d [B@7ea987ac [B@12a3a380 null null null null null [B@511d50c0</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">// 可以看到这里Minor GC后内存依然不够，会触发Full GC，进行新生代和老年代的清理，所以会清理掉所有弱引用指向的对象，</span></span><br><span class="line"><span class="comment">// 总而言之，只要垃圾回收到它们，弱引用指向的对象就一定会被清理，换言之，弱引用指向的对象对垃圾回收过程中的判断不起到任何作用</span></span><br><span class="line"><span class="comment">[GC (Allocation Failure) [PSYoungGen: 4673K-&gt;96K(5632K)] 17325K-&gt;13195K(19456K), 0.0007162 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">[Full GC (Ergonomics) [PSYoungGen: 96K-&gt;0K(5632K)] [ParOldGen: 13099K-&gt;635K(8192K)] 13195K-&gt;635K(13824K), [Metaspace: 3300K-&gt;3300K(1056768K)], 0.0056719 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span></span><br><span class="line"><span class="comment">10: null null null null null null null null null [B@60e53b93</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">循环结束：10</span></span><br><span class="line"><span class="comment">Heap</span></span><br><span class="line"><span class="comment"> PSYoungGen      total 5632K, used 4370K [0x00000000ff980000, 0x0000000100000000, 0x0000000100000000)</span></span><br><span class="line"><span class="comment">  eden space 4608K, 94% used [0x00000000ff980000,0x00000000ffdc4ad8,0x00000000ffe00000)</span></span><br><span class="line"><span class="comment">  from space 1024K, 0% used [0x00000000ffe00000,0x00000000ffe00000,0x00000000fff00000)</span></span><br><span class="line"><span class="comment">  to   space 1024K, 0% used [0x00000000fff00000,0x00000000fff00000,0x0000000100000000)</span></span><br><span class="line"><span class="comment"> ParOldGen       total 8192K, used 635K [0x00000000fec00000, 0x00000000ff400000, 0x00000000ff980000)</span></span><br><span class="line"><span class="comment">  object space 8192K,  7% used [0x00000000fec00000,0x00000000fec9edd8,0x00000000ff400000)</span></span><br><span class="line"><span class="comment"> Metaspace       used 3307K, capacity 4500K, committed 4864K, reserved 1056768K</span></span><br><span class="line"><span class="comment">  class space    used 359K, capacity 388K, committed 512K, reserved 1048576K</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 可达性分析</a>
+              <a href="/tags/%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 四种引用类型</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/10/22/JVM_4_%E5%A0%86%E5%92%8CGC%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3/" rel="prev" title="堆和GC机制详解">
+                  <i class="fa fa-chevron-left"></i> 堆和GC机制详解
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/01/JVM_6_HotSpot%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E8%B1%A1/" rel="next" title="HotSpot虚拟机对象">
+                  HotSpot虚拟机对象 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

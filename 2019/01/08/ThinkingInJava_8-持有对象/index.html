@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="Collection 与 Collections java.util.Collection 是一个集合接口，是描述所有序列容器的共性的根接口。它提供了对集合对象进行基本操作的通用接口方法。Collection 接口在 Java 类库中有很多具体的实现。Collection 接口的意义是为各种具体的集合提供了最大化的统一操作方式。如下图所示，基本包含了常用的容器的关系，其中 LinkedList 与">
+<meta property="og:type" content="article">
+<meta property="og:title" content="持有对象（容器）">
+<meta property="og:url" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="Collection 与 Collections java.util.Collection 是一个集合接口，是描述所有序列容器的共性的根接口。它提供了对集合对象进行基本操作的通用接口方法。Collection 接口在 Java 类库中有很多具体的实现。Collection 接口的意义是为各种具体的集合提供了最大化的统一操作方式。如下图所示，基本包含了常用的容器的关系，其中 LinkedList 与">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_1.png">
+<meta property="og:image" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_2.png">
+<meta property="og:image" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_3.png">
+<meta property="og:image" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_4.png">
+<meta property="og:image" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_5.png">
+<meta property="article:published_time" content="2019-01-08T14:12:10.000Z">
+<meta property="article:modified_time" content="2021-01-24T09:30:16.000Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="集合">
+<meta property="article:tag" content="容器">
+<meta property="article:tag" content="比较器">
+<meta property="article:tag" content="迭代器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_1.png">
+
+
+<link rel="canonical" href="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>持有对象（容器） | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Collection-%E4%B8%8E-Collections"><span class="nav-number">1.</span> <span class="nav-text">Collection 与 Collections</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Iterable-%E5%92%8C-Iterator"><span class="nav-number">2.</span> <span class="nav-text">Iterable 和 Iterator</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E5%95%A5%E6%90%9E%E8%BF%99%E4%B9%88%E5%A4%8D%E6%9D%82%EF%BC%8C%E7%9B%B4%E6%8E%A5%E5%9C%A8%E9%9B%86%E5%90%88%E4%B8%AD%E7%BB%A7%E6%89%BF-Iterator-%E6%8E%A5%E5%8F%A3%E4%B8%8D%E8%A1%8C%E5%90%97%EF%BC%9F"><span class="nav-number">2.0.1.</span> <span class="nav-text">为啥搞这么复杂，直接在集合中继承 Iterator 接口不行吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E5%A2%9E%E5%8A%A0%E4%B8%80%E7%A7%8D%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">2.0.2.</span> <span class="nav-text">适配器模式增加一种迭代器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Comparable-%E5%92%8C-Comparator"><span class="nav-number">3.</span> <span class="nav-text">Comparable 和 Comparator</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#List"><span class="nav-number">4.</span> <span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA-List-%E6%B7%BB%E5%8A%A0%E5%85%83%E7%B4%A0%EF%BC%9Ac-addAll-%E5%92%8C-Collections-addAll"><span class="nav-number">4.1.</span> <span class="nav-text">为 List 添加元素：c.addAll() 和 Collections.addAll()</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Arrays-asList"><span class="nav-number">4.1.1.</span> <span class="nav-text">Arrays.asList()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#List-%E4%B8%AD%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">4.2.</span> <span class="nav-text">List 中的迭代器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ArrayList-%E5%92%8C-LinkedList"><span class="nav-number">4.3.</span> <span class="nav-text">ArrayList 和 LinkedList</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81"><span class="nav-number">4.3.1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%B1%9E%E6%80%A7"><span class="nav-number">4.3.2.</span> <span class="nav-text">基本属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">4.3.3.</span> <span class="nav-text">序列化和反序列化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E9%80%89%E6%8B%A9%EF%BC%9F"><span class="nav-number">4.3.4.</span> <span class="nav-text">怎么选择？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><span class="nav-number">4.3.5.</span> <span class="nav-text">线程安全问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Set"><span class="nav-number">5.</span> <span class="nav-text">Set</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HashSet"><span class="nav-number">5.1.</span> <span class="nav-text">HashSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TreeSet"><span class="nav-number">5.2.</span> <span class="nav-text">TreeSet</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Queue"><span class="nav-number">6.</span> <span class="nav-text">Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue-%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">6.1.</span> <span class="nav-text">Queue 的方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deque-%E5%8F%8C%E5%90%91%E9%98%9F%E5%88%97"><span class="nav-number">6.2.</span> <span class="nav-text">Deque (双向队列)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E5%90%91%E9%98%9F%E5%88%97%EF%BC%88%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97%EF%BC%89"><span class="nav-number">6.2.1.</span> <span class="nav-text">双向队列（单调队列）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%88%EF%BC%88%E6%A0%88%E9%A1%B6%E5%9C%A8%E9%98%9F%E5%A4%B4%EF%BC%89"><span class="nav-number">6.2.2.</span> <span class="nav-text">栈（栈顶在队头）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PriorityQueue-%E5%A0%86"><span class="nav-number">6.3.</span> <span class="nav-text">PriorityQueue (堆)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Map"><span class="nav-number">7.</span> <span class="nav-text">Map</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#hashcode-%E5%92%8C-equals-%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.1.</span> <span class="nav-text">hashcode() 和 equals() 的设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%8D%E5%8E%86Map%E7%9A%84%E5%9B%9B%E7%A7%8D%E6%96%B9%E6%B3%95%E4%BB%A5%E5%8F%8A-Map-entry-%E8%AF%A6%E8%A7%A3"><span class="nav-number">7.2.</span> <span class="nav-text">遍历Map的四种方法以及 Map.entry 详解</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/01/08/ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          持有对象（容器）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-08 22:12:10" itemprop="dateCreated datePublished" datetime="2019-01-08T22:12:10+08:00">2019-01-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-24 17:30:16" itemprop="dateModified" datetime="2021-01-24T17:30:16+08:00">2021-01-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thinking-in-java/" itemprop="url" rel="index"><span itemprop="name">Thinking in java</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>13k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>24 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Collection-与-Collections"><a href="#Collection-与-Collections" class="headerlink" title="Collection 与 Collections"></a>Collection 与 Collections</h1><ul>
+<li>java.util.Collection 是一个集合接口，是描述所有序列容器的共性的根接口。它提供了对集合对象进行基本操作的通用接口方法。Collection 接口在 Java 类库中有很多具体的实现。Collection 接口的意义是为各种具体的集合提供了最大化的统一操作方式。如下图所示，基本包含了常用的容器的关系，其中 LinkedList 与 Queue 之间少了一个Deque 接口 (∩_∩)~。</li>
+<li>java.util.Collections 是一个包装类。它包含有各种有关集合操作的静态多态方法。此类不能实例化，就像一个工具类，服务于 Java 的 Collection 框架。<span id="more"></span></li>
+</ul>
+<p><img src="ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_1.png"></p>
+<h1 id="Iterable-和-Iterator"><a href="#Iterable-和-Iterator" class="headerlink" title="Iterable 和 Iterator"></a>Iterable 和 Iterator</h1><p>持有事物是容器最基本的工作，任何容器类都必须有某种方式可以插入元素并将它们再次取回。对于特定类型的容器都具有 add() 和 get() 方法，但如果我们只是使用容器并不关心容器特定的类型，这种方法就必须为每一种容器都独自编程，这显然不高效。迭代器（也是一种设计模式）的概念可以用于达成此目的（类似于向上转型中的程序设计思想）。迭代器是一个对象，它的工作是遍历并选择序列中的对象，而客户端程序员不必知道或关心该序列底层的结构。Java 中与之相关的接口有两个，分别为 Iterable 和 Iterator。</p>
+<p>Java集合类库将集合的接口与实现分离。同样的接口，可以有不同的实现。Java 集合类的基本接口是 Collection 接口。而 Collection 接口必须继承 java.lang.Iterable 接口。以下图表示集合框架的接口，java.lang 以及 java.util 两个包里的。</p>
+<p><img src="ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_2.png"></p>
+<p>Collection源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Iterable</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Iterable源码：</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Iterable</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns an iterator over a set of elements of type T.</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> an Iterator.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">Iterator&lt;T&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Iterable 接口是 Java SE5 引入的接口，它包含一个能够产生 Iterator 的 iterator() 方法，是为了 for-each 循环而设计的接口，所以说它的功能就是为了产生 Iterator 对象。for-each 循环可以与任何实现了 Iterable 接口的对象一起工作。而 java.util.Collection 接口实现了 java.lang.Iterable，故标准类库中的任何集合都可以使用 for-each 循环。</p>
+<h3 id="为啥搞这么复杂，直接在集合中继承-Iterator-接口不行吗？"><a href="#为啥搞这么复杂，直接在集合中继承-Iterator-接口不行吗？" class="headerlink" title="为啥搞这么复杂，直接在集合中继承 Iterator 接口不行吗？"></a>为啥搞这么复杂，直接在集合中继承 Iterator 接口不行吗？</h3><p>因为 Iterator 接口的核心方法 next() 或者 hasNext() 是依赖于迭代器的当前迭代位置的。如果 Collection 直接实现 Iterator 接口，当集合在不同方法间被传递时，由于当前迭代位置不可预置，那么 next() 方法的结果会变成不可预知。除非再为 Iterator 接口添加一个 reset() 方法，用来重置当前迭代位置。但即使这样，Collection 也只能同时存在一个当前迭代位置。而 Iterable 则不然，每次调用都会返回一个从头开始计数的迭代器，多个迭代器是互不干扰的。</p>
+<h3 id="适配器模式增加一种迭代器"><a href="#适配器模式增加一种迭代器" class="headerlink" title="适配器模式增加一种迭代器"></a>适配器模式增加一种迭代器</h3><p>如果现有一个 Iterable 类，你想要添加一种或多种在 for-each 语句中使用这个类的方法，应该怎么做呢? 例如，假设你希望可以选择以向前的方向或是向后的方向迭代一个单词列表。如果直接继承这个类，并覆盖 iterator() 方法，你只能替换现有的方法，而不能实现选择。一种解决方案是所谓适配器方法的惯用法，“适配器”部分来自于设计模式，因为你必须提供特定接口以满足 for-each 语句。当你有一个接口并需要另一个接口时，编写适配器就可以解决问题。这里，我希望在默认的前向选代器的基础上，添加产生反向迭代器的能力，因此不能使用覆盖，而是添加了一个能够产生 Iterable 对象的方法，该对象可以用于 for-each 语句，这样我们就可以提供多种使用 for-each 的方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReversibleArrayList</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">ArrayList</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReversibleArrayList</span><span class="params">(Collection&lt;T&gt; c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(c);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//实现反向迭代器方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Iterable&lt;T&gt; <span class="title">reversed</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Iterable&lt;T&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> Iterator&lt;T&gt; <span class="title">iterator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Iterator&lt;T&gt;() &#123;</span><br><span class="line">                    <span class="keyword">int</span> current = size() - <span class="number">1</span>;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> current &gt; -<span class="number">1</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> T <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> get(current--);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AdapterMethodIdiom</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ReversibleArrayList&lt;String&gt; ral =</span><br><span class="line">                <span class="keyword">new</span> ReversibleArrayList&lt;String&gt;(Arrays.asList(<span class="string">&quot;To be or not to be&quot;</span>.split(<span class="string">&quot; &quot;</span>)));</span><br><span class="line">        <span class="comment">//通过iterator()获取普通的迭代器</span></span><br><span class="line">        <span class="keyword">for</span> (String s : ral) &#123;</span><br><span class="line">            System.out.print(s + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">        <span class="comment">//获取自定义的迭代器</span></span><br><span class="line">        <span class="keyword">for</span> (String s : ral.reversed() ) &#123;</span><br><span class="line">            System.out.print(s + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="comment">/*Output:</span></span><br><span class="line"><span class="comment">To be or not to be</span></span><br><span class="line"><span class="comment">be to not or be To</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+<h1 id="Comparable-和-Comparator"><a href="#Comparable-和-Comparator" class="headerlink" title="Comparable 和 Comparator"></a>Comparable 和 Comparator</h1><p>Comparable、 Comparator 都是用来实现元素的比较、排序的，只是 Comparable 是在集合内部定义的方法实现的排序，Comparator是在集合外部实现的排序。<br>怎么理解哪？在这教大家一个速记法，如果英语好的人很容易区分这两者，因为它们的名字已经告诉了我们他们两个最大的区别。</p>
+<ul>
+<li>后缀 <code>able</code> 代表某事物具有什么能力，很显然实现了 Comparable 接口的类自身具有比较大小的能力，假如 A 类实现了 Comparable 接口，那么它必须实现 compareTo 方法，并自身对象 a1 可以直接调用 a1.compareTo(a2) 与另一个对象比较大小。它们的方法的名字也很讲究，这里是 To，也就是跟谁比较，换言之是自己跟别人比较。</li>
+<li>后缀 <code>tor</code> 代表这个事物的属性是一个工具，如果一个类 T 实现了 Comparator 接口，那么它必须实现 compare 方法，那么 T 就是一个比较的工具，只用两个要比较的东西传进来，即 t.compare(a1,a2)，所以这个方法后面没有 To。</li>
+</ul>
+<hr>
+<p>终于进入正题了…</p>
+<h1 id="List"><a href="#List" class="headerlink" title="List"></a>List</h1><h2 id="为-List-添加元素：c-addAll-和-Collections-addAll"><a href="#为-List-添加元素：c-addAll-和-Collections-addAll" class="headerlink" title="为 List 添加元素：c.addAll() 和 Collections.addAll()"></a>为 List 添加元素：c.addAll() 和 Collections.addAll()</h2><ul>
+<li>使用 c.addAll()的步骤为：<ul>
+<li>先建一个 Collection 对象 c；</li>
+<li>Arrays.asList() 方法接受一个数组或是一个用逗号分隔的元素列表（使用可变参数），并将其转换为一个 List 对象；</li>
+<li>最后 c.addAll(Array.asList())。</li>
+</ul>
+</li>
+<li>使用 Collections.addAll() 步骤：接收一个 Collection 对象，以及一个数组或是一个用逗号分割的列表，将元素添加到 Collection 中，<code>Collections.addAll(Collection&lt;? super T&gt; c, T... elements)</code>。</li>
+</ul>
+<h3 id="Arrays-asList"><a href="#Arrays-asList" class="headerlink" title="Arrays.asList()"></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/xlgen157387/article/details/91376347">Arrays.asList()</a></h3><p>ArrayList() 方法返回的是Arrays的一个内部类 Arrays.ArrayList，它底层是数组而且很多 List 的方法并没有实现，因此不能调整尺寸，即不能用 add() 或 delete() 方法。</p>
+<h2 id="List-中的迭代器"><a href="#List-中的迭代器" class="headerlink" title="List 中的迭代器"></a>List 中的迭代器</h2><ul>
+<li>Iterator 只能单向移动<ul>
+<li>forEachRemaining(Consumer&lt;? super E&gt; action)：为每个剩余元素执行给定的操作，直到所有的元素都已经被处理或行动将抛出一个异常；</li>
+<li>hasNext()：如果序列中还有元素，则返回true；</li>
+<li>next()：返回序列中的下一个元素；</li>
+<li>remove()：删除迭代器新近返回的元素。</li>
+</ul>
+</li>
+</ul>
+<p>ListIterator 是一个功能更加强大的 Iterator 的子类型，它继承于 Iterator 接口，只能用于各种 List 类型的访问。可以通过调用 listIterator() 方法产生一个指向 List 开始处的 ListIterator, 还可以调用 listIterator(n) 方法创建一个一开始就指向列表索引为 n 的元素处的 ListIterator。</p>
+<ul>
+<li>ListIterator 可以双向移动<ul>
+<li>add()：在next()方法返回的元素之前或previous()方法返回的元素之后插入一个元素，插入后光标后移。</li>
+<li>hasNext()：如果序列中正序遍历的方向上还有元素，则返回true；</li>
+<li>hasPrevious()：如果序列中逆序遍历的方向上还有元素，则返回true；</li>
+<li>next()：返回序列中的下一个元素，并将游标后移；</li>
+<li>previous()：返回序列中的上一个元素，并将游标前移；</li>
+<li>nextIndex()：返回序列中的上一个元素的坐标，跟随在next()后；</li>
+<li>previousIndex()：返回序列中的下一个元素的坐标，跟随在previous()后 ；</li>
+<li>remove()：删除由next()或previous()新近返回的元素；</li>
+<li>set()：替换由next()或previous()新近返回的元素。</li>
+</ul>
+</li>
+</ul>
+<p><img src="ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_3.png"></p>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CrossContainerIteration</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">(Iterator&lt;Pet&gt; it)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext()) &#123;</span><br><span class="line">      Pet p = it.next();</span><br><span class="line">      System.out.print(p.id() + <span class="string">&quot;:&quot;</span> + p + <span class="string">&quot; &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println();</span><br><span class="line">  &#125;    </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    ArrayList&lt;Pet&gt; pets = Pets.arrayList(<span class="number">8</span>);</span><br><span class="line">    LinkedList&lt;Pet&gt; petsLL = <span class="keyword">new</span> LinkedList&lt;Pet&gt;(pets);</span><br><span class="line">    HashSet&lt;Pet&gt; petsHS = <span class="keyword">new</span> HashSet&lt;Pet&gt;(pets);</span><br><span class="line">    TreeSet&lt;Pet&gt; petsTS = <span class="keyword">new</span> TreeSet&lt;Pet&gt;(pets);</span><br><span class="line">    display(pets.iterator());</span><br><span class="line">    display(petsLL.iterator());</span><br><span class="line">    display(petsHS.iterator());</span><br><span class="line">    display(petsTS.iterator());</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">0:Rat 1:Manx 2:Cymric 3:Mutt 4:Pug 5:Cymric 6:Pug 7:Manx</span></span><br><span class="line"><span class="comment">0:Rat 1:Manx 2:Cymric 3:Mutt 4:Pug 5:Cymric 6:Pug 7:Manx</span></span><br><span class="line"><span class="comment">4:Pug 6:Pug 3:Mutt 1:Manx 5:Cymric 7:Manx 2:Cymric 0:Rat</span></span><br><span class="line"><span class="comment">5:Cymric 2:Cymric 7:Manx 1:Manx 3:Mutt 6:Pug 4:Pug 0:Rat</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+<h2 id="ArrayList-和-LinkedList"><a href="#ArrayList-和-LinkedList" class="headerlink" title="ArrayList 和 LinkedList"></a>ArrayList 和 LinkedList</h2><h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayList</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">AbstractList</span>&lt;<span class="title">E</span>&gt;</span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">RandomAccess</span>, <span class="title">Cloneable</span>, <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">8683452581122892189L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Default initial capacity.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_CAPACITY = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Shared empty array instance used for empty instances.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object[] EMPTY_ELEMENTDATA = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Shared empty array instance used for default sized empty instances. We</span></span><br><span class="line"><span class="comment">     * distinguish this from EMPTY_ELEMENTDATA to know how much to inflate when</span></span><br><span class="line"><span class="comment">     * first element is added.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * The array buffer into which the elements of the ArrayList are stored.</span></span><br><span class="line"><span class="comment">     * The capacity of the ArrayList is the length of this array buffer. Any</span></span><br><span class="line"><span class="comment">     * empty ArrayList with elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA</span></span><br><span class="line"><span class="comment">     * will be expanded to DEFAULT_CAPACITY when the first element is added.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">transient</span> Object[] elementData; <span class="comment">// non-private to simplify nested class access</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * The size of the ArrayList (the number of elements it contains).</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@serial</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> size;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LinkedList</span>&lt;<span class="title">E</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">extends</span> <span class="title">AbstractSequentialList</span>&lt;<span class="title">E</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">Deque</span>&lt;<span class="title">E</span>&gt;, <span class="title">Cloneable</span>, <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Pointer to first node.</span></span><br><span class="line"><span class="comment">     * Invariant: (first == null &amp;&amp; last == null) ||</span></span><br><span class="line"><span class="comment">     *            (first.prev == null &amp;&amp; first.item != null)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">transient</span> Node&lt;E&gt; first;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Pointer to last node.</span></span><br><span class="line"><span class="comment">     * Invariant: (first == null &amp;&amp; last == null) ||</span></span><br><span class="line"><span class="comment">     *            (last.next == null &amp;&amp; last.item != null)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">transient</span> Node&lt;E&gt; last;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="基本属性"><a href="#基本属性" class="headerlink" title="基本属性"></a>基本属性</h3><ul>
+<li>ArrayList 本质是一个支持扩容的数组，所以它是有序的（物理有序），而 LinkedList 本质是一个双向链表，所以无序；</li>
+<li>LinkedList 实现了实现了 Deque(Double ended queue) 接口，而 Deque 又继承自 Queue，所以可以当做当作普通队列、双向队列（单调队列）、栈使用；</li>
+<li>ArrayList 和 LinkedList 都实现了 Cloneable 接口，即覆盖了函数 clone()，能克隆；</li>
+<li>ArrayList 和 LinkedList 都不是线程安全的。</li>
+</ul>
+<h3 id="序列化和反序列化"><a href="#序列化和反序列化" class="headerlink" title="序列化和反序列化"></a>序列化和反序列化</h3><p>ArrayList 和 LinkedList 都实现 java.io.Serializable 接口，所以都支持序列化，能通过序列化去传输，但注意它们的主要属性都被 <code>transient</code> 修饰了，那还怎么序列化？原来为了提升序列化的效率它们内部是通过实现 readObject() 和 writeObject() 方法（反射调用）来实现自定义序列化的，具体而言：</p>
+<ul>
+<li>ArrayList 在序列化的时候会调用 writeObject，直接将 size 和 element 写入 ObjectOutputStream；反序列化时调用 readObject，从 ObjectInputStream 获取 size 和 element，再恢复到 elementData。为什么不直接用 elementData 来序列化，而采用上诉的方式来实现序列化呢？原因在于 elementData 是一个缓存数组，它通常会预留一些容量，等容量不足时再扩充容量，那么有些空间可能就没有实际存储元素，采用上诉的方式来实现序列化时，就可以保证只序列化实际存储的那些元素，而不是整个数组，从而节省空间和时间。</li>
+<li>同理 LinkedList 中也重写了 writeObject 方法，ObjectOutputStream 中将调用 ObjectStreamClass 里的方法通过反射根据方法名称来调用 writeObject 方法，以 LinkedList 中定义的方式来序列化链表中的元素和 size 字段，反序列化时调用 readObject，从 ObjectInputStream 获取 size 和 链表中的元素；</li>
+</ul>
+<h3 id="怎么选择？"><a href="#怎么选择？" class="headerlink" title="怎么选择？"></a>怎么选择？</h3><ul>
+<li>涉及到“栈”、“队列”、“链表”等操作，应该考虑用List，具体的选择哪个List，根据下面的标准来取舍：<ul>
+<li>对于需要快速插入、删除元素，中间插入、删除元素，应该使用 LinkedList；</li>
+<li>对于需要快速随机访问元素，应该使用 ArrayList；</li>
+<li>对于“单线程环境” 或者 “多线程环境，但 List 仅仅只会被单个线程操作”，此时应该使用非同步的类(如 ArrayList )；</li>
+<li>对于“多线程环境，且 List 可能同时被多个线程操作”，此时，应该使用同步的类(Vector类 / Colletions封装 / JUC类)。</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程安全问题"><a href="#线程安全问题" class="headerlink" title="线程安全问题"></a>线程安全问题</h3><p><img src="ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_4.png"></p>
+<p>唯有的几个线程安全的集合已经被弃用了，Vector/Stack 和 Hashtable 我觉得是因为大量使用 synchronized 加重量级锁导致的性能很差。</p>
+<h1 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h1><p><img src="ThinkingInJava_8-%E6%8C%81%E6%9C%89%E5%AF%B9%E8%B1%A1/8_5.png"></p>
+<p>Set集合的特点：不能存储相同的元素。典型的实现包括：</p>
+<ul>
+<li>HashSet：为快速查找而设计的Set，存入HashSet的元素必须定义 hashCode()。哈希表是通过使用称为散列法的机制来存储信息的，元素并没有以某种特定顺序来存放；</li>
+<li>LinkedHashSet：具有HashSet的查询速度，且内部使用链表维护元素的数据（插入的次序）。于是在使用迭代器遍历Set时，结果会按元素插入的次序显示。元素也必须定义hashCode()方法；</li>
+<li>TreeSet：保持次序的Set，底层为树结构。使用它可以从set中提取有序的序列。元素必须实现Comparable接口。</li>
+</ul>
+<p>该接口主要继承于Collection接口，所以具有Collection的一些常见的方法，但与List不同的是，Set还提供了equals(Object o)和hashCode()，供其子类重写，以实现对集合中插入重复元素的处理。</p>
+<table>
+<thead>
+<tr>
+<th align="center">No.</th>
+<th align="center">Method &amp; Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">add( )           向集合中添加元素</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">clear( )         去掉集合中所有的元素</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">contains( )    判断集合中是否包含某一个元素</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">isEmpty( )     判断集合是否为空</td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="center">iterator( )       主要用于递归集合，返回一个Iterator()对象</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="center">remove( )      从集合中去掉特定的对象</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="center">size( )            返回集合的大小</td>
+</tr>
+</tbody></table>
+<h2 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h2><p>HashSet实现Set接口，底层由HashMap来实现，为哈希表结构，新增元素相当于HashMap的key，value默认为一个固定的Object。在我看来，HashSet相当于一个阉割版的HashMap;当有元素插入的时候，会计算元素的hashCode值，将元素插入到哈希表对应的位置中来；它继承于AbstractSet，实现了Set, Cloneable, Serializable接口。</p>
+<ul>
+<li>HashSet继承AbstractSet类，获得了Set接口大部分的实现，减少了实现此接口所需的工作，实际上是又继承了AbstractCollection类；</li>
+<li>HashSet实现了Set接口，获取Set接口的方法，可以自定义具体实现，也可以继承AbstractSet类中的实现；</li>
+<li>HashSet实现Cloneable，得到了clone()方法，可以实现克隆功能；</li>
+<li>HashSet实现Serializable，表示可以被序列化，通过序列化去传输，典型的应用就是hessian协议。</li>
+</ul>
+<p>具有如下特点：</p>
+<ul>
+<li>不允许出现重复因素；</li>
+<li>允许插入Null值；</li>
+<li>元素无序（添加顺序和遍历顺序不一致）；</li>
+<li>线程不安全。</li>
+</ul>
+<h2 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h2><p>从名字上可以看出，此集合的实现和树结构有关。与HashSet集合类似，TreeSet也是基于Map来实现，具体实现TreeMap，其底层结构为<strong>红黑树</strong>；与HashSet不同的是，TreeSet具有排序功能，分为自然排序(123456)和自定义排序两类，默认是自然排序；在程序中，我们可以按照任意顺序将元素插入到集合中，等到遍历时TreeSet会按照一定顺序输出——倒序或者升序；它继承AbstractSet，实现NavigableSet, Cloneable, Serializable接口。</p>
+<ul>
+<li>与HashSet同理，TreeSet继承AbstractSet类，获得了Set集合基础实现操作；</li>
+<li>TreeSet实现NavigableSet接口，而NavigableSet又扩展了SortedSet接口。这两个接口主要定义了搜索元素的能力，例如给定某个元素，查找该集合中比给定元素大于、小于、等于的元素集合，或者比给定元素大于、小于、等于的元素个数；简单地说，实现NavigableSet接口使得TreeSet具备了元素搜索功能；</li>
+<li>TreeSet实现Cloneable接口，意味着它也可以被克隆；</li>
+<li>TreeSet实现了Serializable接口，可以被序列化，可以使用hessian协议来传输；</li>
+</ul>
+<p>具有如下特点：</p>
+<ul>
+<li>对插入的元素进行排序，是一个有序的集合（主要与HashSet的区别）;</li>
+<li>底层使用红黑树结构，而不是哈希表结构；</li>
+<li>允许插入Null值；</li>
+<li>不允许插入重复元素；</li>
+<li>线程不安全。</li>
+</ul>
+<h1 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h1><p>队列是一个典型的先进先出（FIFO）的容器，一般在队尾插入，在队头删除。队列在并发编程中非常重要，可以安全地将对象从一个任务传输到另一个任务。</p>
+<ul>
+<li>有界队列：即队列中的元素个数有限制；</li>
+<li>无界队列：即队列中的元素个数无限制。</li>
+</ul>
+<h2 id="Queue-的方法"><a href="#Queue-的方法" class="headerlink" title="Queue 的方法"></a>Queue 的方法</h2><ul>
+<li>向队列中添加元素    <ul>
+<li>add()：向有界队列中添加元素的时候，如果元素的数量超过临界值，会抛出异常java.lang.IllegalStateException: Queue full；</li>
+<li>offer()：向有界队列中添加元素的时候，如果元素的数量超过临界值，会添加失败，失败时返回一个特殊值(取决于操作，为null或false)，但不会抛出异常。</li>
+</ul>
+</li>
+<li>获取队列中的头部元素并删除<ul>
+<li>remove():当队列中没有可获取的元素时，会抛出异常 java.util.NoSuchElementException；</li>
+<li>poll():当队列中没有可获取的元素时，返回一个特殊值(取决于操作，为null或false)。</li>
+</ul>
+</li>
+<li>获取队列中的头部元素但不删除<ul>
+<li>element():当队列中没有可获取的元素时，会抛出异常java.util.NoSuchElementException；</li>
+<li>peek():当队列中没有可获取的元素时，返回一个特殊值(取决于操作，为null或false)。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Deque-双向队列"><a href="#Deque-双向队列" class="headerlink" title="Deque (双向队列)"></a>Deque (双向队列)</h2><p>Deque （Double ended queue）接口继承自 Queue 接口，但它新增了很多方法以实现<strong>双向队列（单调队列）和栈</strong>。Queue 只能在队尾插入，在队头删除（或 peek() 获取），而双端队列队头队尾都能插入删除，主要增加了以下方法，first 代表队头，last 代表队尾：</p>
+<h3 id="双向队列（单调队列）"><a href="#双向队列（单调队列）" class="headerlink" title="双向队列（单调队列）"></a>双向队列（单调队列）</h3><ul>
+<li>添加和删除：<ul>
+<li>addFirst（会抛异常）</li>
+<li>addLast（会抛异常）</li>
+<li>offerFirst</li>
+<li>offerLast</li>
+<li>removeFirst（会抛异常）</li>
+<li>removeLast（会抛异常）</li>
+<li>pollFirst</li>
+<li>pollLast</li>
+</ul>
+</li>
+<li>获取：<ul>
+<li>peekFirst</li>
+<li>peekLast</li>
+<li>getFirst（会抛异常）</li>
+<li>getLast（会抛异常）</li>
+</ul>
+</li>
+</ul>
+<h3 id="栈（栈顶在队头）"><a href="#栈（栈顶在队头）" class="headerlink" title="栈（栈顶在队头）"></a>栈（栈顶在队头）</h3><ul>
+<li>push</li>
+<li>pop</li>
+<li>peek （返回栈顶元素，也就是队头）</li>
+</ul>
+<h2 id="PriorityQueue-堆"><a href="#PriorityQueue-堆" class="headerlink" title="PriorityQueue (堆)"></a>PriorityQueue (堆)</h2><p>先进先出声明的是下一个元素应该是等待时间最长的元素。优先级队列声明下一个弹出元素是最需要的元素(具有最高的优先级)。当在PriorityQueue上调用offer()方法来插入一个对象，要求这个对象一定是可排序的（继承自Comparable方法），这个对象会在队列中被排序。默认的排序将使用对象在队列中的自然顺序，但是你可以通过提供自己的Comparator来修改这个顺序。PriorityQueue可以确保当你调用peek()、poll()和 remove()等方法时，获取的元素将是队列中优先级最高的元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Origin</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">E29</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        PriorityQueue&lt;Origin&gt; priorityQueue = <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line">        System.out.println(<span class="string">&quot;Adding 1st instance...&quot;</span>);</span><br><span class="line">        priorityQueue.offer(<span class="keyword">new</span> Origin());</span><br><span class="line">        System.out.println(<span class="string">&quot;Adding 2st instance...&quot;</span>);</span><br><span class="line">        priorityQueue.offer(<span class="keyword">new</span> Origin());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上例中会抛出异常，因为JDK文档声明:“依赖于自然排序的优先级队列也不允许插入不可比较的对象(这样做可能会导致ClassCastException)。”所以第二次插入将触发异常，所以改成下面这样就好了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Origin</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Origin</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Origin o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h1><p>通过查看Map接口描述，发现Map接口下的集合与Collection接口下的集合，它们存储数据的形式不同。Collection中的集合，元素是<strong>孤立</strong>存在的（理解为单身），向集合中存储元素采用一个个元素的方式存储。Map中的集合，元素是<strong>成对</strong>存在的(理解为夫妻)。每个元素由键与值两部分组成，通过键可以找对所对应的值。Collection中的集合称为单列集合，Map中的集合称为双列集合。</p>
+<p>需要注意的是，Map中的集合不能包含重复的键，值可以重复；每个键只能对应一个值。</p>
+<p>Map中常用的集合为HashMap集合、LinkedHashMap集合。</p>
+<table>
+<thead>
+<tr>
+<th align="center">序号</th>
+<th align="center">方法描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">void clear( )  从此映射中移除所有映射关系（可选操作）。</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">boolean containsKey(Object k) 如果此映射包含指定键的映射关系，则返回 true。</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">boolean containsValue(Object v) 如果此映射将一个或多个键映射到指定值，则返回 true。</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">Set entrySet( ) 返回此映射中包含的映射关系的 Set 视图。</td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="center">boolean equals(Object obj) 比较指定的对象与此映射是否相等。</td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="center">Object get(Object k) 返回指定键所映射的值；如果此映射不包含该键的映射关系，则返回 null。</td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="center">int hashCode( ) 返回此映射的哈希码值。</td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="center">boolean isEmpty( ) 如果此映射未包含键-值映射关系，则返回 true。</td>
+</tr>
+<tr>
+<td align="center">9</td>
+<td align="center">Set keySet( ) 返回此映射中包含的键的 Set 视图。</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="center">Object put(Object k, Object v) 将指定的值与此映射中的指定键关联（可选操作）。</td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td align="center">void putAll(Map m) 从指定映射中将所有映射关系复制到此映射中（可选操作）。</td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td align="center">Object remove(Object k) 如果存在一个键的映射关系，则将其从此映射中移除（可选操作）。</td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td align="center">int size( ) 返回此映射中的键-值映射关系数。</td>
+</tr>
+<tr>
+<td align="center">14</td>
+<td align="center">Collection values( ) 返回此映射中包含的值的 Collection 视图。</td>
+</tr>
+</tbody></table>
+<h2 id="hashcode-和-equals-的设计"><a href="#hashcode-和-equals-的设计" class="headerlink" title="hashcode() 和 equals() 的设计"></a>hashcode() 和 equals() 的设计</h2><ul>
+<li>原则<ul>
+<li>对象相同（场景定义下），hashcode 一定相同（等价表述：hashcode 不相同，对象一定不相同）；</li>
+<li>hashcode 相同，对象不一定相同。</li>
+</ul>
+</li>
+<li>原因<ul>
+<li>因为默认的hashcode方法是根据对象的地址生成的，所以任何一个对象的hash值都是不同的，但在实际的场景中可能出现含有相同意义的多个对象地址不同（hash值），这就导致了我们“想要的一个key”对应多个value的问题，所以一定要重写hashcode方法；</li>
+<li>同样因为重写了hashcode方法，所以同一个hashcode位置上可能对应多个对象（甚至包括场景定义下不同含义的对象——即hash冲突），这时就需要调用equals方法判断新来的对象（的key）与已经有的对象(的key)是否相等，因为默认的equals方法也是判断地址是否相同，所以仍然存在前面的问题，即含有相同意义的多个对象地址不同，而导致相同的key有多个value，所以也要重写equals方法，这里是双重检查。可以简单理解为我们要根据业务需求定义自己的相等机制。</li>
+</ul>
+</li>
+<li>方案<ul>
+<li>所以在 HashMap 中作为 key 的对象一定要重写 equals 和 hashcode 方法；</li>
+<li>这样设计不仅可以解决上述问题，而且可以提高效率，在匹配桶位时，先计算hashcode 通过 hashcode 进行散列，相同对象的 hashcode 肯定散列到同一桶位；</li>
+<li>而且可以防止 hash 冲突，因为可能存在不同对象产生相同 hashcode 的情况，然后再进入链表 or 红黑树通过 equals 方法判断是否存在相同对象，存在则更新，不存在则插入。</li>
+</ul>
+</li>
+<li>流程<ul>
+<li>计算对象的hashcode，看在表中是否存在;</li>
+<li>如果存在则检查对应hashcode位置中的对象和当前对象是否“相等”，“相等”则说明为同一个key，覆盖；不“相等”则添加(key,value)对;</li>
+<li>如果不存在直接添加(key,value)对。</li>
+</ul>
+</li>
+</ul>
+<h2 id="遍历Map的四种方法以及-Map-entry-详解"><a href="#遍历Map的四种方法以及-Map-entry-详解" class="headerlink" title="遍历Map的四种方法以及 Map.entry 详解"></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/kyi_zhu123/article/details/52769469">遍历Map的四种方法以及 Map.entry 详解</a></h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9B%86%E5%90%88/" rel="tag"><i class="fa fa-tag"></i> 集合</a>
+              <a href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 容器</a>
+              <a href="/tags/%E6%AF%94%E8%BE%83%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 比较器</a>
+              <a href="/tags/%E8%BF%AD%E4%BB%A3%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 迭代器</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/12/07/ThinkingInJava_7-%E5%86%85%E9%83%A8%E7%B1%BB/" rel="prev" title="内部类">
+                  <i class="fa fa-chevron-left"></i> 内部类
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/02/03/ThinkingInJava_9_%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" rel="next" title="异常处理">
+                  异常处理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">398k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:03</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
