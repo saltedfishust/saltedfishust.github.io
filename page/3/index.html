@@ -84,9 +84,9 @@
   <ul class="main-menu menu">
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">113</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">116</span></a></li>
         <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">55</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">59</span></a></li>
   </ul>
 </nav>
 
@@ -132,7 +132,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -145,7 +145,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-count">116</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -174,6 +174,443 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/" class="post-title-link" itemprop="url">ReentrantLock 详解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-14 01:05:45" itemprop="dateCreated datePublished" datetime="2020-06-14T01:05:45+08:00">2020-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 21:19:32" itemprop="dateModified" datetime="2021-01-27T21:19:32+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>9.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>18 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="ReentrantLock-简介"><a href="#ReentrantLock-简介" class="headerlink" title="ReentrantLock 简介"></a>ReentrantLock 简介</h2><p>ReentrantLock 又被称为显式锁，它是基于 AQS 原理继承 Lock 接口实现的，简而言之，就是用 Java 实现的锁，而 synchronized 是用 c++ 实现的，所以被称为隐式锁。它们都支持可重入，相对于 synchronized 它还具备如下特点 </p>
+<ul>
+<li>可中断（指的是当线程竞争锁失败时，被动避免死等）</li>
+<li>可以设置超时时间（主动避免死等，可以避免死锁）</li>
+<li>可以设置为公平锁 </li>
+<li>支持多个条件变量（可理解成多个条件多个WaitSet，可以提高唤醒的准确性）
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/06/14/C12_ReentrantLock%E8%AF%A6%E8%A7%A3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/" class="post-title-link" itemprop="url">锁的活跃性</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-05 22:01:45" itemprop="dateCreated datePublished" datetime="2020-06-05T22:01:45+08:00">2020-06-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-26 00:13:18" itemprop="dateModified" datetime="2021-01-26T00:13:18+08:00">2021-01-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><h3 id="死锁现象"><a href="#死锁现象" class="headerlink" title="死锁现象"></a>死锁现象</h3><p>有这样的情况：一个线程需要同时获取多把锁，这时就容易发生死锁 。</p>
+<ul>
+<li>t1 线程 获得 A 对象锁，接下来想获取 B 对象锁</li>
+<li>t2 线程 获得 B 对象锁，接下来想获取 A 对象锁
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/06/05/C11_%E9%94%81%E7%9A%84%E6%B4%BB%E8%B7%83%E6%80%A7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">park & unpark 原理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-02 23:01:45" itemprop="dateCreated datePublished" datetime="2020-06-02T23:01:45+08:00">2020-06-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 21:20:58" itemprop="dateModified" datetime="2021-01-27T21:20:58+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>park 和 unpark 是 LockSupport 类中的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 暂停当前线程 </span></span><br><span class="line">LockSupport.park();</span><br><span class="line"><span class="comment">// 恢复某个线程的运行</span></span><br><span class="line">LockSupport.unpark(暂停线程对象);</span><br></pre></td></tr></table></figure>
+
+<h2 id="park-amp-unpark-与-wait-amp-notify-异同"><a href="#park-amp-unpark-与-wait-amp-notify-异同" class="headerlink" title="park &amp; unpark 与 wait &amp; notify 异同"></a>park &amp; unpark 与 wait &amp; notify 异同</h2><ol>
+<li>park 和 wait 都会让线程进入<code>WAITING</code>或<code>TIMED_WAITING</code>状态，都可以被 interrupt 方法打断（<strong>ReentrateLock 可打断基于 park</strong> ）；</li>
+<li>wait、notify 和 notifyAll 必须配合一个锁对象及其关联的 Monitor 一起使用；而 park、unpark 不必，park没有锁的概念。<ul>
+<li>我们知道 wait 必须写在 synchronized 里，这是因为 wait 必须是由加锁的对象调用的，其原理是通过加锁的对象关联的同步监视器（Monitor）来管理线程，当调用 wait 方法时，把当前持锁线程放入 Monitor 的 WaitSet，所以无论是 wait 还是 notify 都必须由被锁对象调用。</li>
+<li>而 park 则不同，park 是类方法，调用方式类似于 sleep，而 unpark 必须指定线程对象，所以它是“精确唤醒”。</li>
+</ul>
+</li>
+<li>park &amp; unpark 是以线程为单位来【阻塞】和【唤醒】线程，wait 和 notify 都是以被锁对象（准确讲是其关联的 Monitor）为单位的，所以 notify 只能随机唤醒一个关联的 Monitor 里 WaitSet 等待的线程，notifyAll  是唤醒关联的 Monitor 里 WaitSet 所有的等待的线程，就不那么【精确】 。</li>
+<li><strong>park &amp; unpark 可以先 unpark，而 wait &amp; notify 不能先 notify</strong>。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/06/02/C10_park&unpark%E5%8E%9F%E7%90%86/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">join 源码解析和保护性暂停模式</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-24 18:09:41" itemprop="dateCreated datePublished" datetime="2020-05-24T18:09:41+08:00">2020-05-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 21:05:26" itemprop="dateModified" datetime="2021-01-27T21:05:26+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="保护性暂停模式（同步模式）"><a href="#保护性暂停模式（同步模式）" class="headerlink" title="保护性暂停模式（同步模式）"></a>保护性暂停模式（同步模式）</h2><p>即 Guarded Suspension，用在一个线程等待另一个线程的执行结果 。</p>
+<p>要点：</p>
+<ul>
+<li>有一个结果需要从一个线程传递到另一个线程，让他们关联同一个 GuardedObject</li>
+<li>如果有结果不断从一个线程到另一个线程那么可以使用消息队列（见生产者/消费者） </li>
+<li>JDK 中，join 的实现、Future 的实现，采用的就是此模式</li>
+<li>因为要等待另一方的结果，因此归类到同步模式
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/24/C9_join%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -830,570 +1267,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/" class="post-title-link" itemprop="url">Thread类方法之一——start、run、sleep、yield、join</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-03-20 10:25:35" itemprop="dateCreated datePublished" datetime="2020-03-20T10:25:35+08:00">2020-03-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-27 17:43:52" itemprop="dateModified" datetime="2021-01-27T17:43:52+08:00">2021-01-27</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>13 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>suspend()、resume()、stop()方法已经过时，不建议使用，容易破坏同步代码块，造成线程死锁。</p>
-</blockquote>
-<p>这些方法有些是静态方法，有些是对象方法。对于类方法不难理解，例如 sleep 和 yield，是在哪个线程执行体中调用就对哪个线程起作用。</p>
-<p>而 join 和 wait 这种是由线程对象调用的就得注意下，其实他们都是调用了wait方法，wait方法必须在 synchronized 块里使用，sychronized 块一定锁住了一个对象（一般是当前对象），那么调用 wait 方法的就是当前对象（被锁住的对象，join 里是线程对象），这个时候不要犯糊涂，始终记住无论是哪个对象调用的，只要这个方法在某个线程执行体里被调用，那么它就是这个线程执行体里的一个普通成员变量调用的某个普通方法（被锁住的对象调用 wait 方法），那么 wait 所在的线程就会被阻塞。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/20/C2_Thread%E7%B1%BB%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/" class="post-title-link" itemprop="url">Thread类里的线程状态 和 操作系统的线程状态</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-03-10 11:25:35" itemprop="dateCreated datePublished" datetime="2020-03-10T11:25:35+08:00">2020-03-10</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-26 00:12:10" itemprop="dateModified" datetime="2021-01-26T00:12:10+08:00">2021-01-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="五种状态"><a href="#五种状态" class="headerlink" title="五种状态"></a>五种状态</h2><p>这是从操作系统层面来描述的。</p>
-<p><img src="https://note.youdao.com/yws/api/personal/file/1BA69F17AFAB416A9438E298535B16DF?method=download&shareKey=c99a0bf966172b28ffb3e4777cdfa62d" alt="image"></p>
-<center>操作系统层面--线程的生命周期（五种状态）-中文</center>
-
-<p><img src="https://note.youdao.com/yws/api/personal/file/F670D1CB16A648B3B3608675D70E2836?method=download&shareKey=a8f05e81e9886b909d0bc17b3a58d9e7" alt="image"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/01/C0_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/03/01/C0_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/" class="post-title-link" itemprop="url">创建线程和查看线程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-03-01 12:29:39" itemprop="dateCreated datePublished" datetime="2020-03-01T12:29:39+08:00">2020-03-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-02 14:55:38" itemprop="dateModified" datetime="2021-03-02T14:55:38+08:00">2021-03-02</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="线程与进程"><a href="#线程与进程" class="headerlink" title="线程与进程"></a>线程与进程</h3><h4 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h4><ul>
-<li>程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。 </li>
-<li>当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一个实例进程（例如网易云音乐、360 安全卫士等）。</li>
-<li>32位虚拟机的最大寻址地址为 2<sup>32</sup> 也就是 4G，也就是说给进程分配的最大内存为4G。</li>
-</ul>
-<h4 id="进程间的通信方式"><a href="#进程间的通信方式" class="headerlink" title="进程间的通信方式"></a>进程间的通信方式</h4><ul>
-<li>管道：简单方便，但是半双工的单向通信，效率低下，不适合频繁通信的场景。</li>
-<li>消息队列：类似于缓存，生产者和消费者模式，队列充当中间商，优点是高效，缺点是消耗的内存比较大。</li>
-<li>共享内存：将分配给多个进程的虚拟内存各取一部分映射到同一块物理内存，多个进程就完成了内存共享，优点是节约了内存，缺点是进程较多时，频繁发生进程竞争内存影响效率。</li>
-<li>信号量：为了解决共享内存的问题，可以引入信号量，其本质就是一个计数器，实现进程之间的互斥和同步。</li>
-<li>套接字（Socket）：用于远程进程间的通信。</li>
-</ul>
-<h4 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h4><ul>
-<li>一个线程就是一个指令流，将指令流中的一条条指令以一定的顺序交给 CPU 执行。</li>
-</ul>
-<h4 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h4><ul>
-<li>共享内存：volatile共享内存</li>
-<li>消息传递：wait / notify / join / lock(park) / unlock(unpark)</li>
-<li>管道流：使用较少</li>
-</ul>
-<h4 id="二者对比"><a href="#二者对比" class="headerlink" title="二者对比"></a>二者对比</h4><ul>
-<li>定义区别如上</li>
-<li>进程基本上相互独立的，而线程存在于进程内，一个进程可包含多个线程，进程拥有共享的资源，如内存空间等，供其内部的线程共享 </li>
-<li>Java 中，进程作为资源分配的最小单位，线程作为最小调度单位</li>
-<li>进程间通信较为复杂<ul>
-<li>同一台计算机的进程通信称为 IPC（Inter-process communication）</li>
-<li>不同计算机之间的进程通信，需要通过网络，并遵守共同的协议，例如 HTTP</li>
-</ul>
-</li>
-<li>线程通信相对简单，因为它们共享进程内的内存，一个例子是多个线程可以访问同一个共享变量</li>
-<li>线程更轻量，线程上下文切换成本一般上要比进程上下文切换低</li>
-</ul>
-<h3 id="创建和运行线程"><a href="#创建和运行线程" class="headerlink" title="创建和运行线程"></a>创建和运行线程</h3><h4 id="方法1，直接使用-Thread"><a href="#方法1，直接使用-Thread" class="headerlink" title="方法1，直接使用 Thread"></a>方法1，直接使用 Thread</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建线程对象 </span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread() &#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
-<p>例如：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构造方法的参数是给线程指定名字，推荐 </span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(<span class="string">&quot;t1&quot;</span>) &#123;</span><br><span class="line">    Override </span><br><span class="line">    <span class="comment">// run 方法内实现了要执行的任务</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line">t1.start();</span><br></pre></td></tr></table></figure>
-<p>也可以继承 Thread 类，并重写 run 方法。</p>
-<h4 id="方法2，使用-Runnable-配合-Thread"><a href="#方法2，使用-Runnable-配合-Thread" class="headerlink" title="方法2，使用 Runnable 配合 Thread"></a>方法2，使用 Runnable 配合 Thread</h4><p>把【线程】和【任务】（要执行的代码）分开，Runnable 对象仅仅作为 Thread 对象的 target，Runnable 实现类里包含的 run() 方法仅作为线程执行体。而实际的线程对象依然是 Thread 实例，只是该 Thread 线程负责执行其 target 的 run() 方法。</p>
-<ul>
-<li>Thread 代表线程 </li>
-<li>Runnable 可运行的任务（线程要执行的代码）<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123; </span><br><span class="line">    <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;; </span><br><span class="line"><span class="comment">// 创建线程对象 </span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread( runnable ); </span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
-例如：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象 </span></span><br><span class="line">Runnable task2 = <span class="keyword">new</span> Runnable() &#123; </span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐 </span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>); </span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure>
-Java 8 以后可以使用 lambda 精简代码<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象 </span></span><br><span class="line">Runnable task2 = () -&gt; log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐 </span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>); </span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure>
-或者直接<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字</span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(() -&gt; log.debug(<span class="string">&quot;hello&quot;</span>), <span class="string">&quot;t2&quot;</span>); </span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="方法3，FutureTask-配合-Thread"><a href="#方法3，FutureTask-配合-Thread" class="headerlink" title="方法3，FutureTask 配合 Thread"></a>方法3，FutureTask 配合 Thread</h4><p>FutureTask 能够接收 Callable 类型的参数，用来处理有返回结果的情况，Callable接口可看成是Runnable接口的增强版，Callable 接口中的 call 方法比 run 方法功能更强大。</p>
-<ul>
-<li>call()方法可以有返回值;</li>
-<li>call()方法可以声明抛出异常。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象，传入一个 Callable 对象</span></span><br><span class="line">FutureTask&lt;Integer&gt; task3 = <span class="keyword">new</span> FutureTask&lt;&gt;(() -&gt; &#123; </span><br><span class="line">    log.debug(<span class="string">&quot;hello&quot;</span>); </span><br><span class="line">    <span class="keyword">return</span> <span class="number">100</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐 </span></span><br><span class="line"><span class="keyword">new</span> Thread(task3, <span class="string">&quot;t3&quot;</span>).start();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主线程阻塞，同步等待 task 执行完毕的结果 </span></span><br><span class="line">Integer result = task3.get(); </span><br><span class="line">log.debug(<span class="string">&quot;结果是:&#123;&#125;&quot;</span>, result);</span><br><span class="line"></span><br><span class="line"><span class="comment">/*输出</span></span><br><span class="line"><span class="comment">19:22:27 [t3] c.ThreadStarter - hello </span></span><br><span class="line"><span class="comment">19:22:27 [main] c.ThreadStarter - 结果是:100</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="三种方法对比"><a href="#三种方法对比" class="headerlink" title="三种方法对比"></a>三种方法对比</h4><p>采用实现 Runnable、Callable 接口的方式创建多线程的优缺点：</p>
-<ul>
-<li>线程类只是实现了 Runnable 接口或 Callable 接口，还可以继承其他类。</li>
-<li>在这种方式下，多个线程可以共享同一个 target 对象，所以非常适合多个相同线程来处理同一份资源的情况，从而可以将CPU、代码和数据分开，形成清晰的模型，较好地体现了面向对象的思想。</li>
-<li>劣势是，编程稍稍复杂，如果需要访问当前线程，则必须使用 Thread.currentThread()方法。。</li>
-</ul>
-<p>采用继承Thread类的方式创建多线程的优缺点：</p>
-<ul>
-<li>劣势是，因为线程类已经继承了 Thread 类，所以不能再继承其他父类。</li>
-<li>优势是，编写简单，如果需要访问当前线程，则无须使用 Thread.currentThread()方法，直接使用 this 即可获得当前线程。</li>
-</ul>
-<p>鉴于上面分析，因此一般推荐采用实现 Runnable接口、Callable接口的方式来创建多线程。</p>
-<h3 id="查看进程线程的方法"><a href="#查看进程线程的方法" class="headerlink" title="查看进程线程的方法"></a>查看进程线程的方法</h3><h4 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h4><p>任务管理器可以查看进程和线程数，也可以用来杀死进程 </p>
-<ul>
-<li><code>tasklist</code> 查看进程 </li>
-<li><code>taskkill</code> 杀死进程</li>
-</ul>
-<h4 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h4><ul>
-<li><code>ps -fe</code> 查看所有进程 </li>
-<li><code>ps -fT -p &lt;PID&gt;</code> 查看某个进程（PID）的所有线程 </li>
-<li><code>kill</code> 杀死进程 </li>
-<li><code>top</code> 按大写 H 切换是否显示线程 </li>
-<li><code>top -H -p &lt;PID&gt;</code> 查看某个进程（PID）的所有线程</li>
-</ul>
-<h4 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h4><ul>
-<li><code>jps</code> 命令查看所有 Java 进程 </li>
-<li><code>jstack &lt;PID&gt;</code> 查看某个 Java 进程（PID）的所有线程状态 </li>
-<li><code>jconsole</code> 来查看某个 Java 进程中线程的运行情况（图形界面）</li>
-</ul>
-<h4 id="案例1：CPU占用过高"><a href="#案例1：CPU占用过高" class="headerlink" title="案例1：CPU占用过高"></a>案例1：CPU占用过高</h4><ol>
-<li>用<code>top</code>定位哪个进程对cpu的占用过高； </li>
-<li>用<code>ps</code>命令进一步定位是哪个线程引起的cpu占用过高: <code>ps H -eo pid,tid,%cpu | grep 进程id</code>，ps是显示瞬间进程的状态，其中H是打印进程树（显示树状结构，表示程序间的相互关系），-eo代表筛选感兴趣的内容，pid–进程id、tid–线程id、%cpu–对cpu的占用，| grep – 管道运算符，筛选感兴趣的进程；</li>
-<li><code>jstack 进程id</code> 可以根据进程id 找到有问题的线程，进一步定位到问题代码的源码行号。</li>
-</ol>
-<h4 id="案例2：程序运行很长时间没有结果（死锁）"><a href="#案例2：程序运行很长时间没有结果（死锁）" class="headerlink" title="案例2：程序运行很长时间没有结果（死锁）"></a>案例2：程序运行很长时间没有结果（死锁）</h4><ol>
-<li><code>jps</code> 命令查看所有 Java 进程； </li>
-<li><code>jstack &lt;PID&gt;</code> 查看某个 Java 进程（PID）的所有线程状态（如下），或者用<code> jconsole</code> 来查看某个 Java 进程中线程的运行情况（图形界面）。</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Found one Java-level deadlock:</span><br><span class="line">=============================</span><br><span class="line"><span class="string">&quot;Thread-1&quot;</span>:</span><br><span class="line">  waiting to lock monitor <span class="number">0x0000021e94958578</span> (object <span class="number">0x00000000d6fb0ca0</span>, a cn.itcast.jvm.t1.stack.A),</span><br><span class="line">  which is held by <span class="string">&quot;Thread-0&quot;</span></span><br><span class="line"><span class="string">&quot;Thread-0&quot;</span>:</span><br><span class="line">  waiting to lock monitor <span class="number">0x0000021e9495c618</span> (object <span class="number">0x00000000d6fb2dd8</span>, a cn.itcast.jvm.t1.stack.B),</span><br><span class="line">  which is held by <span class="string">&quot;Thread-1&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）"><a href="#案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）" class="headerlink" title="案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）"></a>案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）</h4><ol>
-<li>jps 工具：查看当前系统中有哪些 java 进程；</li>
-<li>jmap 工具： 查看堆内存占用情况<code> jmap - heap 进程id</code>； </li>
-<li>jconsole 工具： 图形界面的，多功能的监测工具，可以连续监测；</li>
-<li>jvisualvm 工具：图像界面的，可以检测内存占用，相比jconsole，它可以方便的抓取内存快照即堆转储（<code>堆 dump</code>）。</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/11/22/%E5%9F%BA%E7%A1%80_%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/11/22/%E5%9F%BA%E7%A1%80_%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="post-title-link" itemprop="url">正则表达式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-11-22 11:21:56" itemprop="dateCreated datePublished" datetime="2019-11-22T11:21:56+08:00">2019-11-22</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-26 00:17:00" itemprop="dateModified" datetime="2021-01-26T00:17:00+08:00">2021-01-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>9 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="正则表达式中的常用字符"><a href="#正则表达式中的常用字符" class="headerlink" title="正则表达式中的常用字符"></a>正则表达式中的常用字符</h2><h3 id="特殊字符及其操作"><a href="#特殊字符及其操作" class="headerlink" title="特殊字符及其操作"></a>特殊字符及其操作</h3><table>
-<thead>
-<tr>
-<th align="center">特殊字符</th>
-<th align="center">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">^</td>
-<td align="center">边界匹配符：匹配一行的开头，不占用字符</td>
-</tr>
-<tr>
-<td align="center">$</td>
-<td align="center">边界匹配符：匹配一行的结尾，不占用字符</td>
-</tr>
-<tr>
-<td align="center">.</td>
-<td align="center">表示任何单个字符</td>
-</tr>
-<tr>
-<td align="center">?</td>
-<td align="center">前一个字符 0 次或 1 次扩展</td>
-</tr>
-<tr>
-<td align="center">*</td>
-<td align="center">前一个字符 0 次或 无限次扩展</td>
-</tr>
-<tr>
-<td align="center">+</td>
-<td align="center">前一个字符 1 次或 无限次扩展</td>
-</tr>
-<tr>
-<td align="center">|</td>
-<td align="center">指定两项之间任选一项，例 abc | def 表示 abc、def</td>
-</tr>
-<tr>
-<td align="center">\</td>
-<td align="center">用于转义下一个字符</td>
-</tr>
-<tr>
-<td align="center">( )</td>
-<td align="center">分组标记，可将多个表达式合并成一个子表达式，内部只能使用 | 操作符</td>
-</tr>
-<tr>
-<td align="center">[ ]</td>
-<td align="center">字符集，对单个字符给出范围</td>
-</tr>
-<tr>
-<td align="center">{m}</td>
-<td align="center">前一个字符 m 次扩展</td>
-</tr>
-<tr>
-<td align="center">{m,n}</td>
-<td align="center">前一个字符 m-n 次扩展</td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>上述所有的字符为正则表达式中定义的特殊字符，如果要匹配它们字符本身，需要进行转义。特别的在Java中，也是用 \ 来转义，Java中如果要匹配这些特殊字符需要经过两轮转义，即<code>\\</code>，所以在Java中要匹配 \ ，需要<code>\\\\</code>。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/22/%E5%9F%BA%E7%A1%80_%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1418,13 +1291,13 @@ Java 8 以后可以使用 lambda 精简代码<figure class="highlight java"><tab
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">398k</span>
+    <span title="站点总字数">408k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">12:03</span>
+    <span title="站点阅读时长">12:22</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
