@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="数据模型从逻辑视图来看，HBase中的数据是以表形式进行组织的，而且和关系型数据库中的表一样，HBase中的表也由行和列构成，因此HBase非常容易理解。但从物理视图来看，HBase是一个Map，由键值（KeyValue，KV）构成，不过与普通的Map不同，HBase是一个稀疏的、分布式的、多维排序的Map。 逻辑视图首先介绍HBase的逻辑视图，HBase中的基本概念包括，  table：表，一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase入门">
+<meta property="og:url" content="http://example.com/2021/06/15/HBase_HBase%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="数据模型从逻辑视图来看，HBase中的数据是以表形式进行组织的，而且和关系型数据库中的表一样，HBase中的表也由行和列构成，因此HBase非常容易理解。但从物理视图来看，HBase是一个Map，由键值（KeyValue，KV）构成，不过与普通的Map不同，HBase是一个稀疏的、分布式的、多维排序的Map。 逻辑视图首先介绍HBase的逻辑视图，HBase中的基本概念包括，  table：表，一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626622239331-a14ffde9-b1bc-42db-a252-6356f28e9d5a.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626625593726-caad3ed0-5463-4841-a1b5-9805b1065cba.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626626033278-60fc8151-369f-4b2b-a996-ccd140ae7dda.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626663398474-ca21103f-7d05-411d-b488-ff33e371ac87.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626665504029-af916507-0e59-4c63-95f3-3c12402bbfb2.png">
+<meta property="article:published_time" content="2021-06-15T11:25:15.000Z">
+<meta property="article:modified_time" content="2021-07-25T07:07:14.684Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="HBase">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626622239331-a14ffde9-b1bc-42db-a252-6356f28e9d5a.png">
+
+
+<link rel="canonical" href="http://example.com/2021/06/15/HBase_HBase%E5%9F%BA%E7%A1%80/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>HBase入门 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">154</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">8</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">83</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E8%A7%86%E5%9B%BE"><span class="nav-number">1.1.</span> <span class="nav-text">逻辑视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E8%A7%86%E5%9B%BE"><span class="nav-number">1.2.</span> <span class="nav-text">物理视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">关键特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.1.</span> <span class="nav-text">与关系型数据库对比</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Client"><span class="nav-number">2.1.</span> <span class="nav-text">Client</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper"><span class="nav-number">2.2.</span> <span class="nav-text">Zookeeper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master"><span class="nav-number">2.3.</span> <span class="nav-text">Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RegionServer"><span class="nav-number">2.4.</span> <span class="nav-text">RegionServer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#WAL-HLog"><span class="nav-number">2.4.1.</span> <span class="nav-text">WAL(HLog)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BlockCache"><span class="nav-number">2.4.2.</span> <span class="nav-text">BlockCache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Regions"><span class="nav-number">2.4.3.</span> <span class="nav-text">Regions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DFSClient"><span class="nav-number">2.5.</span> <span class="nav-text">DFSClient</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HDFS"><span class="nav-number">2.6.</span> <span class="nav-text">HDFS</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%B3%E8%B7%83%E8%A1%A8"><span class="nav-number">3.1.</span> <span class="nav-text">跳跃表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="nav-number">3.2.</span> <span class="nav-text">布隆过滤器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM%E6%A0%91"><span class="nav-number">3.3.</span> <span class="nav-text">LSM树</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">154</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/HBase_HBase%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HBase入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-06-15 19:25:15" itemprop="dateCreated datePublished" datetime="2021-06-15T19:25:15+08:00">2021-06-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 15:07:14" itemprop="dateModified" datetime="2021-07-25T15:07:14+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h1><p>从逻辑视图来看，HBase中的数据是以表形式进行组织的，而且和关系型数据库中的表一样，HBase中的表也由行和列构成，因此HBase非常容易理解。但从物理视图来看，HBase是一个Map，由键值（KeyValue，KV）构成，不过与普通的Map不同，HBase是一个稀疏的、分布式的、多维排序的Map。</p>
+<h2 id="逻辑视图"><a href="#逻辑视图" class="headerlink" title="逻辑视图"></a>逻辑视图</h2><p>首先介绍HBase的逻辑视图，HBase中的基本概念包括，</p>
+<ul>
+<li><p>table：表，一个表包含多行数据。</p>
+</li>
+<li><p>row：行，一行数据包含一个唯一标识rowkey、多个column以及对应的值。在HBase中，一张表中所有row都按照rowkey的字典序由小到大排序。</p>
+</li>
+<li><p>column：列，与关系型数据库中的列不同，HBase中的column由column family（列簇）以及qualifier（列名）两部分组成，两者中间使用”:”相连。比如contents:html，其中contents为列簇，html为列簇下具体的一列。column family在表创建的时候需要指定，用户不能随意增减。一个column family下可以设置任意多个qualifier，因此可以理解为HBase中的列可以动态增加，理论上甚至可以扩展到上百万列。</p>
+</li>
+<li><p>timestamp：时间戳，每个cell在写入HBase的时候都会默认分配一个时间戳作为该cell的版本，当然，用户也可以在写入的时候自带时间戳。HBase支持多版本特性，即同一rowkey、column下可以有多个value存在，这些value使用timestamp作为版本号，版本越大，表示数据越新。</p>
+</li>
+<li><p>cell：单元格，由五元组（row, column, timestamp, type, value）组成的结构，其中type表示Put/Delete这样的操作类型，timestamp代表这个cell的版本。<strong>这个结构在数据库中实际是以KV结构存储的，其中（row, column,timestamp, type）是K，value字段对应KV结构的V。</strong><span id="more"></span></p>
+</li>
+</ul>
+<p>例如：下图是BigTable中一张示例表的<strong>逻辑视图</strong>，表中主要存储网页信息。示例表中包含两行数据，两个rowkey分别为com.cnn.www和com.example.www，按照字典序由小到大排列。每行数据有三个列簇，分别为anchor、contents以及people，其中列簇anchor下有两列，分别为cnnsi.com以及my.look.ca，其他两个列簇都仅有一列。可以看出，根据行com.cnn.www以及列anchor:cnnsi.com可以定位到数据CNN，对应的时间戳信息是t9。而同一行的另一列contents:html下却有三个版本的数据，版本号分别为t5、t6和t7。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626622239331-a14ffde9-b1bc-42db-a252-6356f28e9d5a.png" alt="img"></p>
+<h2 id="物理视图"><a href="#物理视图" class="headerlink" title="物理视图"></a>物理视图</h2><p>HBase中的数据是按照<strong>列簇存储</strong>的，从概念上来说，列簇式存储介于<strong>行式存储（例如mysql）</strong>和<strong>列式存储（例如kudu）</strong>之间，可以通过不同的设计思路在行式存储和列式存储两者之间相互切换。即将数据按照列簇分别存储在不同的目录中。例如上图列簇anchor的所有数据存储在一起形成：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626625593726-caad3ed0-5463-4841-a1b5-9805b1065cba.png" alt="img"></p>
+<h2 id="关键特性"><a href="#关键特性" class="headerlink" title="关键特性"></a>关键特性</h2><p>BigTable论文中称BigTable为”sparse,distributed, persistent multidimensional sorted map”，可见BigTable本质上是一个Map结构数据库，HBase亦然，也是由一系列KV构成的。然而HBase这个Map系统却并不简单，有很多限定词——稀疏的、分布式的、持久性的、多维的以及排序的。</p>
+<ul>
+<li><p>多维：这个特性比较容易理解。HBase中的Map与普通Map最大的不同在于，key是一个复合数据结构，由多维元素构成，包括rowkey、columnfamily、qualifier、type以及timestamp。</p>
+</li>
+<li><p>稀疏：稀疏性是HBase一个突出特点。从上面逻辑表中rowkey为”com.example.www”的行可以看出，整整一行仅有一列（people:author）有值，其他列都为空值。在其他数据库中，对于空值的处理一般都会填充null，而对于HBase，空值不需要任何填充。这个特性为什么重要？因为HBase的列在理论上是允许无限扩展的，对于成百万列的表来说，通常都会存在大量的空值，如果使用填充null的策略，势必会造成大量空间的浪费。因此稀疏性是HBase的列可以无限扩展的一个重要条件。</p>
+</li>
+<li><p>排序：构成HBase的KV在同一个文件中都是有序的，但规则并不是仅仅按照rowkey排序，而是按照KV中的key进行排序——先比较rowkey，rowkey小的排在前面；如果rowkey相同，再比较column，即column family:qualifier，column小的排在前面；如果column还相同，再比较时间戳timestamp，即版本信息，timestamp大的排在前面。这样的多维元素排序规则对于提升HBase的读取性能至关重要。</p>
+</li>
+<li><p>分布式：很容易理解，构成HBase的所有Map并不集中在某台机器上，而是分布在整个集群中。</p>
+</li>
+</ul>
+<h3 id="与关系型数据库对比"><a href="#与关系型数据库对比" class="headerlink" title="与关系型数据库对比"></a>与关系型数据库对比</h3><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>Hbase</th>
+<th>RDBMS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据类型</td>
+<td>只有字符串</td>
+<td>丰富的数据类型</td>
+</tr>
+<tr>
+<td>数据操作</td>
+<td>增删改查，不支持join</td>
+<td>各种各样的函数与表连接</td>
+</tr>
+<tr>
+<td>存储模式</td>
+<td>基于列式存储</td>
+<td>基于表结构和行式存储</td>
+</tr>
+<tr>
+<td>数据保护</td>
+<td>更新后仍然保留旧版本</td>
+<td>替换</td>
+</tr>
+<tr>
+<td>可伸缩性</td>
+<td>轻易增加节点</td>
+<td>需要中间层，牺牲性能</td>
+</tr>
+</tbody></table>
+<h1 id="体系结构"><a href="#体系结构" class="headerlink" title="体系结构"></a>体系结构</h1><p>在Hbase中，表被分割成多个更小的块然后分散的存储在不同的服务器上，这些小块叫做Regions，存放Regions的地方叫做RegionServer。Master进程负责处理不同的RegionServer之间的Region的分发。在Hbase实现中HRegionServer和HRegion类代表RegionServer和Region。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626626033278-60fc8151-369f-4b2b-a996-ccd140ae7dda.png" alt="img"></p>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><p>负责向外界提供各种接口，支持所有常见的DML操作以及DDL操作，即数据的增删改查和表的日常维护。HBase客户端访问数据行之前，首先需要通过元数据表定位目标数据所在RegionServer，之后才会发送请求到该RegionServer。同时这些元数据会被缓存在客户端本地，以方便之后的请求访问。如果集群RegionServer发生宕机或者执行了负载均衡等，从而导致数据分片发生迁移，客户端需要重新请求最新的元数据并缓存在本地。</p>
+<h2 id="Zookeeper"><a href="#Zookeeper" class="headerlink" title="Zookeeper"></a>Zookeeper</h2><p>主要用于协调管理分布式应用程序。在HBase系统中，ZooKeeper扮演着非常重要的角色：</p>
+<ul>
+<li><p>实现Master高可用：通常情况下系统中只有一个Master工作，一旦ActiveMaster由于异常宕机，ZooKeeper会检测到该宕机事件，并通过一定机制选举出新的Master，保证系统正常运转。</p>
+</li>
+<li><p>管理系统核心元数据：比如，管理当前系统中正常工作的RegionServer集合，保存系统元数据表hbase:meta所在的RegionServer地址等。</p>
+</li>
+<li><p>参与RegionServer宕机恢复：ZooKeeper通过心跳可以感知到RegionServer是否宕机，并在宕机后通知Master进行宕机处理。</p>
+</li>
+<li><p>实现分布式表锁：HBase中对一张表进行各种管理操作（比如alter操作）需要先加表锁，防止其他用户对同一张表进行管理操作，造成表状态不一致。和其他RDBMS表不同，HBase中的表通常都是分布式存储，ZooKeeper可以通过特定机制实现分布式表锁。</p>
+</li>
+</ul>
+<h2 id="Master"><a href="#Master" class="headerlink" title="Master"></a>Master</h2><p>Master主要负责HBase系统的各种管理工作：</p>
+<ul>
+<li><p>处理用户的各种管理请求，包括建表、修改表、权限操作、切分表、合并数据分片以及Compaction等。</p>
+</li>
+<li><p>管理集群中所有RegionServer，包括RegionServer中Region的负载均衡、RegionServer的宕机恢复以及Region的迁移等。</p>
+</li>
+<li><p>清理过期日志以及文件，Master会每隔一段时间检查HDFS中HLog是否过期、HFile是否已经被删除，并在过期之后将其删除。</p>
+</li>
+</ul>
+<h2 id="RegionServer"><a href="#RegionServer" class="headerlink" title="RegionServer"></a>RegionServer</h2><p>RegionServer主要用来响应用户的IO请求，可以理解成数据节点，表中的数据存储在这里，是HBase中最核心的模块，由WAL(HLog)、BlockCache以及多个Region构成。</p>
+<h3 id="WAL-HLog"><a href="#WAL-HLog" class="headerlink" title="WAL(HLog)"></a>WAL(HLog)</h3><p>HLog在HBase中有两个核心作用，</p>
+<ul>
+<li>其一，用于实现数据的高可靠性，<strong>HBase数据随机写入时，并非直接写入HFile数据文件，而是先写入缓存，再异步刷新落盘</strong>。为了防止缓存数据丢失，数据写入缓存之前需要首先顺序写入HLog，这样，即使缓存数据丢失，仍然可以通过HLog日志恢复；</li>
+<li>其二，用于实现HBase集群间主从复制，通过回放主集群推送过来的HLog日志实现主从复制。</li>
+</ul>
+<h3 id="BlockCache"><a href="#BlockCache" class="headerlink" title="BlockCache"></a>BlockCache</h3><p>HBase系统中的<strong>读缓存</strong>。客户端从磁盘读取数据之后通常会将数据缓存到系统内存中，后续访问同一行数据可以直接从内存中获取而不需要访问磁盘。BlockCache缓存对象是一系列Block块，一个Block默认为64K，由物理上相邻的多个KV数据组成。BlockCache同时利用了空间局部性和时间局部性原理，前者表示最近将读取的KV数据很可能与当前读取到的KV数据在地址上是邻近的，缓存单位是Block（块）而不是单个KV就可以实现空间局部性；后者表示一个KV数据正在被访问，那么近期它还可能再次被访问。当前BlockCache主要有两种实现——LRUBlockCache和BucketCache，前者实现相对简单，而后者在GC优化方面有明显的提升。</p>
+<h3 id="Regions"><a href="#Regions" class="headerlink" title="Regions"></a>Regions</h3><p>数据表的一个分片，当数据表大小超过一定阈值就会“水平切分”，分裂为两个Region。<strong>Region是集群负载均衡的基本单位</strong>。通常一张表的Region会分布在整个集群的多台RegionServer上，一个RegionServer上会管理多个Region，当然，这些Region一般来自不同的数据表。</p>
+<ul>
+<li><p>Store：一个Region由一个或者多个Store构成，Store的个数取决于表中列簇（columnfamily）的个数，多少个列簇就有多少个Store。HBase中，每个列簇的数据都集中存放在一起形成一个存储单元Store，因此建议将具有相同IO特性的数据设置在同一个列簇中。</p>
+</li>
+<li><p>MemStore和HFile：每个Store由一个MemStore和一个或多个HFile组成。MemStore称为<strong>写缓存</strong>，<strong>用户写入数据时首先会写到MemStore，当MemStore写满之后（缓存数据超过阈值，默认128M）系统会异步地将数据flush成一个HFile文件</strong>。显然，随着数据不断写入，HFile文件会越来越多，当HFile文件数超过一定阈值之后系统将会执行Compact操作，将这些小文件通过一定策略合并成一个或多个大文件。</p>
+</li>
+</ul>
+<p>所以HBase读写数据的基本流程如下图：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626663398474-ca21103f-7d05-411d-b488-ff33e371ac87.png" alt="img"></p>
+<ul>
+<li><p>首先调用client接口发起读写请求；</p>
+</li>
+<li><p>ZooKeeper通过元数据表hbase:meta定位目标数据所在RegionServer地址，之后才会发送请求到该RegionServer；</p>
+</li>
+<li><p>从用户的region中读写数据。</p>
+</li>
+</ul>
+<h2 id="DFSClient"><a href="#DFSClient" class="headerlink" title="DFSClient"></a>DFSClient</h2><p>HBase内部封装了一个名为DFSClient的HDFS客户端组件，负责对HDFS的实际数据进行读写访问。</p>
+<h2 id="HDFS"><a href="#HDFS" class="headerlink" title="HDFS"></a>HDFS</h2><p>HBase运行的底层文件系统。HBase底层依赖HDFS组件存储实际数据，包括用户数据文件、HLog日志文件等最终都会写入HDFS落盘。</p>
+<h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><p>HBase的一个列簇（Column Family）本质上就是一棵LSM树（Log-StructuredMerge-Tree）。LSM树分为内存部分和磁盘部分。LSM树的索引一般由两部分组成，一部分是内存部分，一部分是磁盘部分。</p>
+<ul>
+<li>内存部分一般采用跳跃表来维护一个有序的KeyValue集合。。一般来讲，内存数据结构可以选择平衡二叉树、红黑树、跳跃表（SkipList）等维护有序集的数据结构，这里由于<strong>考虑并发性能（而且跳表的范围读取性能更好）</strong>，HBase选择了表现更优秀的<strong>跳跃表</strong>。</li>
+<li>磁盘部分一般由多个内部KeyValue有序的文件组成。对于数据存储在磁盘上的数据库系统来说，磁盘寻道以及数据读取都是非常耗时的操作（简称IO耗时）。因此，为了避免不必要的IO耗时，可以在磁盘中存储一些额外的二进制数据，这些数据用来判断对于给定的key是否有可能存储在这个数据块中，这个数据结构称为<strong>布隆过滤器（Bloom Filter）</strong>。</li>
+</ul>
+<h2 id="跳跃表"><a href="#跳跃表" class="headerlink" title="跳跃表"></a>跳跃表</h2><p><a target="_blank" rel="noopener" href="https://www.yuque.com/saltedfish-kjhg7/yg9kww/gqtf7z">https://www.yuque.com/saltedfish-kjhg7/yg9kww/gqtf7z</a></p>
+<h2 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h2><p><a target="_blank" rel="noopener" href="https://www.yuque.com/saltedfish-kjhg7/yg9kww/alcor3">https://www.yuque.com/saltedfish-kjhg7/yg9kww/alcor3</a></p>
+<h2 id="LSM树"><a href="#LSM树" class="headerlink" title="LSM树"></a>LSM树</h2><p>LSM树（Log-StructuredMerge-Tree）本质上和B+树一样，是一种磁盘数据的索引结构。但和B+树不同的是，LSM树的索引对写入请求更友好。因为无论是何种写入请求，<strong>LSM树都会将写入操作处理为一次顺序写，而HDFS擅长的正是顺序写（且HDFS不支持随机写），因此基于HDFS实现的HBase采用LSM树作为索引是一种很合适的选择</strong>。</p>
+<p>前面已经说过，一个LSM树的索引主要由两部分构成：内存部分和磁盘部分。内存部分是一个ConcurrentSkipListMap，Key就是前面所说的Key部分，Value是一个字节数组。数据写入时，直接写入MemStore中。<strong>随着不断写入，一旦内存占用超过一定的阈值时，就把内存部分的数据导出，形成一个有序的数据文件（将所有写入转换为顺序写）</strong>，存储在磁盘上LSM树索引结构如下图所示。内存部分导出形成一个有序数据文件的过程称为flush。为了避免flush影响写入性能，会先把当前写入的MemStore设为Snapshot，不再容许新的写入操作写入这个Snapshot的MemStore。另开一个内存空间作为MemStore，让后面的数据写入。一旦Snapshot的MemStore写入完毕，对应内存空间就可以释放。这样，就可以通过两个MemStore来实现稳定的写入性能。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626665504029-af916507-0e59-4c63-95f3-3c12402bbfb2.png" alt="img"></p>
+<p><strong>LSM树的索引结构本质是将写入操作全部转化成磁盘的顺序写入</strong>，极大地提高了写入操作的性能。<strong>但是，这种设计对读取操作是非常不利的，因为需要在读取的过程中，通过归并所有文件来读取所对应的KV，这是非常消耗IO资源的。</strong>因此，在HBase中设计了异步的compaction来降低文件个数，达到提高读取性能的目的。由于HDFS只支持文件的顺序写，不支持文件的随机写，而且HDFS擅长的场景是大文件存储而非小文件，所以上层HBase选择LSM树这种索引结构是最合适的。</p>
+<ol>
+<li>《HBase原理与实践》胡争 范欣欣</li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b23800d9b227">入门HBase，看这一篇就够了</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/HBase/" rel="tag"><i class="fa fa-tag"></i> HBase</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/" rel="prev" title="MySQL中的锁">
+                  <i class="fa fa-chevron-left"></i> MySQL中的锁
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/21/C21_ThreadLocal/" rel="next" title="ThreadLocal和InheritableThreadLocal">
+                  ThreadLocal和InheritableThreadLocal <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">548k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:36</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
