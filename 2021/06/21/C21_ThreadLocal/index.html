@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="先看两个示例，为什么下面两个测试用例输出不一样？ 12345678910111213141516171819202122232425262728293031323334353637@Testpublic void testThreadLocal() &amp;#123;    ThreadLocal&lt;Object&gt; threadLocal &#x3D; new ThreadLocal&lt;&gt;()">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ThreadLocal和InheritableThreadLocal">
+<meta property="og:url" content="http://example.com/2021/06/21/C21_ThreadLocal/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="先看两个示例，为什么下面两个测试用例输出不一样？ 12345678910111213141516171819202122232425262728293031323334353637@Testpublic void testThreadLocal() &amp;#123;    ThreadLocal&lt;Object&gt; threadLocal &#x3D; new ThreadLocal&lt;&gt;()">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625756627167-3b8a5ce6-c48e-4e89-94e1-15dfffd3778e.png#height=294&id=Pa77D&margin=%5Bobject%20Object%5D&name=image.png&originHeight=588&originWidth=1832&originalType=binary&ratio=1&size=98912&status=done&style=none&width=916">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625757542672-70d7ed69-8cb6-4e90-b668-717217f65812.png#height=302&id=La8I9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=604&originWidth=1890&originalType=binary&ratio=1&size=123456&status=done&style=none&width=945">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625761642313-655d846a-804d-43ef-9a83-8288b5d78faa.png#height=592&id=GZCed&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1184&originWidth=1826&originalType=binary&ratio=1&size=259480&status=done&style=none&width=913">
+<meta property="article:published_time" content="2021-06-21T15:45:56.000Z">
+<meta property="article:modified_time" content="2021-07-25T04:07:50.282Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="ThreadLocal">
+<meta property="article:tag" content="InheritableThreadLocal">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625756627167-3b8a5ce6-c48e-4e89-94e1-15dfffd3778e.png#height=294&id=Pa77D&margin=%5Bobject%20Object%5D&name=image.png&originHeight=588&originWidth=1832&originalType=binary&ratio=1&size=98912&status=done&style=none&width=916">
+
+
+<link rel="canonical" href="http://example.com/2021/06/21/C21_ThreadLocal/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>ThreadLocal和InheritableThreadLocal | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">122</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">62</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">122</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/21/C21_ThreadLocal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ThreadLocal和InheritableThreadLocal
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-06-21 23:45:56" itemprop="dateCreated datePublished" datetime="2021-06-21T23:45:56+08:00">2021-06-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 12:07:50" itemprop="dateModified" datetime="2021-07-25T12:07:50+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>先看两个示例，为什么下面两个测试用例输出不一样？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testThreadLocal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ThreadLocal&lt;Object&gt; threadLocal = <span class="keyword">new</span> ThreadLocal&lt;&gt;();</span><br><span class="line">    threadLocal.set(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">    System.out.println(Thread.currentThread());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">        System.out.println(Thread.currentThread()); <span class="comment">// 这里只是为了区分线程</span></span><br><span class="line">        threadLocal.get();</span><br><span class="line">        System.out.println(threadLocal.get()); <span class="comment">// 这里的get里面是当前线程 subThread</span></span><br><span class="line">    &#125;, <span class="string">&quot;subThread&quot;</span>).start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*output:</span></span><br><span class="line"><span class="comment">Thread[main,5,main]</span></span><br><span class="line"><span class="comment">Thread[subThread,5,main]</span></span><br><span class="line"><span class="comment">null</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testInheritableThreadLocal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    InheritableThreadLocal&lt;Object&gt; inheritableThreadLocal = <span class="keyword">new</span> InheritableThreadLocal&lt;&gt;();</span><br><span class="line">    inheritableThreadLocal.set(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">    System.out.println(Thread.currentThread());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">        System.out.println(Thread.currentThread());</span><br><span class="line">        inheritableThreadLocal.get();</span><br><span class="line">        System.out.println(inheritableThreadLocal.get()); <span class="comment">// 这里的get是主线程</span></span><br><span class="line">    &#125;, <span class="string">&quot;subThread&quot;</span>).start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*output</span></span><br><span class="line"><span class="comment">Thread[main,5,main]</span></span><br><span class="line"><span class="comment">Thread[subThread,5,main]</span></span><br><span class="line"><span class="comment">ok</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>为什么输出不一样哪？我们先进入第一个testThreadLocal()方法中的get()方法一探究竟：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="keyword">null</span>) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">            T result = (T)e.value;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!---more-->debug一下，注意看这里的getMap(t)方法返回的是null，
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625756627167-3b8a5ce6-c48e-4e89-94e1-15dfffd3778e.png#height=294&id=Pa77D&margin=%5Bobject%20Object%5D&name=image.png&originHeight=588&originWidth=1832&originalType=binary&ratio=1&size=98912&status=done&style=none&width=916" alt="image.png">方法，而我们没有重写初始化这个方法，所以会返回null。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ThreadLocalMap <span class="title">getMap</span><span class="params">(Thread t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t.threadLocals;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一个为什么是null搞清楚了，下面同样debug一下看看为什么第二个是ok。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625757542672-70d7ed69-8cb6-4e90-b668-717217f65812.png#height=302&id=La8I9&margin=%5Bobject%20Object%5D&name=image.png&originHeight=604&originWidth=1890&originalType=binary&ratio=1&size=123456&status=done&style=none&width=945" alt="image.png"><br>首先我们发现这次的getMap(t)返回的不再是null了，所以他会进入if逻辑然后直接把值返回，但为什么哪？我们明明没有为当前sub线程设置任何threadLocals变量，我们去getMap(t)里看一下。可以看到getMap(Thread t)是InheritableThreadLocal类重写父类ThreadLocal的方法，它返回一个sub线程的inheritableThreadLocals变量，也就是说sub线程的inheritableThreadLocals变量已经被赋值了，那么是怎么被赋值的哪？？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ThreadLocalMap <span class="title">getMap</span><span class="params">(Thread t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t.inheritableThreadLocals;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>疑问出现在这里，前面getMap(t)返回的是null可以理解，因为我们的确没有为sub线程的threadLocals变量赋值，但现在我有些懵逼了，sub线程的inheritableThreadLocals变量被自动赋值了？事实证明的确在进入sub线程时inheritableThreadLocals变量就已经有值了（”OK”）。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1625761642313-655d846a-804d-43ef-9a83-8288b5d78faa.png#height=592&id=GZCed&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1184&originWidth=1826&originalType=binary&ratio=1&size=259480&status=done&style=none&width=913" alt="image.png"><br>陷入了沉思……<br>突然想到这是个继承变量，也就是说会从父线程传递到子线程，难道是在新建线程时就默认传入了，那就去看一下Thread类的构造方法吧，万幸我们终于在这里找到了答案：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Initializes a Thread.</span></span><br><span class="line"><span class="comment"> * ...</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> inheritThreadLocals if &#123;<span class="doctag">@code</span> true&#125;, inherit initial values for</span></span><br><span class="line"><span class="comment"> *            inheritable thread-locals from the constructing thread</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(ThreadGroup g, Runnable target, String name,</span></span></span><br><span class="line"><span class="function"><span class="params">                  <span class="keyword">long</span> stackSize, AccessControlContext acc,</span></span></span><br><span class="line"><span class="function"><span class="params">                  <span class="keyword">boolean</span> inheritThreadLocals)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 这个父线程指的是调用new Thread()的线程，我们的例子里就是main线程，因为此时sub线程并没有初始化完毕，实际上当前线程还是main线程</span></span><br><span class="line">    Thread parent = currentThread();  </span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 如果parent.inheritableThreadLocals不为空，则将它传递给子线程</span></span><br><span class="line">    <span class="keyword">if</span> (inheritThreadLocals &amp;&amp; parent.inheritableThreadLocals != <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">this</span>.inheritableThreadLocals =</span><br><span class="line">        ThreadLocal.createInheritedMap(parent.inheritableThreadLocals); </span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>真相大白！！</p>
+<blockquote>
+<p>参考：<br><a target="_blank" rel="noopener" href="https://www.pdai.tech/md/java/thread/java-thread-x-threadlocal.html">ThreadLocal详解</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ThreadLocal/" rel="tag"><i class="fa fa-tag"></i> ThreadLocal</a>
+              <a href="/tags/InheritableThreadLocal/" rel="tag"><i class="fa fa-tag"></i> InheritableThreadLocal</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/" rel="prev" title="运行期（晚期）优化">
+                  <i class="fa fa-chevron-left"></i> 运行期（晚期）优化
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/28/C22_CountDownLatch/" rel="next" title="CountDownLatch">
+                  CountDownLatch <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">427k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">12:56</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
