@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="本文待解答的问题   什么是事务  事务的四大特性ACID  事务的分类  怎么用事务（控制语句）  隔离性产生的3个问题  四种隔离级别  事务概述概念事务是由一步或几步数据库操作序列组成的完整的业务逻辑单元，这系列操作要么全部执行成功，要么全部执行失败，不能再分。 比如：A给B转账100元，A的银行卡就会少100元，B的银行卡就会多100元，整个过程要么全部执行成功，要么全部失败。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中的事务处理">
+<meta property="og:url" content="http://example.com/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="本文待解答的问题   什么是事务  事务的四大特性ACID  事务的分类  怎么用事务（控制语句）  隔离性产生的3个问题  四种隔离级别  事务概述概念事务是由一步或几步数据库操作序列组成的完整的业务逻辑单元，这系列操作要么全部执行成功，要么全部执行失败，不能再分。 比如：A给B转账100元，A的银行卡就会少100元，B的银行卡就会多100元，整个过程要么全部执行成功，要么全部失败。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-17T17:12:45.000Z">
+<meta property="article:modified_time" content="2021-07-25T06:42:53.576Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="事务特性">
+<meta property="article:tag" content="隔离级别">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>MySQL中的事务处理 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">事务概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%9B%9B%E5%A4%A7%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">事务的四大特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">事务的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%81%E5%B9%B3%E4%BA%8B%E5%8A%A1%EF%BC%88flat-transactions%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">扁平事务（flat transactions）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%A6%E6%9C%89%E4%BF%9D%E5%AD%98%E7%82%B9%E7%9A%84%E6%89%81%E5%B9%B3%E4%BA%8B%E5%8A%A1%EF%BC%88flat-transactions-with-savepoints%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">带有保存点的扁平事务（flat transactions with savepoints）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E4%BA%8B%E5%8A%A1%EF%BC%88chained-transactions%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">链事务（chained transactions）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97%E4%BA%8B%E5%8A%A1%EF%BC%88nested-transactions%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">嵌套事务（nested transactions）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%88distributed-transactions%EF%BC%89"><span class="nav-number">2.5.</span> <span class="nav-text">分布式事务（distributed transactions）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6%E8%AF%AD%E5%8F%A5"><span class="nav-number">3.</span> <span class="nav-text">事务控制语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6%E5%91%BD%E4%BB%A4"><span class="nav-number">3.1.</span> <span class="nav-text">事务控制命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E8%B0%88%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4"><span class="nav-number">3.2.</span> <span class="nav-text">详谈事务提交</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">4.</span> <span class="nav-text">事务的隔离级别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5-1"><span class="nav-number">4.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.2.</span> <span class="nav-text">存在的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E7%A7%8D%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">4.3.</span> <span class="nav-text">四种隔离级别</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">150</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL中的事务处理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-18 01:12:45" itemprop="dateCreated datePublished" datetime="2021-03-18T01:12:45+08:00">2021-03-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:42:53" itemprop="dateModified" datetime="2021-07-25T14:42:53+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文待解答的问题</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 什么是事务</li>
+<li><input checked="" disabled="" type="checkbox"> 事务的四大特性ACID</li>
+<li><input checked="" disabled="" type="checkbox"> 事务的分类</li>
+<li><input checked="" disabled="" type="checkbox"> 怎么用事务（控制语句）</li>
+<li><input checked="" disabled="" type="checkbox"> 隔离性产生的3个问题</li>
+<li><input checked="" disabled="" type="checkbox"> 四种隔离级别</li>
+</ul>
+<h2 id="事务概述"><a href="#事务概述" class="headerlink" title="事务概述"></a>事务概述</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>事务是由一步或几步数据库操作序列组成的完整的业务逻辑单元，这系列操作要么全部执行成功，要么全部执行失败，不能再分。</p>
+<p>比如：A给B转账100元，A的银行卡就会少100元，B的银行卡就会多100元，整个过程要么全部执行成功，要么全部失败。<span id="more"></span></p>
+<h3 id="事务的四大特性"><a href="#事务的四大特性" class="headerlink" title="事务的四大特性"></a>事务的四大特性</h3><p>事务具备4个特性，这4个特性也简称为<strong>ACID</strong>性：</p>
+<ul>
+<li><strong>原子性（Atomicity）</strong>：事务是最小的业务逻辑单元。<ul>
+<li>事务是应用中不可再分的最小逻辑执行体，是不可分割的最小操作单位，要么同时成功，要么同时失败。</li>
+</ul>
+</li>
+<li><strong>一致性（Consistency）</strong>：一致性指事务将数据库从一种状态转变为另一种一致的状态。在事务开始之前和事务结束以后，数据库的完整性约束没有被破坏。<ul>
+<li>当数据库只包含事务成功提交的结果时，数据库处于一致性状态。如果系统运行发生中断，某个事务尚未完成而被迫中断，而该未完成的事务对数据库所做的修改已被写入数据库，此时，数据库就处于一种不正确的状态。</li>
+<li>比如银行在两个账户之间转账：从A账户向B账户转入1000元，系统先减少A账户的1000元，然后再为B账户增加1000元。如果全部执行成功，数据库处于一致性状态；如果仅执行完A账户金额的修改，而没有增加B账户的金额，则数据库就处于不一致性状态；因此，一致性是通过原子性来保证的。</li>
+</ul>
+</li>
+<li><strong>隔离性（Isolation）</strong>：隔离性还有其他的称呼，如并发控制（concurrency control）、锁（locking）。事务的隔离性要求每个读写事务的对象与其他事务的操作对象能相互分离，即该事务提交前对其他事务都不可见，这通常使用锁来实现。<ul>
+<li>各个事务的执行互不干扰，任意一个事务的内部操作对其他并发的事务都是隔离的。也就是说，并发执行的事务之间不能看到对方的中间状态，并发执行的事务之间不能互相影响。</li>
+</ul>
+</li>
+<li><strong>持久性（Durability）</strong>：当事务提交或回滚后，数据库会持久化的保存数据。<ul>
+<li>需要注意的是，持久性只能从事务本身的角度来保证结果的永久性，如事务提交后，所有的变化都是永久的，即使当数据库由于崩溃而需要恢复时，也能保证恢复后提交的数据都不会丢失。但如果不是数据库本身发生故障，而是一些外部的原因，如自然灾害等导致数据库发生问题，那么所有提交的数据可能会丢失。因此持久性保证的是事务系统的<code>高可靠性</code>（high reliability），而不是高可用性（highavailability）。对于高可用性的实现，事务本身并不能保证，需要一些系统共同配合来完成。</li>
+</ul>
+</li>
+</ul>
+<h2 id="事务的分类"><a href="#事务的分类" class="headerlink" title="事务的分类"></a>事务的分类</h2><p>MySQL数据库（InnoDB存储引擎）支持扁平事务、带有保存点的扁平事务、链事务、分布式事务。而并没有原生的嵌套事务，但用户可以通过带有保存点的事务来模拟串行的嵌套事务。</p>
+<h3 id="扁平事务（flat-transactions）"><a href="#扁平事务（flat-transactions）" class="headerlink" title="扁平事务（flat transactions）"></a>扁平事务（flat transactions）</h3><p>扁平事务是事务类型中最简单的一种，也是使用最为频繁的事务。在扁平事务中，所有操作都处于同一层次，其由BEGIN开始，由COMMIT WORK或ROLLBACK WORK结束。处于之间的操作是原子的，要么都执行，要么都回滚。因此，扁平事务是应用程序成为原子操作的基本组成模块。</p>
+<h3 id="带有保存点的扁平事务（flat-transactions-with-savepoints）"><a href="#带有保存点的扁平事务（flat-transactions-with-savepoints）" class="headerlink" title="带有保存点的扁平事务（flat transactions with savepoints）"></a>带有保存点的扁平事务（flat transactions with savepoints）</h3><p>扁平事务的缺陷就是不能回滚一部分，当一个事务中只有后面一个步骤出现问题时需要回滚整个事务，显然开销太大。而带有保存点的扁平事务，允许在事务执行过程中回滚到同一事务中的中间状态（保存点）。保存点（savepoint）用来通知系统应该记住事务当前的状态。实际上扁平事务也有一个隐式的保存点，就是事务开始的位置，每次回滚即回滚到开始处。还有一点需要注意的是，保存点的编号在事务内部是递增的，可以理解成auto-increment 即使回滚也不影响保存点的计数。</p>
+<h3 id="链事务（chained-transactions）"><a href="#链事务（chained-transactions）" class="headerlink" title="链事务（chained transactions）"></a>链事务（chained transactions）</h3><p>带有保存点的扁平事务的缺陷是当发生系统崩溃时，所有的保存点都将消失，因为其保存点是易失的（volatile），而非持久的（persistent）。这意味着当恢复保存点时，事务需要从开始处重新执行，而不能从最近的一个保存点继续执行。而链事务可以解决该问题，链事务可视为保存点模式的一个变种。链事务的特点是：在提交一个事务时，释放不需要的数据对象，将必要的处理上下文隐式地传给下一个要开始的事务；提交事务操作和开始下一个事务操作将合并为一个原子操作，这意味着下一个事务将看到上一个事务的结果，就好像在一个事务中进行的。简而言之，<strong>链事务的思想就是将带有保存点的扁平事务以保存点为界分割成多个单个事务然后转变成链式的事务，这样当系统发生崩溃时，可以从最近的一个保存点继续执行</strong>。</p>
+<h3 id="嵌套事务（nested-transactions）"><a href="#嵌套事务（nested-transactions）" class="headerlink" title="嵌套事务（nested transactions）"></a>嵌套事务（nested transactions）</h3><p>嵌套事务是一个层次结构框架。有一个顶层事务（top-level transaction）控制着各个层次的事务。顶层事务之下嵌套的事务被称为子事务（subtransaction），其控制每一个局部的变换。其准确定义如下：</p>
+<ul>
+<li>嵌套事务是由若干事务组成的一棵树，子树既可以是嵌套事务，也可以是扁平事务。</li>
+<li>处在叶节点的事务是扁平事务，但是每个子事务从根到叶节点的距离可以是不同的。</li>
+<li>位于根节点的事务称为顶层事务，其他事务称为子事务。事务的前驱（predecessor）称为父事务（parent），事务的下一层称为儿子事务（child）。</li>
+<li>子事务既可以提交也可以回滚，但是它的提交操作并不马上生效，除非由其父事务提交。因此可以推论出，任何子事务都在顶层事务提交后才真正提交。</li>
+<li>树中的任意一个事务的回滚会引起它的所有子事务一同回滚。故子事务仅保留A、C、I特性，不具有D特性。</li>
+</ul>
+<h3 id="分布式事务（distributed-transactions）"><a href="#分布式事务（distributed-transactions）" class="headerlink" title="分布式事务（distributed transactions）"></a>分布式事务（distributed transactions）</h3><p>分布式事务通常是一个在分布式环境下运行的扁平事务，因此需要根据数据所在位置访问网络中的不同节点，分布式事务允许多个独立的事务资源参与到一个全局的事务中。全局事务要求在其中的所有参与的事务要么都提交，要么都回滚，这对于事务原有的ACID要求又有了提高。<strong>所以在使用分布式事务时，InnoDB存储引擎的事务隔离级别必须设置为SERIALIZABLE</strong>。</p>
+<p>InnoDB存储引擎提供了对于<code>XA事务</code>的支持，并通过XA事务来支持分布式事务的实现。XA事务允许不同数据库之间的分布式事务，如一台服务器是MySQL数据库的，另一台是Oracle数据库的，可能还有一台服务器是SQL Server数据库的，只要参与到全局事务中的每个节点都支持XA事务即可，所以XA事务更像是一种协议。</p>
+<p>XA事务由一个或多个资源管理器（resource manager）、一个事务管理器（transaction manager）以及一个应用程序（application program）组成。</p>
+<ul>
+<li>资源管理器：提供访问事务资源的方法。通常一个数据库就是一个资源管理器。</li>
+<li>事务管理器：协调参与全局事务中的各个事务。需要和参与到全局事务中的所有资源管理器进行通信。</li>
+<li>应用程序：定义事务的边界，指定全局事务中的操作。</li>
+</ul>
+<p>分布式事务使用两段式提交（two-phase commit）的方式。在第一个阶段，所有参与全局事务的节点都开始准备（PREPARE），告诉事务管理器它们准备好提交了。第二个阶段，事务管理器告诉资源管理器执行ROLLBACK还是COMMIT。如果任何一个节点显示不能提交，则所有的节点都被告知需要回滚。<strong>可见与本地事务不同的是，需要多一次的PREPARE操作，待收到所有节点的同意信息后，再进行COMMIT或ROLLBACK操作</strong>。</p>
+<p>MySQL数据库XA事务的SQL命令如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">XA &#123;START|BEGIN&#125; xid [JOIN|RESUME]    </span><br><span class="line">XA <span class="keyword">END</span> xid [SUSPEND [<span class="keyword">FOR</span> MIGRATE]]</span><br><span class="line">XA <span class="keyword">PREPARE</span> xid</span><br><span class="line">XA <span class="keyword">COMMIT</span> xid [<span class="keyword">ONE</span> PHASE]</span><br><span class="line">XA <span class="keyword">ROLLBACK</span> xid</span><br><span class="line">XA RECOVER</span><br></pre></td></tr></table></figure>
+
+<h2 id="事务控制语句"><a href="#事务控制语句" class="headerlink" title="事务控制语句"></a>事务控制语句</h2><p>MySQL数据库中事务默认自动提交，即执行SQL语句后就会马上执行COMMIT操作。因此要显式地开启一个事务须使用命令<code>BEGIN</code>和<code>START TRANSACTION</code>，或者执行命令<code>SET AUTOCOMMIT=0</code>，以禁用当前会话的自动提交。</p>
+<h3 id="事务控制命令"><a href="#事务控制命令" class="headerlink" title="事务控制命令"></a>事务控制命令</h3><ul>
+<li><code>START TRANSACTION | BEGIN</code>：显式地开启一个事务；</li>
+<li><code>ROLLBACK</code>：回滚，也可以写为<code>ROLLBACK WORK</code>，二者等价；</li>
+<li><code>COMMIT</code>：提交，也可写为<code>COMMIT WORK</code>，二者几乎等价；</li>
+<li><code>SAVEPOINT identifier</code>：<code>SAVEPOINT</code>允许在事务中创建一个保存点，一个事务中可以有多个<code>SAVEPOINT</code>；</li>
+<li><code>RELEASE SAVEPOINT identifier</code>：删除一个事务的保存点，当没有一个保存点执行这句语句时，会抛出一个异常；</li>
+<li><code>ROLLBACK TO [SAVEPOINT] identifier</code> ：这个语句与<code>SAVEPOINT</code>命令一起使用，可以把事务回滚到标记点，而不回滚在此标记点之前的任何工作；</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> account (</span><br><span class="line">	id <span class="type">INT</span> <span class="keyword">PRIMARY</span> KEY AUTO_INCREMENT,</span><br><span class="line">	NAME <span class="type">VARCHAR</span>(<span class="number">10</span>),</span><br><span class="line">	balance <span class="keyword">DOUBLE</span></span><br><span class="line">);</span><br><span class="line"><span class="comment">-- 添加数据</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> account (NAME, balance) <span class="keyword">VALUES</span> (<span class="string">&#x27;zhangsan&#x27;</span>, <span class="number">1000</span>), (<span class="string">&#x27;lisi&#x27;</span>, <span class="number">1000</span>);</span><br><span class="line">		<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> account;</span><br><span class="line">UPDATE account <span class="keyword">SET</span> balance <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 张三给李四转账 500 元</span></span><br><span class="line"><span class="comment">-- 0. 开启事务</span></span><br><span class="line"><span class="keyword">START</span> TRANSACTION;</span><br><span class="line"><span class="comment">-- 1. 张三账户 -500</span></span><br><span class="line">UPDATE account <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">500</span> <span class="keyword">WHERE</span> NAME <span class="operator">=</span> <span class="string">&#x27;zhangsan&#x27;</span>;</span><br><span class="line"><span class="comment">-- 2. 李四账户 +500</span></span><br><span class="line">UPDATE account <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">500</span> <span class="keyword">WHERE</span> NAME <span class="operator">=</span> <span class="string">&#x27;lisi&#x27;</span>;</span><br><span class="line"><span class="comment">-- 3. 发现执行没有问题，提交事务</span></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br><span class="line"><span class="comment">-- 4. 发现出问题了，回滚事务</span></span><br><span class="line"><span class="keyword">ROLLBACK</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面有两点需要注意一下：</p>
+<ul>
+<li><code>START TRANSACTION</code>和<code>BEGIN</code>语句都可以在MySQL命令行下显式地开启一个事务。但是在存储过程中，MySQL数据库的分析器会自动将<code>BEGIN</code>识别为<code>BEGIN ...END</code>，因此在存储过程中只能使用<code>START TRANSACTION</code>语句来开启一个事务。所以建议开启事务用<code>START TRANCACTION</code>。</li>
+<li><code>COMMIT</code>和<code>COMMIT WORK</code>语句基本上是一致的，都用来提交事务。区别在于<code>COMMIT WORK</code>用来控制事务结束后的行为是<code>CHAIN</code>还是<code>NO_CHAIN</code>的。如果是<code>CHAIN</code>方式，那么事务就变成了链事务。用户可以通过参数<code>completion_type</code>来进行控制，默认该参数为<code>NO_CHAIN</code>，表示没有任何操作。在这种设置下，<code>COMMIT</code>和<code>COMMIT WORK</code>是完全等价的。当参数<code>completion_type</code>的值为<code>CHAIN</code>时，<code>COMMIT WORK</code>等同于<code>COMMIT AND CHAIN</code>，会在提交完该事务后马上自动开启一个相同隔离级别的事务，也就是链事务。</li>
+</ul>
+<h3 id="详谈事务提交"><a href="#详谈事务提交" class="headerlink" title="详谈事务提交"></a>详谈事务提交</h3><p>MySQL默认自动提交，一条DML(增删改)语句以及会自动提交一次事务，当然可以关闭自动提交，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* 查看事务的默认提交方式：</span><br><span class="line">    SELECT @@autocommit; -- 1 代表自动提交  0 代表手动提交</span><br><span class="line">* 修改默认提交方式： set @@autocommit &#x3D; 0;</span><br></pre></td></tr></table></figure>
+<p>但事务提交不仅包含DML语句，MySQL中还有一类隐式提交的语句，大致分类为以下三中：</p>
+<ul>
+<li>DDL语句：ALTER … 、UPGRADE …、CREATE …、DROP …、 RENAME TABLE和TRUNCATE TABLE。</li>
+<li>用来隐式地修改MySQL架构的操作：CREATE USER、DROP USER、GRANT、RENAME USER、REVOKE和SET PASSWORD。</li>
+<li>管理语句：ANALYZE TABLE、CACHE INDEX、CHECK TABLE、LOADINDEX INTO CACHE、OPTIMIZE TABLE和REPAIR TABLE</li>
+</ul>
+<p>关闭了自动提交后，隐式提交语句仍然会自动提交（无法回滚），而DML不会自动提交（即可以回滚），可以理解成 autocommit 只对DML有效。</p>
+<h2 id="事务的隔离级别"><a href="#事务的隔离级别" class="headerlink" title="事务的隔离级别"></a>事务的隔离级别</h2><h3 id="概念-1"><a href="#概念-1" class="headerlink" title="概念"></a>概念</h3><p>多个事务之间隔离的，相互独立的。但是如果多个事务操作同一批数据，则会引发一些问题，设置不同的隔离级别就可以解决这些问题。</p>
+<h3 id="存在的问题"><a href="#存在的问题" class="headerlink" title="存在的问题"></a>存在的问题</h3><ol>
+<li><strong>脏读</strong>：一个事务，读取到另一个事务中没有提交的数据。<ul>
+<li>例如，当事务B对data进行了修改但是未提交事务，此时事务A对data进行读取，并使用事务B修改的数据做业务处理，但B可能进行回滚，这时就会出现问题。</li>
+</ul>
+</li>
+<li>**不可重复读(虚读)**：在同一个事务中，两次读取到的数据不一样 <strong>（侧重值）</strong>。<ul>
+<li>例如，事务A、事务B同时对data进行访问，事务A对data进行读取，事务B对data进行修改，当事务A第一次对data进行读取完后事务B提交，此时当事务A第二次读取该数据时的数据就与第一次读取的数据不同，这种情况称为不可重复读。</li>
+</ul>
+</li>
+<li><strong>幻读</strong>：一个事务操作(DML)数据表中所有符合条件的记录，另一个事务又添加了一条记录，则第一个事务在修改后会发现还有一条记录没有被修改 <strong>（侧重记录）</strong>。<ul>
+<li>data 表有一条记录，事务A在执行读取操作，需要两次统计数据的总量，前一次查询数据总量后，此时事务B执行了新增数据的操作并提交后，这个时候事务A读取的数据总量和之前统计的不一样，就像产生了幻觉一样，平白无故的多了几条数据，称为幻读。</li>
+</ul>
+</li>
+</ol>
+<h3 id="四种隔离级别"><a href="#四种隔离级别" class="headerlink" title="四种隔离级别"></a>四种隔离级别</h3><ol>
+<li><strong>read uncommitted</strong>：读未提交<ul>
+<li>产生的问题：脏读、不可重复读、幻读</li>
+</ul>
+</li>
+<li><strong>read committed</strong>：读已提交<ul>
+<li>产生的问题：不可重复读、幻读</li>
+</ul>
+</li>
+<li><strong>repeatable read</strong>：可重复读 （MySQL默认），也被称为2.9999°的隔离<ul>
+<li>产生的问题：幻读</li>
+</ul>
+</li>
+<li><strong>serializable</strong>：串行化，也被称为3°的隔离<ul>
+<li>可以解决所有的问题</li>
+</ul>
+</li>
+</ol>
+<p><code>SET TRANSACTION</code>：这个语句可用来设置事务的隔离级别。InnoDB存储引擎提供的事务隔离级别名称为<code>READ UNCOMMITTED、READ COMMITTED、REPEATABLE READ、SERIALIZABLE</code>。</p>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">*</span> 数据库查询隔离级别：</span><br><span class="line">	<span class="keyword">select</span> @<span class="variable">@transaction</span>_isolation;</span><br><span class="line"><span class="operator">*</span> 数据库设置隔离级别：</span><br><span class="line">	<span class="keyword">set</span> [<span class="keyword">global</span><span class="operator">|</span>session] transaction_isolation <span class="operator">=</span> <span class="string">&#x27;级别字符串&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>具体而言：</p>
+<ul>
+<li>隔离级别从小到大安全性越来越高，但是效率越来越低，因为隔离级别越高意味着事务请求的锁越多或保持锁的时间就越长，那么其并发性就会越差。</li>
+<li>InnoDB存储引擎默认的支持隔离级别是<code>REPEATABLE READ</code>，但是与标准SQL不同的是，<strong>InnoDB存储引擎在REPEATABLE READ事务隔离级别下，可以使用Next-KeyLock的锁算法避免幻读的产生，也就是说对于InnoDB在RR级别下就完全遵循和满足事务的ACID特性了</strong>。</li>
+<li>由于InnoDB存储引擎在REPEATABLE READ隔离级别下就可以达到3°的隔离，因此一般不在本地事务中使用SERIALIZABLE隔离级别，SERIALIZABLE事务隔离级别主要用于InnoDB存储引擎的分布式事务。</li>
+<li>在READ COMMITTED事务隔离级别下，除了唯一性的约束检查及外键约束的检查需要<code>Gap Lock</code>，InnoDB存储引擎不会使用Gap Lock的锁算法。</li>
+<li>在SERIALIZABLE的事务隔离级别，InnoDB存储引擎会对每个SELECT语句后自动加上<code>LOCK IN SHARE MODE</code>，即给每个读取操作加一个共享锁。在这个事务隔离级别下，读占用锁了，因此对于一致性的非锁定读不再予以支持。</li>
+</ul>
+<p>关于Innodb的隔离级别的实现原理会在后面详细介绍，现在只是简单了解一下。</p>
+<blockquote>
+<p>ref：</p>
+<ol>
+<li><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/103580034?utm_source=wechat_session">Mysql：幻读到底是什么？</a></p>
+</li>
+<li><p>《MySQL技术内幕：SQL编程》</p>
+</li>
+</ol>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%8B%E5%8A%A1%E7%89%B9%E6%80%A7/" rel="tag"><i class="fa fa-tag"></i> 事务特性</a>
+              <a href="/tags/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" rel="tag"><i class="fa fa-tag"></i> 隔离级别</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/" rel="prev" title="MySQL中的存储过程与存储函数">
+                  <i class="fa fa-chevron-left"></i> MySQL中的存储过程与存储函数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/01/MySQL09_MySQL%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95%E2%80%94%E2%80%94%E5%8E%9F%E7%90%86%E5%8F%8A%E4%BC%98%E5%8C%96/" rel="next" title="MySQL中的索引——原理及优化">
+                  MySQL中的索引——原理及优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:04</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

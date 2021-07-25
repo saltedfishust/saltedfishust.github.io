@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="基本概念优缺点 ref: 《阿里巴巴Java开发手册》 【强制】禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。  所以在学习之前，首先我们要清楚存储过程的优点和缺点，互联网企业一般都禁用存储过程，例如阿里，因为它不适合用在需要频繁拓展和移植的业务中，但在模型相当稳定的场景，存储过程其实是非常好的一个选择，它可以提高开发效率。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中的存储过程与存储函数">
+<meta property="og:url" content="http://example.com/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="基本概念优缺点 ref: 《阿里巴巴Java开发手册》 【强制】禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。  所以在学习之前，首先我们要清楚存储过程的优点和缺点，互联网企业一般都禁用存储过程，例如阿里，因为它不适合用在需要频繁拓展和移植的业务中，但在模型相当稳定的场景，存储过程其实是非常好的一个选择，它可以提高开发效率。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-02T17:12:45.000Z">
+<meta property="article:modified_time" content="2021-07-25T06:40:48.304Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="存储过程">
+<meta property="article:tag" content="存储函数">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>MySQL中的存储过程与存储函数 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AB%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">含义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">存储过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AF%AD%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">创建语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E8%AF%AD%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">调用语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E8%AF%AD%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">删除语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%88%9B%E5%BB%BA%E4%BF%A1%E6%81%AF"><span class="nav-number">2.4.</span> <span class="nav-text">查看创建信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#in%E3%80%81out%E3%80%81in-out%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">in、out、in out参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0%EF%BC%88%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">存储函数（函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AF%AD%E6%B3%95-1"><span class="nav-number">4.1.</span> <span class="nav-text">创建语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E8%AF%AD%E6%B3%95-1"><span class="nav-number">4.2.</span> <span class="nav-text">调用语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E8%AF%AD%E6%B3%95-1"><span class="nav-number">4.3.</span> <span class="nav-text">删除语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%88%9B%E5%BB%BA%E4%BF%A1%E6%81%AF-1"><span class="nav-number">4.4.</span> <span class="nav-text">查看创建信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B8%B8%E6%A0%87"><span class="nav-number">5.</span> <span class="nav-text">游标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%B8%E6%A0%87%E7%9A%84%E5%BC%80%E9%94%80"><span class="nav-number">5.1.</span> <span class="nav-text">游标的开销</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">150</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL中的存储过程与存储函数
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-03 01:12:45" itemprop="dateCreated datePublished" datetime="2021-03-03T01:12:45+08:00">2021-03-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:40:48" itemprop="dateModified" datetime="2021-07-25T14:40:48+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><blockquote>
+<p>ref: 《阿里巴巴Java开发手册》</p>
+<p>【强制】禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。</p>
+</blockquote>
+<p>所以在学习之前，首先我们要清楚存储过程的优点和缺点，互联网企业一般都禁用存储过程，例如阿里，因为它不适合用在需要频繁拓展和移植的业务中，但在模型相当稳定的场景，存储过程其实是非常好的一个选择，它可以提高开发效率。<span id="more"></span></p>
+<h3 id="含义"><a href="#含义" class="headerlink" title="含义"></a>含义</h3><p>刚开始接触存储过程和存储函数的时候可能会产生误解，这里的“存储”并不是指这种语句是数据库用来存储数据的，“存储”的真正含义是存储预编译的语句，可以简单地把它理解成类似其他编程语言里的函数。</p>
+<ul>
+<li>存储过程:存储过程就是提前编译好的一段pl/sql语言，放置在数据库端，可以直接被调用，这一段pl/sql一般都是固定步骤的业务。</li>
+<li>存储函数：在存储过程的基础上加上返回值。</li>
+</ul>
+<p>MySQL中的存储过程和存储函数跟Oracle中的原理相同，语法也几乎一样，只有细微的差别，但他们的参数列表还是有较大差异的。</p>
+<h2 id="存储过程"><a href="#存储过程" class="headerlink" title="存储过程"></a>存储过程</h2><h3 id="创建语法"><a href="#创建语法" class="headerlink" title="创建语法"></a>创建语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> 存储过程名(参数列表)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    存储过程体(组合的<span class="keyword">SQL</span>语句);</span><br><span class="line"><span class="keyword">END</span>;</span><br></pre></td></tr></table></figure>
+<p>可以看出其创建语法跟Oracle略有区别，其所有的操作必须在<code>begin..end</code>之间，包括定义变量，而且没有<code>create or replace</code>这种写法，必须先删除再创建；还有一点，<strong>declare声明变量必须在存储过程的最开始，否则就会出错</strong>。</p>
+<p>这里插播一个小知识，我们知道 <code>;</code> 默认是语句的结束，当我们在dos界面输入一个很长的存储过程或者存储函数时，其内部必然含有大量 <code>;</code> ，当我们<code>enter</code>后会自动编译，我们不希望这样，我们想要的是同时编译一段语句，这个怎么做到哪？我们可以将本来默认的<code>;</code>改为别的符号，语法为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELIMITER $$   <span class="comment">-- 自定义的符号，不要加分号</span></span><br></pre></td></tr></table></figure>
+<p>所以上面我们可以改成，delimiter的作用范围为当前会话，可以理解成当前的<code>.sql</code>文件：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DELIMITER $$ </span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> 存储过程名(参数列表)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    存储过程体(组合的<span class="keyword">SQL</span>语句);</span><br><span class="line"><span class="keyword">END</span> $$</span><br></pre></td></tr></table></figure>
+
+<h3 id="调用语法"><a href="#调用语法" class="headerlink" title="调用语法"></a>调用语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CALL</span> 存储过程名(参数列表);</span><br></pre></td></tr></table></figure>
+<p>这个跟oracle也不一样，需要加CALL关键字。</p>
+<h3 id="删除语法"><a href="#删除语法" class="headerlink" title="删除语法"></a>删除语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">PROCEDURE</span> 存储过程名;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看创建信息"><a href="#查看创建信息" class="headerlink" title="查看创建信息"></a>查看创建信息</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> 存储过程名;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="in、out、in-out参数"><a href="#in、out、in-out参数" class="headerlink" title="in、out、in out参数"></a>in、out、in out参数</h2><p>用法跟oracle中有很大差异，这里的参数跟普通编程语言里比较相似，不像Oracle那么严格。</p>
+<ul>
+<li><strong>in</strong>：用于<strong>接收参数</strong>，将参数传入存储过程或存储函数内部后也可以进行修改，但是不建议，因为这样没有任何意义，这类似于c语言中的形参，在存储过程或者函数内部修改形参并不会改变外部传入参数的值，默认的参数模式为in；例如下面允许修改input（在Oracle中这种行为是非法的）但这样做没有任何意义：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- in参数</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> p1(<span class="keyword">IN</span> input <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">SET</span> input<span class="operator">=</span><span class="number">5</span>; <span class="comment">-- 可以改变input</span></span><br><span class="line">	<span class="keyword">SELECT</span> input;</span><br><span class="line"><span class="keyword">END</span> $$</span><br><span class="line"><span class="comment">-- 测试</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@n</span><span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@n</span>;  <span class="comment">-- 输出1</span></span><br><span class="line"><span class="keyword">CALL</span> p1(<span class="variable">@n</span>);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@n</span>;  <span class="comment">-- 输出还是1，并没有改变外部的变量</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>out</strong>：用于<strong>修改参数</strong>，必须先在外部定义变量（一般不赋值），然后传入存储过程或存储函数内部进行修改，存储过程或存储函数并不care在外部有没有赋值，即使有赋值也会忽略掉（清零赋值为null），可以理解成你传入output但不对它进行赋值，这样做没有意义，那么MySQL会自动赋值为null，例如：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 带out参数的存储过程，赋值</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> p2(<span class="keyword">OUT</span> output <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">SET</span> output<span class="operator">=</span><span class="number">10</span>;</span><br><span class="line">	<span class="keyword">SELECT</span> output;</span><br><span class="line"><span class="keyword">END</span> $$</span><br><span class="line"><span class="comment">-- 测试</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@num</span><span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@num</span>;  <span class="comment">-- 输出1</span></span><br><span class="line"><span class="keyword">CALL</span> p2(<span class="variable">@num</span>);</span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@num</span>;  <span class="comment">-- 输出10，改变了外部的变量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 带out参数的存储过程，不赋值，忽略（清空）传入的值</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> p3(<span class="keyword">OUT</span> output <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">SELECT</span> output;  <span class="comment">-- 清空，输出null</span></span><br><span class="line"><span class="keyword">END</span> $$</span><br><span class="line"><span class="comment">-- 测试</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@num</span><span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@num</span>;   <span class="comment">-- 输出1</span></span><br><span class="line"><span class="keyword">CALL</span> p3(<span class="variable">@num</span>); <span class="comment">-- 输出null</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@num</span>;   <span class="comment">-- 输出null，改变了外部变量！赋值为null</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>inout</strong>：既要用于<strong>接收参数</strong>，又要用于<strong>修改参数</strong>，既能干in的事又能干out的事，这里的in out才是真正类似于C语言中的函数参数传入地址，总结起来就是既能像in读入参数的值（out读不了，会清零为null），又能对外部变量赋值（in干不了，只能读值），例如：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 带in out参数的存储过程</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> p4(<span class="keyword">INOUT</span> in_output_a <span class="type">INT</span>, <span class="keyword">INOUT</span> in_output_b <span class="type">INT</span>)</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">SELECT</span> in_output_a, in_output_b;  <span class="comment">-- 输出1, 2</span></span><br><span class="line">	<span class="keyword">SET</span> in_output_a<span class="operator">=</span>in_output_a<span class="operator">*</span><span class="number">2</span>;</span><br><span class="line">	<span class="keyword">SET</span> in_output_b<span class="operator">=</span>in_output_b<span class="operator">*</span><span class="number">2</span>;</span><br><span class="line"><span class="keyword">END</span> $$</span><br><span class="line"><span class="comment">-- 测试</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@a</span><span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@b</span><span class="operator">=</span><span class="number">2</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@a</span>, <span class="variable">@b</span>;    <span class="comment">-- 输出1, 2</span></span><br><span class="line"><span class="keyword">CALL</span> p4(<span class="variable">@a</span>, <span class="variable">@b</span>);  <span class="comment">-- 输出1, 2; 说明读入了</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="variable">@a</span>, <span class="variable">@b</span>;    <span class="comment">-- 输出2, 4; 说明改变了外部的变量</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="存储函数（函数）"><a href="#存储函数（函数）" class="headerlink" title="存储函数（函数）"></a>存储函数（函数）</h2><p>函数大家应该都不陌生，因为 MySQL 内部已经预置了许多函数，例如MAX()，MIN()等。  </p>
+<h3 id="创建语法-1"><a href="#创建语法-1" class="headerlink" title="创建语法"></a>创建语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">DELIMITER $$ </span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> 函数名(参数列表) <span class="keyword">RETURNS</span> 返回类型</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">    函数体(一般步骤为：</span><br><span class="line">                先定义返回值，</span><br><span class="line">                再为返回值赋值，</span><br><span class="line">                最后返回);</span><br><span class="line"><span class="keyword">END</span> $$</span><br></pre></td></tr></table></figure>
+<p>注意这里的<code>returns</code>跟oracle中的不同，要加个s哦。</p>
+<h3 id="调用语法-1"><a href="#调用语法-1" class="headerlink" title="调用语法"></a>调用语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> 函数名(参数列表);</span><br></pre></td></tr></table></figure>
+<p>这里的意思是执行函数，并返回值。</p>
+<h3 id="删除语法-1"><a href="#删除语法-1" class="headerlink" title="删除语法"></a>删除语法</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">FUNCTION</span> 函数名;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看创建信息-1"><a href="#查看创建信息-1" class="headerlink" title="查看创建信息"></a>查看创建信息</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> 函数名;</span><br></pre></td></tr></table></figure>
+
+<p>我之所以在前面讲参数，是因为Oracle和MySQL中的存储函数有很大不同，MySQL中的存储函数是没有in、out、inout参数区分的，可以把它的参数看做默认是且必须是<code>in</code>类型的，而且还有一点需要注意的是存储函数只能有一个<code>返回值</code>，而且在存储函数内部是不允许使用<code>select 变量名;</code>这种格式打印返回值的。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 存储函数</span></span><br><span class="line">DELIMITER $$</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> f3(a <span class="type">INT</span>, b <span class="type">INT</span>) <span class="keyword">RETURNS</span> <span class="type">INT</span></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line">	<span class="keyword">DECLARE</span> SUM <span class="type">INT</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">SET</span> SUM<span class="operator">=</span>a<span class="operator">+</span>b;</span><br><span class="line">	<span class="comment">-- select sum; -- 这样写是非法的</span></span><br><span class="line">	<span class="keyword">RETURN</span> SUM;</span><br><span class="line"><span class="keyword">END</span> $$</span><br><span class="line"><span class="comment">-- 测试</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@a</span><span class="operator">=</span><span class="number">5</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@b</span><span class="operator">=</span><span class="number">5</span>;</span><br><span class="line"><span class="keyword">SELECT</span> f3(<span class="variable">@a</span>, <span class="variable">@b</span>); <span class="comment">-- 输出10</span></span><br></pre></td></tr></table></figure>
+<h2 id="游标"><a href="#游标" class="headerlink" title="游标"></a>游标</h2><p>我们知道一般处理数据库中的问题都是从面向集合的角度出发的，而游标（cursor）是一种面向过程的SQL编程方法。游标在大多数情况下的性能都不咋地，但在一些特定的场景下还是有其用武之地的，不然它也不会存在。</p>
+<p>MySQL 数据库中，游标可以在存储过程和函数（Stored Routine）以及触发器（Trigger）和事件（Event）中使用。游标需要与<code>handler</code>一起使用，并且游标要在handler之前定义。游标有以下3个属性。</p>
+<ul>
+<li>Asensitive：数据库也可以选择不复制结果集。</li>
+<li>Read only：不可更新。</li>
+<li>Nonscrollable：游标只能向一个方向行进，并且不可以跳过任何一行数据。</li>
+</ul>
+<p>使用方法：</p>
+<ul>
+<li>要使用游标，先要定义一个游标变量；</li>
+<li>然后打开定义的游标变量；</li>
+<li>接着从游标中取得数据；</li>
+<li>最后关闭游标。</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> cur_demo()</span><br><span class="line">    <span class="keyword">BEGIN</span></span><br><span class="line">        <span class="keyword">DECLARE</span> done <span class="type">INT</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">DECLARE</span> _emp_no <span class="type">INT</span>;</span><br><span class="line">        <span class="keyword">DECLARE</span> _dept_no <span class="type">VARCHAR</span>(<span class="number">10</span>);</span><br><span class="line">        <span class="keyword">DECLARE</span> cur1 <span class="keyword">CURSOR</span> <span class="keyword">FOR</span> <span class="keyword">SELECT</span> emp_no,dept_no <span class="keyword">FROM</span> dept_emp;</span><br><span class="line">        <span class="keyword">DECLARE</span> CONTINUE HANDLER <span class="keyword">FOR</span> <span class="keyword">NOT</span> FOUND <span class="keyword">SET</span> done <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">OPEN</span> cur1;</span><br><span class="line">        read_loop: LOOP</span><br><span class="line">        <span class="keyword">FETCH</span> cur1 <span class="keyword">INTO</span> _emp_no,_dept_no;</span><br><span class="line">        IF done <span class="keyword">THEN</span></span><br><span class="line">            LEAVE read_loop;</span><br><span class="line">        <span class="keyword">END</span> IF;</span><br><span class="line">        <span class="keyword">END</span> LOOP;</span><br><span class="line">        <span class="keyword">CLOSE</span> cur1;</span><br><span class="line">    <span class="keyword">END</span>;</span><br></pre></td></tr></table></figure>
+<p>注意变量的名称不能和游标定义中的列名一样。</p>
+<h3 id="游标的开销"><a href="#游标的开销" class="headerlink" title="游标的开销"></a>游标的开销</h3><p>游标最大的开销在于其需要对每一行数据进行处理，如果这个处理需要一定的时间，那么游标的操作可能非常慢。一般而言，对于面向集合的SQL语句，如果该SQL语句的扫描成本为O（N），那么使用游标不太可能带来性能上的巨大提升，因为游标需要额外的开销。但是对于某些扫描成本为O（N<sup>2</sup>）的问题，游标或许可以带来性能上的巨大提升。特定的场景中例如 连续聚合 和 最大会话数 等。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B/" rel="tag"><i class="fa fa-tag"></i> 存储过程</a>
+              <a href="/tags/%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/" rel="tag"><i class="fa fa-tag"></i> 存储函数</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/02/27/MySQL06_MySQL%E4%B8%AD%E7%9A%84%E5%8F%98%E9%87%8F/" rel="prev" title="MySQL中的变量">
+                  <i class="fa fa-chevron-left"></i> MySQL中的变量
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/" rel="next" title="MySQL中的事务处理">
+                  MySQL中的事务处理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:04</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

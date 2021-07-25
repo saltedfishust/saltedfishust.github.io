@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="类型属性在介绍数据类型前，先来介绍两个属性：UNSIGNED 和 ZEROFILL，是否使用这两个属性对选择数据类型有着莫大的关系。 UNSIGNEDUNSIGNED 属性就是将数字类型无符号化，与C、C++这些程序语言中的unsigned含义相同。例如，INT的类型范围是-2147483648～2147483647， INTUNSIGNED的范围类型就是0～4294967295。但要注意使用这个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中的基本变量">
+<meta property="og:url" content="http://example.com/2021/01/04/MySQL02_MySQL%E4%B8%AD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8F%98%E9%87%8F/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="类型属性在介绍数据类型前，先来介绍两个属性：UNSIGNED 和 ZEROFILL，是否使用这两个属性对选择数据类型有着莫大的关系。 UNSIGNEDUNSIGNED 属性就是将数字类型无符号化，与C、C++这些程序语言中的unsigned含义相同。例如，INT的类型范围是-2147483648～2147483647， INTUNSIGNED的范围类型就是0～4294967295。但要注意使用这个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/D0F01A0BBA454CC3840F10FBFFE851A2?method=download&shareKey=09849fae1e53e5fe3e26dfe3bdaad8a3">
+<meta property="article:published_time" content="2021-01-03T17:12:45.000Z">
+<meta property="article:modified_time" content="2021-07-25T06:33:06.027Z">
+<meta property="article:author" content="Saltedfish">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/D0F01A0BBA454CC3840F10FBFFE851A2?method=download&shareKey=09849fae1e53e5fe3e26dfe3bdaad8a3">
+
+
+<link rel="canonical" href="http://example.com/2021/01/04/MySQL02_MySQL%E4%B8%AD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8F%98%E9%87%8F/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>MySQL中的基本变量 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E5%B1%9E%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">类型属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UNSIGNED"><span class="nav-number">1.1.</span> <span class="nav-text">UNSIGNED</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZEROFILL"><span class="nav-number">1.2.</span> <span class="nav-text">ZEROFILL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8F%98%E9%87%8F"><span class="nav-number">2.</span> <span class="nav-text">基本变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E5%92%8C%E6%97%B6%E9%97%B4%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">日期和时间类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">数字类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B4%E5%9E%8B"><span class="nav-number">2.2.1.</span> <span class="nav-text">整型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E5%9E%8B%EF%BC%88%E9%9D%9E%E7%B2%BE%E7%A1%AE%E7%B1%BB%E5%9E%8B%EF%BC%89"><span class="nav-number">2.2.2.</span> <span class="nav-text">浮点型（非精确类型）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%B2%BE%E5%BA%A6%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.3.</span> <span class="nav-text">高精度类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%8D%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.4.</span> <span class="nav-text">位类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.3.</span> <span class="nav-text">字符类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CHAR-%E5%92%8C-VARCHAR"><span class="nav-number">2.3.1.</span> <span class="nav-text">CHAR 和 VARCHAR</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BINARY-%E5%92%8C-VARBINARY"><span class="nav-number">2.3.2.</span> <span class="nav-text">BINARY 和 VARBINARY</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BLOB-%E5%92%8C-TEXT"><span class="nav-number">2.3.3.</span> <span class="nav-text">BLOB 和 TEXT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ENUM-%E5%92%8C-SET"><span class="nav-number">2.3.4.</span> <span class="nav-text">ENUM 和 SET</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">150</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/04/MySQL02_MySQL%E4%B8%AD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8F%98%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL中的基本变量
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-04 01:12:45" itemprop="dateCreated datePublished" datetime="2021-01-04T01:12:45+08:00">2021-01-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:33:06" itemprop="dateModified" datetime="2021-07-25T14:33:06+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="类型属性"><a href="#类型属性" class="headerlink" title="类型属性"></a>类型属性</h2><p>在介绍数据类型前，先来介绍两个属性：<code>UNSIGNED</code> 和 <code>ZEROFILL</code>，是否使用这两个属性对选择数据类型有着莫大的关系。</p>
+<h3 id="UNSIGNED"><a href="#UNSIGNED" class="headerlink" title="UNSIGNED"></a>UNSIGNED</h3><p>UNSIGNED 属性就是将数字类型无符号化，与C、C++这些程序语言中的unsigned含义相同。例如，INT的类型范围是-2147483648～2147483647， INTUNSIGNED的范围类型就是0～4294967295。但要注意使用这个属性时可能会出现错误和无法预料的情况，例如：<span id="more"></span></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">+</span><span class="comment">-------+-------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">Table</span> <span class="operator">|</span> <span class="keyword">Create</span> <span class="keyword">Table</span>                                                                                                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> t     <span class="operator">|</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `t` (</span><br><span class="line">  `a` <span class="type">int</span> unsigned <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `b` <span class="type">int</span> unsigned <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4 <span class="keyword">COLLATE</span><span class="operator">=</span>utf8mb4_0900_ai_ci <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-------------------------------------------------------------------------------+</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>; <span class="comment">-- 插入数据</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+------+</span></span><br><span class="line"><span class="operator">|</span> a    <span class="operator">|</span> b    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> a <span class="operator">-</span> b <span class="keyword">from</span> t;</span><br><span class="line">ERROR <span class="number">1690</span> (<span class="number">22003</span>): <span class="type">BIGINT</span> UNSIGNED <span class="keyword">value</span> <span class="keyword">is</span> <span class="keyword">out</span> <span class="keyword">of</span> <span class="keyword">range</span> <span class="keyword">in</span> <span class="string">&#x27;(`eesy_mybatis`.`t`.`a` - `eesy_mybatis`.`t`.`b`)&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>上面 a-b 在windows系统直接报错，不卖关子了，是因为a-b即-1是0xFFFFFFFF，只是0xFFFFFFFF可以代表两种值：对于无符号的整型值，其是整型数的最大值，即4294967295；对于有符号的整型数来说，第一位代表符号位，如果是1，表示是负数，这时应该是取反加1得到负数值，即-1，-1超出了 UNSIGNED 的范围就直接报错了，所以这个谨慎使用。</p>
+<h3 id="ZEROFILL"><a href="#ZEROFILL" class="headerlink" title="ZEROFILL"></a>ZEROFILL</h3><p>ZEROFILL属性非常有意思，更像是一个<strong>显示</strong>的属性。这里还需要提及的是，一旦启用ZEROFILL属性，MySQL数据库为列自动添加UNSIGNED属性</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> <span class="keyword">create</span> <span class="keyword">table</span> t;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-----------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">Table</span> <span class="operator">|</span> <span class="keyword">Create</span> <span class="keyword">Table</span>                                                                                                                                                                     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-----------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> t     <span class="operator">|</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `t` (</span><br><span class="line">  `a` <span class="type">int</span>(<span class="number">10</span>) unsigned zerofill <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `b` <span class="type">int</span>(<span class="number">10</span>) unsigned zerofill <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4 <span class="keyword">COLLATE</span><span class="operator">=</span>utf8mb4_0900_ai_ci <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-----------------------------------------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.04</span> sec)</span><br><span class="line">Records: <span class="number">1</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t;</span><br><span class="line"><span class="operator">+</span><span class="comment">------------+------------+</span></span><br><span class="line"><span class="operator">|</span> a          <span class="operator">|</span> b          <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------+------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">0000000001</span> <span class="operator">|</span> <span class="number">0000000002</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------+------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>所以没啥用，就是显示时会起作用，对实际值没有任何影响。</p>
+<h2 id="基本变量"><a href="#基本变量" class="headerlink" title="基本变量"></a>基本变量</h2><h3 id="日期和时间类型"><a href="#日期和时间类型" class="headerlink" title="日期和时间类型"></a>日期和时间类型</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>空间</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DATETIME</td>
+<td>8 BYTE</td>
+<td>既显示日期，也显示时间，时间范围较大</td>
+</tr>
+<tr>
+<td>DATE</td>
+<td>3 BYTE</td>
+<td>只显示日期，范围同DATETIME</td>
+</tr>
+<tr>
+<td>TIME</td>
+<td>3 BYTE</td>
+<td>只显示时间，范围可正可负，可表示时间间隔</td>
+</tr>
+<tr>
+<td>TIMESTAMP</td>
+<td>4 BYTE</td>
+<td>既显示日期，也显示时间，不过比DATETIME范围小</td>
+</tr>
+<tr>
+<td>YEAR</td>
+<td>1 BYTE</td>
+<td>显示年份，可以指定宽度</td>
+</tr>
+</tbody></table>
+<p>日期函数可能是比较常使用的一种函数。下面介绍一些最为常用的日期函数。</p>
+<ul>
+<li>NOW、CURRENT_TIMESTAMP和SYSDATE<ul>
+<li>CURRENT_TIMESTAMP是NOW的同义词，也就是说两者是相同的。</li>
+<li>SYSDATE函数返回的是执行到当前函数时的时间，而NOW返回的是执行SQL语句时的时间。 </li>
+</ul>
+</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> t (a <span class="type">int</span>, b <span class="type">timestamp</span> <span class="keyword">default</span> <span class="built_in">current_timestamp</span>);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.29</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t (a) <span class="keyword">values</span> (<span class="number">1</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.05</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+</span></span><br><span class="line"><span class="operator">|</span> a    <span class="operator">|</span> b                   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span> <span class="number">2021</span><span class="number">-02</span><span class="number">-01</span> <span class="number">21</span>:<span class="number">06</span>:<span class="number">56</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h3 id="数字类型"><a href="#数字类型" class="headerlink" title="数字类型"></a>数字类型</h3><h4 id="整型"><a href="#整型" class="headerlink" title="整型"></a>整型</h4><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>空间</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TINYINT</td>
+<td>1 BYTES</td>
+<td>-128 ~ 127</td>
+</tr>
+<tr>
+<td>SMALLINT</td>
+<td>2 BYTES</td>
+<td>…</td>
+</tr>
+<tr>
+<td>MEDIUMINT</td>
+<td>3 BYTES</td>
+<td>…</td>
+</tr>
+<tr>
+<td>INT</td>
+<td>4 BYTES</td>
+<td>-2147483648 ~ 2147483647</td>
+</tr>
+<tr>
+<td>BIGINT</td>
+<td>8 BYTES</td>
+<td>…</td>
+</tr>
+</tbody></table>
+<h4 id="浮点型（非精确类型）"><a href="#浮点型（非精确类型）" class="headerlink" title="浮点型（非精确类型）"></a>浮点型（非精确类型）</h4><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>空间</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FLOAT</td>
+<td>4 bytes</td>
+<td>单精度</td>
+</tr>
+<tr>
+<td>DOUBLE</td>
+<td>8 bytes</td>
+<td>双精度</td>
+</tr>
+</tbody></table>
+<h4 id="高精度类型"><a href="#高精度类型" class="headerlink" title="高精度类型"></a>高精度类型</h4><p>DECIMAL 用于保存必须为确切精度的值。</p>
+<blockquote>
+<p>ref: 《阿里巴巴Java开发手册》</p>
+<p>【强制】小数类型为 decimal，禁止使用 float和 double。 说明：float和 double在存储的时候，存在精度损失的问题，很可能在值的比较时，得到不 正确的结果。如果存储的数据范围超过 decimal的范围，建议将数据拆成整数和小数分开存储</p>
+</blockquote>
+<p>使用：decimal(a,b)<br>参数说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">- a:指定小数点左边和右边可以存储的十进制数字的最大个数，最大为65。</span><br><span class="line">- b:指定小数点右边可以存储的十进制数字的最大个数。小数位数必须是从0~a之间的值，默认小数位数是0. </span><br><span class="line">举例说明，11615.23653234568</span><br><span class="line">1. decimal：11615，等价于 decimal(5, 0)</span><br><span class="line">2. decimal(3)：999，等价于 deciaml(3, 0)</span><br><span class="line">3. decimal(10,5)：11615.23653</span><br><span class="line">4. decimal(8,3)：11615.237 -- 会四舍五入</span><br><span class="line">超出精度范围的数会被强制进位并只显示数据类型定义的格式</span><br></pre></td></tr></table></figure>
+<h4 id="位类型"><a href="#位类型" class="headerlink" title="位类型"></a>位类型</h4><p>位类型，即BIT数据类型可用来保存位字段的值。BIT(M)类型表示允许存储M位数值，M范围为1到64，占用的空间为 (M+7)/8 字节。</p>
+<h3 id="字符类型"><a href="#字符类型" class="headerlink" title="字符类型"></a>字符类型</h3><blockquote>
+<p>拓展：<a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html">关于编码</a></p>
+</blockquote>
+<blockquote>
+<p>ASCII: ASCII 码一共规定了128个字符的编码，比如空格SPACE是32（二进制00100000），大写的字母A是65（二进制01000001）。这128个符号（包括32个不能打印出来的控制符号），只占用了一个字节的后面7位，最前面的一位统一规定为0。显然 ASCII码 只能满足美国人的需求。</p>
+</blockquote>
+<blockquote>
+<p>UNICODE：万国码。Unicode 当然是一个很大的集合，现在的规模可以容纳100多万个符号。需要注意的是，Unicode 只是一个符号集，它只规定了符号的二进制代码，却没有规定这个二进制代码应该如何存储，这里就有两个严重的问题，第一个问题是，如何才能区别 Unicode 和 ASCII ？计算机怎么知道三个字节表示一个符号，而不是分别表示三个符号呢？第二个问题是，我们已经知道，英文字母只用一个字节表示就够了，如果 Unicode 统一规定，每个符号用三个或四个字节表示，那么每个英文字母前都必然有二到三个字节是0，这对于存储来说是极大的浪费，文本文件的大小会因此大出二三倍，这是无法接受的。</p>
+</blockquote>
+<blockquote>
+<p>UTF-8：这里的关系是，UTF-8 是 Unicode 的实现方式之一。UTF-8 最大的一个特点，就是它是一种变长的编码方式。它可以使用1~4个字节表示一个符号，根据不同的符号而变化字节长度。</p>
+</blockquote>
+<p>字符串类型指 CHAR 和 VARCHAR、BINARY 和 VARBINARY、BLOB 和 TEXT、ENUM 和 SET。<br>| 类型       | 大小                      | 用途                            |<br>| ———- | ————————- | ——————————- |<br>| CHAR       | 0-255 (2^8) bytes         | 定长字符串                      |<br>| VARCHAR    | 0-65535 (2^16) bytes      | 变长字符串                      |<br>| TINYBLOB   | 0-255 (2^8) bytes         | 不超过 255 个字符的二进制字符串 |<br>| BLOB       | 0-65535 (2^16) bytes      | 二进制形式的长文本数据          |<br>| MEDIUMBLOB | 0-16777215 (2^24) bytes   | 二进制形式的中等长度文本数据    |<br>| LONGBLOB   | 0-4294967295 (2^32) bytes | 二进制形式的极大文本数据        |<br>| TINYTEXT   | 0-255 (2^8) bytes         | 短文本字符串                    |<br>| TEXT       | 0-65535 (2^16) bytes      | 长文本数据                      |<br>| MEDIUMTEXT | 0-16777215 (2^24) bytes   | 中等长度文本数据                |<br>| LONGTEXT   | 0-4294967295 (2^32) bytes | 极大文本数据                    |</p>
+<h4 id="CHAR-和-VARCHAR"><a href="#CHAR-和-VARCHAR" class="headerlink" title="CHAR 和 VARCHAR"></a>CHAR 和 VARCHAR</h4><ul>
+<li>CHAR(n) 和 VARCHAR(n) 中括号中 n 代表字符的个数，并不代表字节个数，比如 CHAR(30) 就可以存储 30 个字符。</li>
+<li>对于 CHAR 类型的字符串，MySQL 数据库会自动对存储列的右边进行填充（RightPadded）操作，直到字符串达到指定的长度N。而在读取该列时，MySQL 数据库会自动将填充的字符删除。</li>
+<li>VARCHAR 类型存储变长字段的字符类型，与 CHAR 类型不同的是，其存储时需要在前缀长度列表加上实际存储的字符，该字符占用1～2字节的空间。当存储的字符串长度小于255字节时，其需要1字节的空间，当大于255字节时，需要2字节的空间。所以，对于单字节的 latin1 来说，CHAR（10）占用10个字节这是毫无疑问的，而 VARCHAR（10）的最大占用空间数是11字节，因为其需要1字节来存放字符长度。</li>
+<li>CHAR 和 VARCHAR 类型类似，但它们保存和检索的方式不同。它们的最大长度和是否尾部空格被保留等方面也不同。在存储或检索过程中不进行大小写转换。</li>
+</ul>
+<blockquote>
+<p>ref: 《阿里巴巴Java开发手册》</p>
+<p>【强制】varchar是可变长字符串，不预先分配存储空间，长度不要超过 5000，如果存储长度大于此值，定义字段类型为 text，独立出来一张表，用主键来对应，避免影响其它字段索引效率。</p>
+</blockquote>
+<h4 id="BINARY-和-VARBINARY"><a href="#BINARY-和-VARBINARY" class="headerlink" title="BINARY 和 VARBINARY"></a>BINARY 和 VARBINARY</h4><p>BINARY 和 VARBINARY 类似于 CHAR 和 VARCHAR，不同的是它们包含二进制字符串而不要非二进制字符串。也就是说，它们包含字节字符串而不是字符字符串。这说明它们没有字符集，对其排序和比较都是按照二进制值进行对比。BINARY（N）和  VARBINARY（N）中的 N 指的是字节长度。</p>
+<h4 id="BLOB-和-TEXT"><a href="#BLOB-和-TEXT" class="headerlink" title="BLOB 和 TEXT"></a>BLOB 和 TEXT</h4><p>在大多数情况下，可以将 BLOB 类型的列视为足够大的 VARBINARY 类型的列。同样，也可以将TEXT类型的列视为足够大的 VARCHAR 类型的列。然而，BLOB 和 TEXT 在以下几个方面又不同于 VARBINARY 和 VARCHAR：</p>
+<ul>
+<li>在BLOB和TEXT类型的列上创建索引时，必须指定索引前缀的长度。而VARCHAR和VARBINARY的前缀长度是可选的。</li>
+<li>BLOB和TEXT类型的列不能有默认值。</li>
+<li>在排序时只使用列的前max_sort_length个字节。</li>
+</ul>
+<p>另外还有一点需要注意，即 BLOB 和 TEXT 的存储也与其他类型不同。在数据库中，最小的存储单元是页（也可以称为块）。为了有效存储列类型为BLOB或TEXT的大数据类型，一般将列的值存放在行溢出页（其他页/块），而数据页存储的行数据只包含BLOB或TEXT类型数据列前一部分数据。例如InnoDB存储引擎只存储前20字节，而该列的完整数据则存放在BLOB的行溢出页中。在这种方式下，数据页中能存放大量的行数据，从而提高了数据的查询效率，而且Innodb会将大 VARCHAR 类型字符串（如VARCHAR（65530））自动转化为 TEXT 或 BLOB 类型。</p>
+<p><img src="https://note.youdao.com/yws/api/personal/file/D0F01A0BBA454CC3840F10FBFFE851A2?method=download&shareKey=09849fae1e53e5fe3e26dfe3bdaad8a3"></p>
+<h4 id="ENUM-和-SET"><a href="#ENUM-和-SET" class="headerlink" title="ENUM 和 SET"></a>ENUM 和 SET</h4><p>ENUM和SET类型都是集合类型，不同的是ENUM类型最多可枚举65536个元素，而SET类型最多枚举64个元素。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> t (user_name <span class="type">varchar</span>(<span class="number">30</span>), sex enum(<span class="string">&#x27;male&#x27;</span>, <span class="string">&#x27;female&#x27;</span>));</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.33</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t <span class="keyword">select</span> <span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;male&#x27;</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.05</span> sec)</span><br><span class="line">Records: <span class="number">1</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t <span class="keyword">select</span> <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;female&#x27;</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.07</span> sec)</span><br><span class="line">Records: <span class="number">1</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t <span class="keyword">select</span> <span class="string">&#x27;c&#x27;</span>, <span class="string">&#x27;bimale&#x27;</span>;</span><br><span class="line">ERROR <span class="number">1265</span> (<span class="number">01000</span>): Data truncated <span class="keyword">for</span> <span class="keyword">column</span> <span class="string">&#x27;sex&#x27;</span> <span class="keyword">at</span> <span class="type">row</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+--------+</span></span><br><span class="line"><span class="operator">|</span> user_name <span class="operator">|</span> sex    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+--------+</span></span><br><span class="line"><span class="operator">|</span> a         <span class="operator">|</span> male   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> b         <span class="operator">|</span> female <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+--------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/15/MySQL01_MySQL%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E4%B8%8ESQL%E5%85%A5%E9%97%A8/" rel="prev" title="MySQL的基本概念与SQL入门">
+                  <i class="fa fa-chevron-left"></i> MySQL的基本概念与SQL入门
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/" rel="next" title="运行期（晚期）优化">
+                  运行期（晚期）优化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:04</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

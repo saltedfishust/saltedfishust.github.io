@@ -84,9 +84,9 @@
   <ul class="main-menu menu">
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">130</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">68</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
   </ul>
 </nav>
 
@@ -132,20 +132,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">68</span>
+          <span class="site-state-item-count">79</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">130</span>
+        <span class="site-state-item-count">150</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -618,7 +618,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/uploads/avatar.png">
@@ -631,7 +631,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">运行期（晚期）优化</a>
+          <a href="/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/" class="post-title-link" itemprop="url">MySQL中的锁</a>
         </h2>
 
         <div class="post-meta-container">
@@ -642,14 +642,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-01-05 18:11:23" itemprop="dateCreated datePublished" datetime="2021-01-05T18:11:23+08:00">2021-01-05</time>
+      <time title="创建时间：2021-05-03 01:12:45" itemprop="dateCreated datePublished" datetime="2021-05-03T01:12:45+08:00">2021-05-03</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-04 16:06:18" itemprop="dateModified" datetime="2021-03-04T16:06:18+08:00">2021-03-04</time>
+        <time title="修改时间：2021-07-25 14:50:48" itemprop="dateModified" datetime="2021-07-25T14:50:48+08:00">2021-07-25</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -657,7 +657,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
         </span>
     </span>
 
@@ -669,14 +669,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>5.2k</span>
+      <span>6.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
+      <span>12 分钟</span>
     </span>
 </div>
 
@@ -687,20 +687,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h3 id="本文待解答的问题"><a href="#本文待解答的问题" class="headerlink" title="本文待解答的问题"></a>本文待解答的问题</h3><ul>
-<li><input checked="" disabled="" type="checkbox"> 为何 HotSpot 虚拟机要使用解释器与即时编译器并存的架构？ </li>
-<li><input checked="" disabled="" type="checkbox"> 为何 HotSpot 虚拟机要实现两个（或三个）不同的即时编译器？ </li>
-<li><input checked="" disabled="" type="checkbox"> 程序何时使用解释器执行？何时使用编译器执行？ </li>
-<li><input checked="" disabled="" type="checkbox"> 哪些程序代码会被编译为本地代码？如何编译本地代码？ </li>
-<li><input checked="" disabled="" type="checkbox"> 即时编译器的编译优化技术有哪些？</li>
-<li><input checked="" disabled="" type="checkbox"> Java的多态特性为什么会给方法内联带来困难？</li>
-</ul>
-<blockquote>
-<p>说明：文中叙述中出现的“本地代码”等同于“机器码”。</p>
-</blockquote>
+          <p><img src="https://cdn.nlark.com/yuque/0/2021/jpeg/21753219/1627141827312-714de5c3-917d-4939-a9a4-ed7aeb55f0bd.jpeg" alt="img"></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/#more" rel="contents">
+              <a class="btn" href="/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -731,7 +721,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/01/JVM_10_%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/uploads/avatar.png">
@@ -744,7 +734,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/12/01/JVM_10_%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" class="post-title-link" itemprop="url">类加载器</a>
+          <a href="/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/" class="post-title-link" itemprop="url">MySQL的体系结构以及两种常见存储引擎的对比</a>
         </h2>
 
         <div class="post-meta-container">
@@ -755,14 +745,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2020-12-01 19:25:15" itemprop="dateCreated datePublished" datetime="2020-12-01T19:25:15+08:00">2020-12-01</time>
+      <time title="创建时间：2021-04-12 01:12:45" itemprop="dateCreated datePublished" datetime="2021-04-12T01:12:45+08:00">2021-04-12</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-04 16:01:16" itemprop="dateModified" datetime="2021-03-04T16:01:16+08:00">2021-03-04</time>
+        <time title="修改时间：2021-07-25 14:48:01" itemprop="dateModified" datetime="2021-07-25T14:48:01+08:00">2021-07-25</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -770,7 +760,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
         </span>
     </span>
 
@@ -782,216 +772,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>12k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>22 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h4 id="类与类加载器"><a href="#类与类加载器" class="headerlink" title="类与类加载器"></a>类与类加载器</h4><p>Java虚拟机设计团队有意把类加载阶段中的“通过一个类的全限定名来获取描述该类的二进制字节流”这个动作放到 Java 虚拟机外部去实现，以便让应用程序自己决定如何去获取所需的类。实现这个动作的代码被称为“类加载器”（Class Loader）。</p>
-<p>对于任意一个类，都必须由加载它的类加载器和这个类本身一起共同确立其在 Java 虚拟机中的唯一性，每 一个类加载器，都拥有一个独立的类名称空间。这句话可以表达得更通俗一些：<strong>比较两个类是否“相等”，只有在这两个类是由同一个类加载器加载的前提下才有意义</strong>。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/01/JVM_10_%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/25/JVM_9_%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%98%B6%E6%AE%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/11/25/JVM_9_%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%98%B6%E6%AE%B5/" class="post-title-link" itemprop="url">类加载阶段</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-25 19:25:15" itemprop="dateCreated datePublished" datetime="2020-11-25T19:25:15+08:00">2020-11-25</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-04 15:28:54" itemprop="dateModified" datetime="2021-03-04T15:28:54+08:00">2021-03-04</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>一个类型从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期将会经历加载、验证、准备、解析、初始化、使用和卸载七个阶段，其中验证、准备、解析三个部分统称为连接（Linking）。类的生命周期如下图：</p>
-<p><img src="https://note.youdao.com/yws/api/personal/file/DF757E66497A4BFC88A021A246C9937F?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
-<p>注意：加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类型的加载过程必须按照这种顺序按部就班地开始，而<strong>解析阶段则不一定：它在某些情况下可以在初始化阶段之后再开始， 这是为了支持Java语言的动态绑定特性（也称为运行时绑定或晚期绑定）</strong>，没错这就是我们前面介绍调用方法字节码指令时的 <code>invokevirtual</code> 虚方法，后面在讲运行期（编译器）优化的方法内联时还会遇到多态的，可见多态这个特性对 Java 产生了多么深远的影响。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/25/JVM_9_%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%98%B6%E6%AE%B5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/25/SQL05_drop&truncate%E5%92%8Cdelete%E7%9A%84%E5%8C%BA%E5%88%AB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/11/25/SQL05_drop&truncate%E5%92%8Cdelete%E7%9A%84%E5%8C%BA%E5%88%AB/" class="post-title-link" itemprop="url">drop、truncate和delete的区别</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-25 01:12:45" itemprop="dateCreated datePublished" datetime="2020-11-25T01:12:45+08:00">2020-11-25</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-25 14:23:42" itemprop="dateModified" datetime="2021-07-25T14:23:42+08:00">2021-07-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/SQL%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">SQL基础</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.3k</span>
+      <span>1.9k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -1009,10 +790,22 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h1><p>删除表中的数据的指令有delete,truncate, 其中truncate先删除表，再新建一个表。truncate与没有 where条件的delete语句类似；但是，truncate速度更快，使用的系统资源和事务日志资源更少。truncate和delete只删除数据，drop则删除整个表（结构和数据），所以当不再需要该表时，用drop；当你仍要保留该表，但要删除所有记录时， 用 truncate；当你要删除部分记录用 delete配合where条件。
+          <h2 id="MySQL的体系结构"><a href="#MySQL的体系结构" class="headerlink" title="MySQL的体系结构"></a>MySQL的体系结构</h2><p>从下图可以发现，MySQL主要由以下几部分组成：</p>
+<ul>
+<li>连接池组件</li>
+<li>工具组件（MySQL Shell）</li>
+<li>NoSQL/SQL接口组件</li>
+<li>查询分析器组件</li>
+<li>优化器组件</li>
+<li>缓冲缓冲（Caches &amp; Buffers）组件</li>
+<li>插件式存储引擎</li>
+<li>物理文件系统</li>
+</ul>
+<p><img src="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png"></p>
+<p>其中MySQL数据库区别于其他数据库的最重要的一个特点就是其<strong>插件式的表存储引擎</strong>，注意我们说的是表存储引擎，因为其存储引擎是以表为单位的。我们可以把MySQL的架构按照其功能特点分为四层，分别为连接层、服务层、引擎层和存储层（物理层）。
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/11/25/SQL05_drop&truncate%E5%92%8Cdelete%E7%9A%84%E5%8C%BA%E5%88%AB/#more" rel="contents">
+              <a class="btn" href="/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1043,7 +836,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/20/JVM_8_%E7%BC%96%E8%AF%91%E6%9C%9F%E6%97%A9%E6%9C%9F%E4%BC%98%E5%8C%96%E8%AF%AD%E6%B3%95%E7%B3%96/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/02/MySQL10_MySQL%E4%B8%AD%E7%9A%84%E5%88%86%E5%8C%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/uploads/avatar.png">
@@ -1056,7 +849,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/11/20/JVM_8_%E7%BC%96%E8%AF%91%E6%9C%9F%E6%97%A9%E6%9C%9F%E4%BC%98%E5%8C%96%E8%AF%AD%E6%B3%95%E7%B3%96/" class="post-title-link" itemprop="url">编译期（早期）优化 ——语法糖</a>
+          <a href="/2021/04/02/MySQL10_MySQL%E4%B8%AD%E7%9A%84%E5%88%86%E5%8C%BA/" class="post-title-link" itemprop="url">MySQL中的分区</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1067,14 +860,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2020-11-20 19:25:15" itemprop="dateCreated datePublished" datetime="2020-11-20T19:25:15+08:00">2020-11-20</time>
+      <time title="创建时间：2021-04-02 01:12:45" itemprop="dateCreated datePublished" datetime="2021-04-02T01:12:45+08:00">2021-04-02</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-02 13:29:18" itemprop="dateModified" datetime="2021-03-02T13:29:18+08:00">2021-03-02</time>
+        <time title="修改时间：2021-07-25 14:46:26" itemprop="dateModified" datetime="2021-07-25T14:46:26+08:00">2021-07-25</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1082,7 +875,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
         </span>
     </span>
 
@@ -1094,14 +887,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>13k</span>
+      <span>14k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>23 分钟</span>
+      <span>25 分钟</span>
     </span>
 </div>
 
@@ -1112,12 +905,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="先谈一下编译"><a href="#先谈一下编译" class="headerlink" title="先谈一下编译"></a>先谈一下编译</h2><p>在Java技术下谈“编译期”而没有具体上下文语境的话，其实是一句很含糊的表述，因为它可能是指一个前端编译器（叫“编译器的前端”更准确一些）把 <code>.java文件转变成.class文件</code>的过程；也可能是指Java虚拟机的即时编译器（常称JIT编译器，Just In Time Compiler）运行期把<code>字节码转变成本地机器码</code>的过程；还可能是指使用静态的提前编译器（常称AOT编译器，Ahead Of Time Compiler）直接把程序编译成与目标机器指令。 </p>
-<p>我们接下来将要讨论的是前端编译器的优化，也就是javac编译器，而后期优化将会在稍后讨论。</p>
-<h2 id="语法糖"><a href="#语法糖" class="headerlink" title="语法糖"></a>语法糖</h2><p>所谓的 语法糖，其实就是指 javac 编译器把 .java 源码编译为 .class 字节码的过程中，自动生成和转换的一些代码，主要是为了减轻程序员的负担，算是 java 编译器给我们的一个额外福利（给糖吃嘛），常见的语法糖有以下几种。</p>
+          <h2 id="分区概述"><a href="#分区概述" class="headerlink" title="分区概述"></a>分区概述</h2><ul>
+<li>分区是一种表的设计模式。分区功能并不是在存储引擎层完成的，因此不只有InnoDB存储引擎支持分区。</li>
+<li>分区的过程是将一个表或索引分解为多个更小、更可管理的部分。就访问数据库的应用而言，从逻辑上讲，只有一个表或一个索引，但是在物理上这个表或索引可能由数十个物理分区组成。每个分区都是独立的对象，可以独自处理，也可以作为一个更大对象的一部分进行处理。</li>
+<li>MySQL数据库支持的分区类型为水平分区（分行），并不支持垂直分区（分列）。此外，MySQL数据库的分区是局部分区索引，一个分区中既存放数据又存放索引。全局分区是指，数据存放各个分区中，但是所有数据的索引放在一个对象中。目前，MySQL数据库暂时不支持全局分区。
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/11/20/JVM_8_%E7%BC%96%E8%AF%91%E6%9C%9F%E6%97%A9%E6%9C%9F%E4%BC%98%E5%8C%96%E8%AF%AD%E6%B3%95%E7%B3%96/#more" rel="contents">
+              <a class="btn" href="/2021/04/02/MySQL10_MySQL%E4%B8%AD%E7%9A%84%E5%88%86%E5%8C%BA/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1148,7 +942,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/15/JVM_7_%E7%B1%BB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8C%87%E4%BB%A4/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/01/MySQL09_MySQL%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95%E2%80%94%E2%80%94%E5%8E%9F%E7%90%86%E5%8F%8A%E4%BC%98%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/uploads/avatar.png">
@@ -1161,7 +955,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/11/15/JVM_7_%E7%B1%BB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8C%87%E4%BB%A4/" class="post-title-link" itemprop="url">类文件结构与字节码指令</a>
+          <a href="/2021/04/01/MySQL09_MySQL%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95%E2%80%94%E2%80%94%E5%8E%9F%E7%90%86%E5%8F%8A%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">MySQL中的索引——原理及优化</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1172,14 +966,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2020-11-15 19:25:15" itemprop="dateCreated datePublished" datetime="2020-11-15T19:25:15+08:00">2020-11-15</time>
+      <time title="创建时间：2021-04-01 01:12:45" itemprop="dateCreated datePublished" datetime="2021-04-01T01:12:45+08:00">2021-04-01</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-27 22:02:32" itemprop="dateModified" datetime="2021-01-27T22:02:32+08:00">2021-01-27</time>
+        <time title="修改时间：2021-07-25 14:45:07" itemprop="dateModified" datetime="2021-07-25T14:45:07+08:00">2021-07-25</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1187,7 +981,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
         </span>
     </span>
 
@@ -1199,14 +993,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>18k</span>
+      <span>7k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>33 分钟</span>
+      <span>13 分钟</span>
     </span>
 </div>
 
@@ -1217,10 +1011,230 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">类加载与字节码技术 包括以下几篇学习笔记</span><br><span class="line">7 - 类文件结构与字节码指令</span><br><span class="line">8 - 编译期（早期）优化——语法糖</span><br><span class="line">9 - 类加载阶段</span><br><span class="line">10 - 类加载器</span><br><span class="line">11 - 运行期（晚期）优化</span><br></pre></td></tr></table></figure>
+          <h2 id="数据的读取（缓冲池、顺序读取与随机读取）"><a href="#数据的读取（缓冲池、顺序读取与随机读取）" class="headerlink" title="数据的读取（缓冲池、顺序读取与随机读取）"></a>数据的读取（缓冲池、顺序读取与随机读取）</h2><p>在学习索引之前，我们先探讨一下数据库中的数据是怎么读取的。根据存储介质的不同，可以将数据库分为基于磁盘的数据库系统、基于内存的数据库系统，以及混合型数据库系统。毫无疑问，基于内存的数据库系统是最快的，因为数据库不需要对磁盘进行操作。磁盘的速度要远慢于内存的速度，因此基于磁盘的数据库系统一般都有缓冲池，即一块内存区域，其作用是将从磁盘上读取的指定大小数据—称为页（或块）放入缓冲池，当再次读取时，数据库首先判断该页是否在缓冲池中，如果在则直接读取缓冲池中的页，如果不在则读取磁盘上的页。对于写操作，数据库将页读入缓冲池，然后在缓冲池中对页进行修改，修改完成后的页一般被异步地写入磁盘上。对于缓冲池的维护一般采用最近最少使用（Least Recently Used，LRU）算法。通过缓冲池避免频繁的磁盘IO，可以加快读取的速度。
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/11/15/JVM_7_%E7%B1%BB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E4%B8%8E%E5%AD%97%E8%8A%82%E7%A0%81%E6%8C%87%E4%BB%A4/#more" rel="contents">
+              <a class="btn" href="/2021/04/01/MySQL09_MySQL%E4%B8%AD%E7%9A%84%E7%B4%A2%E5%BC%95%E2%80%94%E2%80%94%E5%8E%9F%E7%90%86%E5%8F%8A%E4%BC%98%E5%8C%96/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/" class="post-title-link" itemprop="url">MySQL中的事务处理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-18 01:12:45" itemprop="dateCreated datePublished" datetime="2021-03-18T01:12:45+08:00">2021-03-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:42:53" itemprop="dateModified" datetime="2021-07-25T14:42:53+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>本文待解答的问题</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 什么是事务</li>
+<li><input checked="" disabled="" type="checkbox"> 事务的四大特性ACID</li>
+<li><input checked="" disabled="" type="checkbox"> 事务的分类</li>
+<li><input checked="" disabled="" type="checkbox"> 怎么用事务（控制语句）</li>
+<li><input checked="" disabled="" type="checkbox"> 隔离性产生的3个问题</li>
+<li><input checked="" disabled="" type="checkbox"> 四种隔离级别</li>
+</ul>
+<h2 id="事务概述"><a href="#事务概述" class="headerlink" title="事务概述"></a>事务概述</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>事务是由一步或几步数据库操作序列组成的完整的业务逻辑单元，这系列操作要么全部执行成功，要么全部执行失败，不能再分。</p>
+<p>比如：A给B转账100元，A的银行卡就会少100元，B的银行卡就会多100元，整个过程要么全部执行成功，要么全部失败。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/18/MySQL08_MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">MySQL中的存储过程与存储函数</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-03 01:12:45" itemprop="dateCreated datePublished" datetime="2021-03-03T01:12:45+08:00">2021-03-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:40:48" itemprop="dateModified" datetime="2021-07-25T14:40:48+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><blockquote>
+<p>ref: 《阿里巴巴Java开发手册》</p>
+<p>【强制】禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。</p>
+</blockquote>
+<p>所以在学习之前，首先我们要清楚存储过程的优点和缺点，互联网企业一般都禁用存储过程，例如阿里，因为它不适合用在需要频繁拓展和移植的业务中，但在模型相当稳定的场景，存储过程其实是非常好的一个选择，它可以提高开发效率。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/03/MySQL07_MySQL%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E4%B8%8E%E5%AD%98%E5%82%A8%E5%87%BD%E6%95%B0/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1244,7 +1258,7 @@
 
 
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 <script src="/js/comments.js"></script>
 </div>
@@ -1267,13 +1281,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">440k</span>
+    <span title="站点总字数">530k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">13:20</span>
+    <span title="站点阅读时长">16:04</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

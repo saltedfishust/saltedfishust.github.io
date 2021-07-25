@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="查询操作是关系数据库中使用最为频繁的操作，也是构成其他SQL语句（如DELETE、UPDATE）的基础，一个简单的 select 语句其背后的执行确实十分复杂的，我们不仅要学会怎么用，而且要知晓其背后的原理。对于查询处理，可将其分为逻辑查询处理及物理查询处理。逻辑查询处理表示执行查询应该产生什么样的结果，而物理查询代表 MySQL 数据库是如何得到该结果的（例如MySQL内部对语句的优化）。两种查">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL查询处理（SELECT的处理过程）">
+<meta property="og:url" content="http://example.com/2021/01/08/MySQL03_SQL%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86(SELECT%E7%9A%84%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B)/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="查询操作是关系数据库中使用最为频繁的操作，也是构成其他SQL语句（如DELETE、UPDATE）的基础，一个简单的 select 语句其背后的执行确实十分复杂的，我们不仅要学会怎么用，而且要知晓其背后的原理。对于查询处理，可将其分为逻辑查询处理及物理查询处理。逻辑查询处理表示执行查询应该产生什么样的结果，而物理查询代表 MySQL 数据库是如何得到该结果的（例如MySQL内部对语句的优化）。两种查">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/49DDF5C52FA1430A81BAA76EB00154A1?method=download&shareKey=09849fae1e53e5fe3e26dfe3bdaad8a3">
+<meta property="og:image" content="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png">
+<meta property="article:published_time" content="2021-01-07T17:12:45.000Z">
+<meta property="article:modified_time" content="2021-07-25T06:34:43.167Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="SELECT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://note.youdao.com/yws/api/personal/file/49DDF5C52FA1430A81BAA76EB00154A1?method=download&shareKey=09849fae1e53e5fe3e26dfe3bdaad8a3">
+
+
+<link rel="canonical" href="http://example.com/2021/01/08/MySQL03_SQL%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86(SELECT%E7%9A%84%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B)/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>SQL查询处理（SELECT的处理过程） | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">逻辑查询处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-FROM%EF%BC%88%E7%AC%9B%E5%8D%A1%E5%B0%94%E7%A7%AF%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">1. FROM（笛卡尔积）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ON%EF%BC%88%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BF%87%E6%BB%A4%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">2. ON（第一次过滤）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-JOIN%EF%BC%88%E6%9C%89%E5%8F%AF%E8%83%BD%E6%B7%BB%E5%8A%A0%E5%A4%96%E9%83%A8%E8%A1%8C%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">3. JOIN（有可能添加外部行）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-WHERE%EF%BC%88%E7%AC%AC%E4%BA%8C%E6%AC%A1%E8%BF%87%E6%BB%A4%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">4. WHERE（第二次过滤）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-GROUP-BY"><span class="nav-number">1.5.</span> <span class="nav-text">5. GROUP BY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-CUBE-ROLLUP"><span class="nav-number">1.6.</span> <span class="nav-text">6. CUBE | ROLLUP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-HAVING%EF%BC%88%E7%AC%AC%E4%B8%89%E6%AC%A1%E8%BF%87%E6%BB%A4%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">7. HAVING（第三次过滤）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-SELECT"><span class="nav-number">1.8.</span> <span class="nav-text">8. SELECT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-DISTINCT"><span class="nav-number">1.9.</span> <span class="nav-text">9. DISTINCT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-ORDER-BY"><span class="nav-number">1.10.</span> <span class="nav-text">10. ORDER BY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-LIMIT"><span class="nav-number">1.11.</span> <span class="nav-text">11. LIMIT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">物理查询处理</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">150</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/08/MySQL03_SQL%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86(SELECT%E7%9A%84%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SQL查询处理（SELECT的处理过程）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 01:12:45" itemprop="dateCreated datePublished" datetime="2021-01-08T01:12:45+08:00">2021-01-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:34:43" itemprop="dateModified" datetime="2021-07-25T14:34:43+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>查询操作是关系数据库中使用最为频繁的操作，也是构成其他SQL语句（如DELETE、UPDATE）的基础，一个简单的 select 语句其背后的执行确实十分复杂的，我们不仅要学会怎么用，而且要知晓其背后的原理。对于查询处理，可将其分为<code>逻辑查询处理</code>及<code>物理查询处理</code>。逻辑查询处理表示执行查询应该产生什么样的结果，而物理查询代表 MySQL 数据库是如何得到该结果的（例如MySQL内部对语句的优化）。两种查询的方法可能完全不同，但是得到的结果必定是相同的。<span id="more"></span></p>
+<h2 id="逻辑查询处理"><a href="#逻辑查询处理" class="headerlink" title="逻辑查询处理"></a>逻辑查询处理</h2><p>我们可能知道SQL语句的执行顺序不是按照编码顺序的，例如我们在select后面对列起的别名为什么在where里不能使用？这种问题的答案其实就是因为SQL语句的执行顺序导致的。先给出结论，接下来我们将具体分析其执行过程。</p>
+<p><img src="https://note.youdao.com/yws/api/personal/file/49DDF5C52FA1430A81BAA76EB00154A1?method=download&shareKey=09849fae1e53e5fe3e26dfe3bdaad8a3"></p>
+<p>可以看到一共有11个步骤，最先执行的是FROM操作，最后执行的是LIMIT操作。每个操作都会产生一张虚拟表，该虚拟表作为一个处理的输入。这些虚拟表对用户是隐藏的，只有最后一步生成的虚拟表才会返回给用户。如果没有在查询中指定某一子句，则将跳过相应的步骤。</p>
+<p>接着我们来具体分析查询处理的各个阶段：</p>
+<h3 id="1-FROM（笛卡尔积）"><a href="#1-FROM（笛卡尔积）" class="headerlink" title="1. FROM（笛卡尔积）"></a>1. FROM（笛卡尔积）</h3><p>对FROM子句中的左表 <left_table> 和右表 <right_table> 执行笛卡儿积（Cartesian product），也叫作交叉连结，产生虚拟表VT1。</p>
+<h3 id="2-ON（第一次过滤）"><a href="#2-ON（第一次过滤）" class="headerlink" title="2. ON（第一次过滤）"></a>2. ON（第一次过滤）</h3><p>对虚拟表VT1应用ON筛选，只有那些符合<join_condition>的行才被插入虚拟表VT2中。</p>
+<p><strong>注意</strong>：对于大多数的编程语言而言，逻辑表达式的值只有两种：TRUE和FALSE。但是在关系数据库中起逻辑表达式作用的并非只有两种，还有一种称为三值逻辑的表达式。<br>例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="number">1</span> <span class="operator">=</span> <span class="keyword">NULL</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span> <span class="operator">=</span> <span class="keyword">NULL</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span>     <span class="keyword">NULL</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="keyword">NULL</span> <span class="operator">=</span> <span class="keyword">NULL</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">=</span> <span class="keyword">NULL</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+</span></span><br><span class="line"><span class="operator">|</span>        <span class="keyword">NULL</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>第一个NULL值的比较返回的是NULL而不是0，第二个NULL值的比较返回的仍然是NULL，而不是1。对于比较返回值为NULL的情况，用户应该将其视为UNKNOWN，即表示未知的。这时为什么哪？因为在某些情况下，NULL返回值可能代表1，即NULL等于NULL，而有时NULL返回值可能代表0，对于在ON过滤条件下的NULL值比较，此时的比较结果为UNKNOWN，但视为FALSE来进行处理，因为是未知的，即两个NULL并不相同。但是在下面两种情况下认为两个NULL值的比较是相等的：</p>
+<ul>
+<li>GROUP BY子句把所有 NULL 值分到同一组</li>
+<li>ORDER BY子句中把所有 NULL 值排列在一起（NULL值默认最小）</li>
+</ul>
+<h3 id="3-JOIN（有可能添加外部行）"><a href="#3-JOIN（有可能添加外部行）" class="headerlink" title="3. JOIN（有可能添加外部行）"></a>3. JOIN（有可能添加外部行）</h3><p>如果指定了OUTER JOIN（如LEFT OUTER JOIN、RIGHT OUTER JOIN），那么保留表中未匹配的行作为外部行添加到虚拟表VT2中，产生虚拟表VT3。如果FROM子句包含两个以上表，则对上一个连接生成的结果表VT3和下一个表重复执行步骤1）～步骤3），直到处理完所有的表为止。</p>
+<p><strong>注意</strong>：所以这里我们发现上面 ON 的第一次过滤并非永久过滤，在后面的 OUTER JOIN 可能还会将过滤掉的行添加进去，这与下面的 WHERE 是不同的，WHERE 的过滤是永久过滤的，所以有时将过滤条件写在ON 和 WHERE 上会造成不同的结果，但如果是内连接（不添加外部行），过滤条件在ON子句和WHERE子句中是没有任何区别的。</p>
+<h3 id="4-WHERE（第二次过滤）"><a href="#4-WHERE（第二次过滤）" class="headerlink" title="4. WHERE（第二次过滤）"></a>4. WHERE（第二次过滤）</h3><p>对虚拟表VT3应用WHERE过滤条件，只有符合<where_condition>的记录才被插入虚拟表VT4中。</p>
+<p><strong>注意</strong>：由于 WHERE 是在 SELECT 之前调用，所以</p>
+<ul>
+<li>由于数据还没有分组，因此现在还不能在WHERE过滤器中使用 where_condition=MIN(col) 这类对统计的过滤。</li>
+<li>由于没有进行列的选取操作，因此在SELECT中使用列的别名也是不被允许的，如SELECT city as c FROM t WHERE c=’ShangHai’是不允许出现的。</li>
+</ul>
+<h3 id="5-GROUP-BY"><a href="#5-GROUP-BY" class="headerlink" title="5. GROUP BY"></a>5. GROUP BY</h3><p>根据GROUP BY子句中的列，对VT4中的记录进行分组操作，产生VT5。</p>
+<p><strong>注意</strong>：前面已经介绍了在执行GROUP BY阶段，数据库认为两个NULL值是相等的，因此会将NULL值分到同一个分组中。</p>
+<h3 id="6-CUBE-ROLLUP"><a href="#6-CUBE-ROLLUP" class="headerlink" title="6. CUBE | ROLLUP"></a>6. CUBE | ROLLUP</h3><p>对表VT5进行CUBE或ROLLUP操作，产生表VT6。</p>
+<p>group by 为对列进行分组，只展现分组统计的值，而rollup为分层次展现，cube为展现列中所有层次，用于对多个列进行分组时，简单了解即可。例如 group by a,b,c ;那么</p>
+<ul>
+<li>group by a,b,c with rollup; 就相当于 group by a + group by a,b + group by a,b,c；</li>
+<li>group by a,b,c with cube; 就相当于 group by a + group by b + group by c + group by a,b + group by a,c + group by b,c + group by a,b,c;</li>
+</ul>
+<h3 id="7-HAVING（第三次过滤）"><a href="#7-HAVING（第三次过滤）" class="headerlink" title="7. HAVING（第三次过滤）"></a>7. HAVING（第三次过滤）</h3><p>对虚拟表VT6应用HAVING过滤器，只有符合<having_condition>的记录才被插入虚拟表VT7中。</p>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>HAVING是对分组条件进行过滤的筛选器，即过滤的是分组而不是记录，ON 和 WHERE 过滤的都是行，而 HAVING 必须在 GROUP BY 之后过滤的是整个分组。</li>
+<li> 在这个分组中如果使用到 COUNT( ) 时要特别注意能否使用 COUNT(1) 或 COUNT(*)，因为这会把通过OUTER JOIN添加的行（包含NULL值）统计入内，视实际需要而定。</li>
+</ul>
+<p><strong>补充：关于count</strong></p>
+<ol>
+<li><code>count(1)</code>与<code>count(*)</code>得到的结果一致，包含<code>null</code>值。</li>
+<li><code>count(字段)</code>不计算<code>null</code>值</li>
+<li><code>count(null)</code>结果恒为0</li>
+</ol>
+<h3 id="8-SELECT"><a href="#8-SELECT" class="headerlink" title="8. SELECT"></a>8. SELECT</h3><p>第二次执行SELECT操作，选择指定的列，插入到虚拟表VT8中。</p>
+<p><strong>注意</strong>：列的别名也不能在SELECT中的其他别名表达式中使用，例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> order_id <span class="keyword">as</span> o, o<span class="operator">+</span><span class="number">1</span> <span class="keyword">as</span> n <span class="keyword">from</span> orders; <span class="comment">-- ×</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-DISTINCT"><a href="#9-DISTINCT" class="headerlink" title="9. DISTINCT"></a>9. DISTINCT</h3><p>去除重复数据，产生虚拟表VT9。这张内存临时表的表结构和上一步产生的虚拟表一样，不同的是对进行DISTINCT操作的列增加了一个<strong>唯一索引</strong>，以此来去除重复数据。另外，对于使用了GROUP BY的查询，再使用DISTINCT是多余的，因为已经进行分组，不会移除任何行。</p>
+<h3 id="10-ORDER-BY"><a href="#10-ORDER-BY" class="headerlink" title="10. ORDER BY"></a>10. ORDER BY</h3><p>将虚拟表VT9中的记录按照<order_by_list>进行排序操作，产生虚拟表VT10。</p>
+<p><strong>注意</strong>:</p>
+<ul>
+<li>没有 ORDER BY 得到数据并非总是按照主键顺序进行排序的，把数据库想象成集合，SELECT 就是从集合中取元素，所以不要为表中的行假定任何特定的顺序。就是说，在实际使用环境中，如果确实需要有序输出行记录，则必须使用 ORDER BY 子句。</li>
+<li>前面已经提到，在ORDER BY子句中，NULL值被认为是相同 的值，并且是最小的。</li>
+</ul>
+<h3 id="11-LIMIT"><a href="#11-LIMIT" class="headerlink" title="11. LIMIT"></a>11. LIMIT</h3><p>取出指定行的记录，产生虚拟表VT11，并返回给查询用户。对于没有应用ORDER BY的LIMIT子句，结果同样可能是无序的，因此LIMIT子句通常和ORDER BY子句一起使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1. limit 是一个MySQL&quot;方言&quot;</span><br><span class="line">2. 语法：limit 每页查询的条数 offset 开始的索引,</span><br><span class="line">   简化版：limit 开始的索引,每页查询的条数;</span><br><span class="line">3. 公式：开始的索引 &#x3D; （当前的页码 - 1） * 每页显示的条数</span><br><span class="line"></span><br><span class="line">	-- 每页显示3条记录 </span><br><span class="line">	SELECT * FROM student LIMIT 0,3; -- 第1页</span><br><span class="line">	SELECT * FROM student LIMIT 3,3; -- 第2页</span><br><span class="line">	SELECT * FROM student LIMIT 6,3; -- 第3页</span><br></pre></td></tr></table></figure>
+
+<h2 id="物理查询处理"><a href="#物理查询处理" class="headerlink" title="物理查询处理"></a>物理查询处理</h2><p>SQL 语句的结果一定符合我们上面逻辑查询处理的分析，但是数据库也许并不会完全按照逻辑查询处理的方式来进行查询，MySQL的体系结构图中显示了在MySQL数据库层有 Parser 和 Optimizer 两个组件。Parser 的工作就是分析SQL语句，而 Optimizer 的工作就是对这个SQL语句进行优化，选择一条最优的路径来选取数据，但是必须保证物理查询处理的最终结果和逻辑查询处理是相等的。例如如果表上建有索引，那么优化器就会判断SQL语句是否可以利用该索引来进行优化；或者调整索引的顺序等。这一部分很复杂，后面在索引的讲解中会详细解释。</p>
+<p>先来看看这个图混个眼熟吧。<br><img src="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png"></p>
+<blockquote>
+<p>ref: <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/">https://dev.mysql.com/doc/refman/8.0/en/</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SELECT/" rel="tag"><i class="fa fa-tag"></i> SELECT</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/01/05/JVM_11_%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%99%9A%E6%9C%9F%E4%BC%98%E5%8C%96/" rel="prev" title="运行期（晚期）优化">
+                  <i class="fa fa-chevron-left"></i> 运行期（晚期）优化
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/09/MySQL04_EXPLAIN%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/" rel="next" title="EXPLAIN性能分析">
+                  EXPLAIN性能分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:04</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

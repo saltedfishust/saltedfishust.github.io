@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中的锁">
+<meta property="og:url" content="http://example.com/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/jpeg/21753219/1627141827312-714de5c3-917d-4939-a9a4-ed7aeb55f0bd.jpeg">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1627126774877-e8d0bea6-9f2c-4b5e-831e-278e2a735a03.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1627128792460-8a078c52-d85b-472c-b394-b251ada83691.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1627145330484-af7ed4d0-55ba-4182-be41-c80f67738bd5.png">
+<meta property="article:published_time" content="2021-05-02T17:12:45.000Z">
+<meta property="article:modified_time" content="2021-07-25T06:50:48.294Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="共享锁">
+<meta property="article:tag" content="排它锁">
+<meta property="article:tag" content="意向锁">
+<meta property="article:tag" content="间隙锁">
+<meta property="article:tag" content="幻读">
+<meta property="article:tag" content="MVCC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/jpeg/21753219/1627141827312-714de5c3-917d-4939-a9a4-ed7aeb55f0bd.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>MySQL中的锁 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3"><span class="nav-number">1.</span> <span class="nav-text">按照设计思想</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%90%E8%A7%82%E9%94%81"><span class="nav-number">1.1.</span> <span class="nav-text">乐观锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%82%B2%E8%A7%82%E9%94%81"><span class="nav-number">1.2.</span> <span class="nav-text">悲观锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E9%94%81"><span class="nav-number">1.2.1.</span> <span class="nav-text">共享锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%B3%95"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">用法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8%E6%9C%9F%E9%99%90"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">作用期限</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%AE%83%E9%94%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">排它锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%B3%95-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">用法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%EF%BC%9A%E6%AD%BB%E9%94%81"><span class="nav-number">1.2.3.</span> <span class="nav-text">案例分析：死锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">基础知识</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">代码分析</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E9%94%81%E7%B2%92%E5%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">按照锁粒度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S%E9%94%81%E5%92%8CX%E9%94%81%E6%98%AF%E8%A1%8C%E9%94%81%E8%BF%98%E6%98%AF%E8%A1%A8%E9%94%81%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">S锁和X锁是行锁还是表锁？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95"><span class="nav-number">2.1.1.</span> <span class="nav-text">使用索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95"><span class="nav-number">2.1.2.</span> <span class="nav-text">不使用索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%E9%94%81%EF%BC%88%E6%84%8F%E5%90%91%E9%94%81%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">表锁（意向锁）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%8F%E5%90%91%E9%94%81%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">意向锁有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E5%85%BC%E5%AE%B9%E6%80%A7"><span class="nav-number">2.2.2.</span> <span class="nav-text">锁的兼容性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%8C%E9%94%81"><span class="nav-number">2.3.</span> <span class="nav-text">行锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Record-Lock%EF%BC%88%E8%AE%B0%E5%BD%95%E9%94%81%EF%BC%89"><span class="nav-number">2.3.1.</span> <span class="nav-text">Record Lock（记录锁）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gap-Lock%EF%BC%88%E9%97%B4%E9%9A%99%E9%94%81%EF%BC%89"><span class="nav-number">2.3.2.</span> <span class="nav-text">Gap Lock（间隙锁）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%B4%E9%9A%99%E9%94%81%E9%81%BF%E5%85%8D%E5%B9%BB%E8%AF%BB"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">间隙锁避免幻读</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E5%B9%BB%E8%AF%BB%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">2.3.2.1.1.</span> <span class="nav-text">避免幻读的原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BF%AB%E7%85%A7%E8%AF%BB%E5%92%8C%E5%BD%93%E5%89%8D%E8%AF%BB"><span class="nav-number">2.3.2.1.2.</span> <span class="nav-text">快照读和当前读</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Next-Key-Lock"><span class="nav-number">2.3.3.</span> <span class="nav-text">Next-Key Lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E6%84%8F%E5%90%91-GAP-%E9%94%81"><span class="nav-number">2.3.4.</span> <span class="nav-text">插入意向 GAP 锁</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MVCC-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">MVCC(多版本并发控制)</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">150</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL中的锁
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-03 01:12:45" itemprop="dateCreated datePublished" datetime="2021-05-03T01:12:45+08:00">2021-05-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:50:48" itemprop="dateModified" datetime="2021-07-25T14:50:48+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cdn.nlark.com/yuque/0/2021/jpeg/21753219/1627141827312-714de5c3-917d-4939-a9a4-ed7aeb55f0bd.jpeg" alt="img"></p>
+<span id="more"></span>
+
+<h1 id="按照设计思想"><a href="#按照设计思想" class="headerlink" title="按照设计思想"></a>按照设计思想</h1><p>乐观锁和悲观锁是一种设计思想，这种设计思想广泛存在于所有需要同步加锁的场景中，例如Java中的实现：乐观锁为volatile+cas，悲观锁为synchronized或ReentrantLock这种锁。在mysql中思想是类似的。</p>
+<h2 id="乐观锁"><a href="#乐观锁" class="headerlink" title="乐观锁"></a>乐观锁</h2><p>每次读数据的时候都认为其他人不会修改，所以不会上锁，而是在更新的时候去判断在此期间有没有其他人更新了数据，可以<strong>使用版本号机制</strong>。在数据库中可以通过为数据表增加一个版本号字段实现。读取数据时将版本号一同读出，数据每次更新时对版本号加一。当我们更新的时候，判断数据库表对应记录的当前版本号与第一次取出来的版本号值进行比对，如果值相等，则予以更新，否则认为是过期数据，类似于Java中的cas操作。乐观锁适用于多读的应用类型，可以提高吞吐量。</p>
+<h2 id="悲观锁"><a href="#悲观锁" class="headerlink" title="悲观锁"></a>悲观锁</h2><p>每次读数据的时候都认为别人会修改，所以每次在读数据的时候都会上锁，这样别人想读这个数据时就会被阻塞。MySQL中就用到了很多这种锁机制，比如行锁、表锁、读锁、写锁等，都是在操作之前先上锁。</p>
+<h3 id="共享锁"><a href="#共享锁" class="headerlink" title="共享锁"></a>共享锁</h3><p>共享锁又叫做<strong>读锁或S锁</strong>，在数据（表或者行，后面会介绍）被加上共享锁后，所有事务都可以并发读取数据，但其他事务如果自己没有获得共享锁，那么在当前共享锁作用期限内不能对数据进行修改（即对数据加排他锁），直到已释放其他所有共享锁。但当前事务可以对数据进行修改，这时候会先释放掉共享锁，然后为数据加上排他锁，这段有点绕，细节有点难以理解，后面会结合死锁的案例详细分析。</p>
+<h4 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h4><p>在select语句后加上<code>lock in share mode。</code></p>
+<h4 id="作用期限"><a href="#作用期限" class="headerlink" title="作用期限"></a>作用期限</h4><p>要真正理解共享锁，必须搞清楚它的作用期限，即什么时候释放。<strong>一般读取操作一完成，就立即释放资源上的共享锁</strong>，除非将事务隔离级别设置为可重复读或更高级别，<strong>或者在事务持续时间内用锁定提示保留共享锁</strong>。</p>
+<p>例如，用例表格如下，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">+-----------+------------------------------------------------------------------+</span><br><span class="line">| Table     | Create Table                                                     |</span><br><span class="line">+-----------+------------------------------------------------------------------+</span><br><span class="line">| lock_test | CREATE TABLE &#96;lock_test&#96; (</span><br><span class="line">  &#96;id&#96; bigint NOT NULL AUTO_INCREMENT,</span><br><span class="line">  &#96;name&#96; varchar(255) DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (&#96;id&#96;)</span><br><span class="line">) ENGINE&#x3D;InnoDB AUTO_INCREMENT&#x3D;18 DEFAULT CHARSET&#x3D;utf8mb3 |</span><br><span class="line">+-----------+------------------------------------------------------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from lock_test;</span><br><span class="line">+----+--------+</span><br><span class="line">| id | name   |</span><br><span class="line">+----+--------+</span><br><span class="line">|  1 | chengu |</span><br><span class="line">+----+--------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>一般我们在设置自动提交的前提下，一句select语句就是一个事务，执行完后共享锁就释放了，但为了演示我们可以开启一个事务在事务持续时间内用锁定提示保留共享锁。例如下面的例子，注意看我的注释123456代表执行的顺序。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1627126774877-e8d0bea6-9f2c-4b5e-831e-278e2a735a03.png" alt="img"></p>
+<h3 id="排它锁"><a href="#排它锁" class="headerlink" title="排它锁"></a>排它锁</h3><p>排他锁又叫<strong>写锁或X锁</strong>，某个事务对数据加上排他锁后，只能这个事务对其进行读写，在此事务结束之前，其他事务不能对其加任何锁，可以读取但不能进行写操作，需等待其释放。排他锁（X 锁）可以防止并发事务对资源进行访问。</p>
+<h4 id="用法-1"><a href="#用法-1" class="headerlink" title="用法"></a>用法</h4><ol>
+<li><strong>数据修改语句通常默认请求共享锁和排他锁</strong>。数据修改语句（如 INSERT、UPDATE 和 DELETE）合并了修改和读取操作。语句在执行所需的修改操作之前首先执行读取操作以获取数据。 例如，UPDATE 语句可能根据与一个表的联接修改另一个表中的行。在此情况下，除了请求更新行上的排他锁之外，UPDATE 语句还将请求在联接表中读取的行上的共享锁。</li>
+<li>显示调用：在sql语句后加<code>for update</code>。</li>
+</ol>
+<h3 id="案例分析：死锁"><a href="#案例分析：死锁" class="headerlink" title="案例分析：死锁"></a>案例分析：死锁</h3><h4 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h4><ol>
+<li><p>如果AUTOCOMMIT设置为1（默认值），每一个SQL语句都被认为是一个完整的事务，在mysql中默认为1。AUTOCOMMIT设置为0时，在随后的一系列语句的作用就像一个事务，直到一个明确的COMMIT语句结束。</p>
+</li>
+<li><p>共享锁的作用期限，在事务持续时间内用锁定提示保留共享锁</p>
+</li>
+<li><p>同一个事务内可以从共享锁升级到排它锁，但需要先释放掉其他共享锁。</p>
+</li>
+</ol>
+<h4 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h4><p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1627128792460-8a078c52-d85b-472c-b394-b251ada83691.png" alt="img"></p>
+<p>我们可以看出产生死锁的过程，两个事务都等着对方先释放掉共享锁，所以陷入了死锁。</p>
+<h1 id="按照锁粒度"><a href="#按照锁粒度" class="headerlink" title="按照锁粒度"></a>按照锁粒度</h1><p>表锁是指对一整张表加锁，一般是 DDL 处理时使用；而行锁则是锁定某一行或者某几行，或者行与行之间的间隙。表锁由 MySQL Server 实现，行锁则是存储引擎实现，不同的引擎实现的不同。在 MySQL 的常用引擎中 InnoDB 支持行锁，而 MyISAM 则只能使用 MySQL Server 提供的表锁。</p>
+<h2 id="S锁和X锁是行锁还是表锁？"><a href="#S锁和X锁是行锁还是表锁？" class="headerlink" title="S锁和X锁是行锁还是表锁？"></a>S锁和X锁是行锁还是表锁？</h2><p>我们上文所说的S锁和X锁到底是行锁还是表锁？有必要分析一下它们的加锁原理。</p>
+<h3 id="使用索引"><a href="#使用索引" class="headerlink" title="使用索引"></a>使用索引</h3><p>下面以两条 SQL 的执行为例，讲解一下 InnoDB 对于单行数据的加锁原理，这个表中id为主键（一级索引），我们也为name列建立了索引（二级索引）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">update user set age &#x3D; 10 where id &#x3D; 19;</span><br><span class="line"></span><br><span class="line">update user set age &#x3D; 10 where name &#x3D; &#39;Tom&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>第一条 SQL 使用<strong>主键索引</strong>来查询，则只需要在 id = 19 这个主键索引上加上写锁；第二条 SQL 则使用<strong>二级索引</strong>来查询，则首先在 name = Tom 这个索引上加写锁，然后由于使用 InnoDB 二级索引还需再次根据主键索引查询，所以还需要在 id = 19 这个主键索引上加写锁。也就是说使用主键索引需要加一把锁，使用二级索引需要在二级索引和主键索引上各加一把锁。<strong>所以在使用索引的情况下，是为索引加锁也就是加的是行锁。</strong></p>
+<h3 id="不使用索引"><a href="#不使用索引" class="headerlink" title="不使用索引"></a>不使用索引</h3><p>根据索引对单行数据进行更新的加锁原理了解了，那如果更新操作涉及多个行呢，比如下面 SQL 的执行场景。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update user set age &#x3D; 10 where id &gt; 19;</span><br></pre></td></tr></table></figure>
+
+<p>MySQL Server 会根据 WHERE 条件读取第一条满足条件的记录，然后 InnoDB 引擎会将第一条记录返回并加锁，接着 MySQL Server 发起更新改行记录的 UPDATE 请求，更新这条记录。一条记录操作完成，再读取下一条记录，直至没有匹配的记录为止。<strong>所以在不使用索引的情况下会为表中所有记录加锁，也就是加的是表锁</strong>。<strong>所以更新操作必须要根据索引进行操作，没有索引时，不仅会消耗大量的锁资源，增加数据库的开销，还会极大的降低了数据库的并发性能。</strong></p>
+<h2 id="表锁（意向锁）"><a href="#表锁（意向锁）" class="headerlink" title="表锁（意向锁）"></a>表锁（意向锁）</h2><p>表级锁主要为意向锁，分为<strong>读意向锁（IS 锁）和写意向锁（IX 锁）</strong>。可以理解成在给表中记录加S锁之前，系统会默认给表加上IS锁，同理在给表中记录加X锁之前，系统会默认给表加上IX锁。</p>
+<h3 id="意向锁有什么用"><a href="#意向锁有什么用" class="headerlink" title="意向锁有什么用"></a>意向锁有什么用</h3><p>由于表锁和行锁虽然锁定范围不同，但是会相互冲突。所以当你要加表锁时，势必要先遍历该表的所有记录，判断是否加有排他锁。这种遍历检查的方式显然是一种低效的方式，<strong>MySQL 引入了意向锁，来快捷检测表锁和行锁的冲突，提高加锁的效率。</strong>举个例子，如果表中记录1亿，事务A把其中有几条记录上了排它锁了，这时事务B需要给这个表加表级锁，如果没有意向锁的话，那就要去表中查找这一亿条记录是否上锁了。如果存在意向锁，事务Ａ在更新一条记录之前，先加意向锁，再加Ｘ锁，事务B先检查该表上是否存在意向锁，存在的意向锁是否与自己准备加的锁冲突，如果有冲突，则等待直到事务Ａ释放，而无须逐条记录去检测。事务Ｂ更新表时，其实无须知道到底哪一行被锁了，它只要知道反正有一行被锁了就行了。</p>
+<h3 id="锁的兼容性"><a href="#锁的兼容性" class="headerlink" title="锁的兼容性"></a>锁的兼容性</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>IS</th>
+<th>IX</th>
+<th>S</th>
+<th>X</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IS</td>
+<td>兼容</td>
+<td>兼容</td>
+<td>兼容</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>IX</td>
+<td>兼容</td>
+<td>兼容</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>S</td>
+<td>兼容</td>
+<td>❌</td>
+<td>兼容</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>X</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody></table>
+<p>总结起来有下面几点：</p>
+<ul>
+<li><p>意向锁之间互不冲突：在表级别它们是没有冲突的，可以像下面这样这么理解，它们互相并不知道表中具体哪几行会冲突，所以干脆放行，让它们再去扫描表。</p>
+</li>
+<li><p>意向共享锁：事务想要获得一张表中某几行的共享锁；</p>
+</li>
+<li><p>意向排他锁：事务想要获得一张表中某几行的排他锁。</p>
+</li>
+<li><p>S 锁与 S/IS 锁兼容，和其他锁冲突：例如要给表中某几行记录加S锁，但表中某几行记录存在X锁，换言之表也被加上了IX锁，这个时候就不需要扫描整个表，会陷入阻塞等待释放X锁和IX锁。</p>
+</li>
+<li><p>X 锁和其他所有锁都冲突：例如要给表中某几行记录加X锁，但表中某几行记录存在S锁，换言之表也被加上了IS锁，这个时候就不需要扫描整个表，会陷入阻塞等待释放S锁和IS锁。</p>
+</li>
+</ul>
+<h2 id="行锁"><a href="#行锁" class="headerlink" title="行锁"></a>行锁</h2><p>行锁部分主要从参考2搬运而来，加入了一些自己的思考。</p>
+<p>行锁根据场景的不同有不同的实现，依次为Record Lock（记录锁）、Gap Lock（间隙锁）、Next-Key Lock和插入意向 GAP 锁。不同的锁锁定的位置是不同的，比如说记录锁只锁住对应的记录，而间隙锁锁住记录和记录之间的间隔，Next-Key Lock 则所属记录和记录之前的间隙。不同类型锁的锁定范围大致如下图所示：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1627145330484-af7ed4d0-55ba-4182-be41-c80f67738bd5.png" alt="img"></p>
+<h3 id="Record-Lock（记录锁）"><a href="#Record-Lock（记录锁）" class="headerlink" title="Record Lock（记录锁）"></a>Record Lock（记录锁）</h3><p>记录锁是最简单的行锁。<strong>上边描述 InnoDB 加锁原理中的锁就是记录锁，只锁住 id = 19 或者 name = ‘Tom’ 这一条记录</strong>。当 SQL 语句无法使用索引时，会进行全表扫描，这个时候 MySQL 会给整张表的所有数据行加记录锁，再由 MySQL Server 层进行过滤。但是，在 MySQL Server 层进行过滤的时候，如果发现不满足 WHERE 条件，会释放对应记录的锁。这样做，保证了最后只会持有满足条件记录上的锁。</p>
+<h3 id="Gap-Lock（间隙锁）"><a href="#Gap-Lock（间隙锁）" class="headerlink" title="Gap Lock（间隙锁）"></a>Gap Lock（间隙锁）</h3><p>还是最开始更新用户年龄的例子，如果 id = 19 这条记录不存在，这个 SQL 语句还会加锁吗？答案是可能有，这取决于数据库的隔离级别。这种情况下，<strong>在 RC 隔离级别不会加任何锁，在 RR 隔离级别会在 id = 19 前后两个索引之间加上间隙锁。</strong>为什么哪？我们稍后讨论，先来了解一下间隙锁。**间隙锁是一种加在两个索引之间的锁，例如(10, 20)；或者加在第一个索引之前，例如(-∞, 10)；或最后一个索引之后的间隙，例如(20, ∞)**。这个间隙可以跨一个索引记录，多个索引记录，甚至是空的。</p>
+<h4 id="间隙锁避免幻读"><a href="#间隙锁避免幻读" class="headerlink" title="间隙锁避免幻读"></a><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/422425988/answer/1488030769">间隙锁避免幻读</a></h4><h5 id="避免幻读的原理"><a href="#避免幻读的原理" class="headerlink" title="避免幻读的原理"></a>避免幻读的原理</h5><p>我们经常在资料上看到，<strong>mysql在RR隔离级别下就可以解决幻读问题，其原理就是通过间隙锁来实现的，</strong>使用间隙锁可以防止其他事务在这个范围内插入或修改记录，保证两次读取这个范围内的记录不会变，从而不会出现幻读现象。先来回顾一下什么是幻读，简而言之就是一个事务在前后两次查询同一个范围的时候，后一次查询看到了前一次查询没有看到的数据行，还是取上面的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update user set age &#x3D; 10 where id &#x3D; 19;</span><br></pre></td></tr></table></figure>
+
+<p>假设在一个事务的过程中，我们执行上面的sql，首先通过索引没找到id为19的记录。试想一下，假如没有加间隙锁可能出现怎样的后果。假如这时有另外一个事务新增了一条id为19的记录，那么当前事务再次执行上面那条sql（查询）便会奇怪的找到了记录，彷佛出现了幻觉，这就是幻读。那么如果在RR隔离级别下，会在索引(10, 20)之间加间隙锁，也就避免了幻读问题的出现。</p>
+<h5 id="快照读和当前读"><a href="#快照读和当前读" class="headerlink" title="快照读和当前读"></a>快照读和当前读</h5><p>在RR和RC级别下，数据库的读分为快照读和当前读:</p>
+<ul>
+<li>快照读：单纯的select操作。读取的是快照（ReadView）中的数据，可能是历史数据。</li>
+<li>当前读：如下情况会用当前读<code>select ... for update/in share mode、update、insert、delete</code>。读取的总是当前的最新数据，RC 只加记录锁，RR 除了加记录锁，还会加间隙锁，用于解决幻读问题。</li>
+</ul>
+<p>不同的 SQL 语句对应不同的读模式，也会加不同的锁，总结起来主要分为五种情况：</p>
+<ul>
+<li><p>SELECT … 语句正常情况下为快照读，不加锁；</p>
+</li>
+<li><p>SELECT … LOCK IN SHARE MODE 语句为当前读，加 S 锁；</p>
+</li>
+<li><p>SELECT … FOR UPDATE 语句为当前读，加 X 锁；</p>
+</li>
+<li><p>常见的 DML 语句（如 INSERT、DELETE、UPDATE）为当前读，加 X 锁；</p>
+</li>
+<li><p>常见的 DDL 语句（如 ALTER、CREATE 等）加表级锁，且这些语句为隐式提交，不能回滚。</p>
+</li>
+</ul>
+<p>其中，当前读的 SQL 语句的 where 从句的不同也会影响加锁，包括是否使用索引，索引是否是唯一索引等等。</p>
+<p><strong>RR模式下</strong>幻读的问题我觉得要分快照读和当前读两种情况来讨论：</p>
+<ul>
+<li>对于快照读，RR中一个事务的所有快照读读取的都是同一份快照，所以无论其他的事务怎么修改，无论是更新还是插入删除，都不会影响当前事务的快照读结果，也就不会出现不可重复读、幻读的情形。<strong>快照读解决幻读问题的原理是基于MVCC的</strong>。</li>
+<li>对于当前读，你读取的行，以及行的间隙都会被加锁，直到事务提交时才会释放，其他的事务无法进行修改，所以也不会出现不可重复读、幻读的情形。</li>
+</ul>
+<p><strong>所以如果你总是进行快照读，或者总是进行当前读，是不会出现幻读的情况的。而你的事务之所以会出现“幻读”，是因为你先进行了一次快照读（select），读取了历史数据，再进行了一次当前读读取最新数据，这样就出现幻读了。</strong></p>
+<h3 id="Next-Key-Lock"><a href="#Next-Key-Lock" class="headerlink" title="Next-Key Lock"></a>Next-Key Lock</h3><p><strong>Next-key锁是记录锁和间隙锁的组合</strong>，它指的是加在某条记录以及这条记录前面间隙上的锁。假设一个索引包含 5、8、10、20这几个值，可能的 Next-key 锁如下：<code>(-∞, 5]，(5, 8]，(8, 10]，(10, 20]，(20, +∞)</code>。通常我们都用这种左开右闭区间来表示 Next-key 锁，其中，圆括号表示不包含该记录，方括号表示包含该记录。前面四个都是 Next-key 锁，最后一个为间隙锁。<strong>和间隙锁一样，在 RC 隔离级别下没有 Next-key 锁，只有 RR 隔离级别才有。</strong>还是之前的例子，这次我们换一下设定，假设 id 不是主键，而是二级索引，且不是唯一索引，那么这个 SQL 在 RR 隔离级别下就会加如下的 Next-key 锁 (8, 10]、(10, 20)。此时如果插入一条 id = 10 的记录将会阻塞住。之所以要把 id = 10 前后的间隙都锁住，仍然是为了解决幻读问题，因为 id 是非唯一索引，所以 id = 10 可能会有多条记录，为了防止再插入一条 id = 10 的记录。</p>
+<h3 id="插入意向-GAP-锁"><a href="#插入意向-GAP-锁" class="headerlink" title="插入意向 GAP 锁"></a>插入意向 GAP 锁</h3><p>插入意向锁是一种特殊的间隙锁（简写成 II GAP）表示插入的意向，只有在 INSERT 的时候才会有这个锁。注意，这个锁虽然也叫意向锁，但是和上面介绍的表级意向锁是两个完全不同的概念，不要搞混了。多个插入意向锁之间互不冲突，所以可以在同一个间隙中有多个事务同时插入不同索引的记录。譬如在上面的例子中，id = 30 和 id = 49 之间如果有两个事务要同时分别插入 id = 32 和 id = 33 是没问题的，虽然两个事务都会在 id = 30 和 id = 50 之间加上插入意向锁，但是不会冲突。</p>
+<p><strong>插入意向锁只会和间隙锁或 Next-key 锁冲突，正如上面所说，间隙锁唯一的作用就是防止其他事务插入记录造成幻读，正是由于在执行 INSERT 语句时需要加插入意向锁，而插入意向锁和间隙锁冲突，从而阻止了插入操作的执行。</strong></p>
+<h1 id="MVCC-多版本并发控制"><a href="#MVCC-多版本并发控制" class="headerlink" title="MVCC(多版本并发控制)"></a>MVCC(多版本并发控制)</h1><p>参考4。</p>
+<ol>
+<li><p><a target="_blank" rel="noopener" href="https://www.toutiao.com/i6838563153626792451/?wid=1627134627769">把MySQL中的各种锁及其原理都画出来</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/422425988/answer/1488030769">如何理解MySQL中间隙锁可以避免幻读的问题</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903668571963406">全面了解mysql锁机制（InnoDB）与问题排查</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/52977862">Innodb MVCC实现原理 </a></p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%85%B1%E4%BA%AB%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 共享锁</a>
+              <a href="/tags/%E6%8E%92%E5%AE%83%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 排它锁</a>
+              <a href="/tags/%E6%84%8F%E5%90%91%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 意向锁</a>
+              <a href="/tags/%E9%97%B4%E9%9A%99%E9%94%81/" rel="tag"><i class="fa fa-tag"></i> 间隙锁</a>
+              <a href="/tags/%E5%B9%BB%E8%AF%BB/" rel="tag"><i class="fa fa-tag"></i> 幻读</a>
+              <a href="/tags/MVCC/" rel="tag"><i class="fa fa-tag"></i> MVCC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/" rel="prev" title="MySQL的体系结构以及两种常见存储引擎的对比">
+                  <i class="fa fa-chevron-left"></i> MySQL的体系结构以及两种常见存储引擎的对比
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/21/C21_ThreadLocal/" rel="next" title="ThreadLocal和InheritableThreadLocal">
+                  ThreadLocal和InheritableThreadLocal <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:04</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

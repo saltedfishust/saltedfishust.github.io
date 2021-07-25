@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
+<meta name="description" content="MySQL的体系结构从下图可以发现，MySQL主要由以下几部分组成：  连接池组件 工具组件（MySQL Shell） NoSQL&#x2F;SQL接口组件 查询分析器组件 优化器组件 缓冲缓冲（Caches &amp; Buffers）组件 插件式存储引擎 物理文件系统   其中MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎，注意我们说的是表存储引擎，因为其存储引擎是以表为单位">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL的体系结构以及两种常见存储引擎的对比">
+<meta property="og:url" content="http://example.com/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/index.html">
+<meta property="og:site_name" content="Saltedfish">
+<meta property="og:description" content="MySQL的体系结构从下图可以发现，MySQL主要由以下几部分组成：  连接池组件 工具组件（MySQL Shell） NoSQL&#x2F;SQL接口组件 查询分析器组件 优化器组件 缓冲缓冲（Caches &amp; Buffers）组件 插件式存储引擎 物理文件系统   其中MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎，注意我们说的是表存储引擎，因为其存储引擎是以表为单位">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png">
+<meta property="article:published_time" content="2021-04-11T17:12:45.000Z">
+<meta property="article:modified_time" content="2021-07-25T06:48:01.848Z">
+<meta property="article:author" content="Saltedfish">
+<meta property="article:tag" content="InnoDB">
+<meta property="article:tag" content="MyISAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png">
+
+
+<link rel="canonical" href="http://example.com/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/">
+
+
+
+<meta name="hexo-config-page" content="{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;}">
+<meta name="hexo-config-calendar" content="">
+<title>MySQL的体系结构以及两种常见存储引擎的对比 | Saltedfish</title><script data-pjax src="/js/load-config.js"></script>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Saltedfish</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Welcome to the home of saltedfish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">150</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">7</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">79</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">MySQL的体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E5%B1%82"><span class="nav-number">1.1.</span> <span class="nav-text">连接层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%B1%82"><span class="nav-number">1.2.</span> <span class="nav-text">服务层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E6%93%8E%E5%B1%82"><span class="nav-number">1.3.</span> <span class="nav-text">引擎层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%B1%82"><span class="nav-number">1.4.</span> <span class="nav-text">存储层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#InnoDB-%E5%92%8C-MyISAM"><span class="nav-number">2.</span> <span class="nav-text">InnoDB 和 MyISAM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#InnoDB%EF%BC%88%E9%BB%98%E8%AE%A4%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">InnoDB（默认）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MyISAM"><span class="nav-number">2.2.</span> <span class="nav-text">MyISAM</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Saltedfish"
+      src="/uploads/avatar.png">
+  <p class="site-author-name" itemprop="name">Saltedfish</p>
+  <div class="site-description" itemprop="description">Stay hungry, stay foolish</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">150</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL的体系结构以及两种常见存储引擎的对比
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-12 01:12:45" itemprop="dateCreated datePublished" datetime="2021-04-12T01:12:45+08:00">2021-04-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 14:48:01" itemprop="dateModified" datetime="2021-07-25T14:48:01+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="MySQL的体系结构"><a href="#MySQL的体系结构" class="headerlink" title="MySQL的体系结构"></a>MySQL的体系结构</h2><p>从下图可以发现，MySQL主要由以下几部分组成：</p>
+<ul>
+<li>连接池组件</li>
+<li>工具组件（MySQL Shell）</li>
+<li>NoSQL/SQL接口组件</li>
+<li>查询分析器组件</li>
+<li>优化器组件</li>
+<li>缓冲缓冲（Caches &amp; Buffers）组件</li>
+<li>插件式存储引擎</li>
+<li>物理文件系统</li>
+</ul>
+<p><img src="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png"></p>
+<p>其中MySQL数据库区别于其他数据库的最重要的一个特点就是其<strong>插件式的表存储引擎</strong>，注意我们说的是表存储引擎，因为其存储引擎是以表为单位的。我们可以把MySQL的架构按照其功能特点分为四层，分别为连接层、服务层、引擎层和存储层（物理层）。<span id="more"></span></p>
+<h3 id="连接层"><a href="#连接层" class="headerlink" title="连接层"></a>连接层</h3><p>对应连接池组件。</p>
+<p>最上层是一些客户端和连接服务，包含本地 socket 通信和大多数基于客户端/服务端工具实现的类似于 tcp/ip 的<br>通信。主要完成一些类似于连接处理、授权认证、及相关的安全方案。在该层上引入了线程池的概念，为通过认证 安全接入的客户端提供线程。同样在该层上可以实现基于 SSL 的安全链接。服务器也会为安全接入的每个客户端验证它所具有的操作权限。</p>
+<h3 id="服务层"><a href="#服务层" class="headerlink" title="服务层"></a>服务层</h3><p>对应NoSQL/SQL接口组件、查询分析器组件、优化器组件和缓冲缓冲（Caches &amp; Buffers）组件。</p>
+<table>
+<thead>
+<tr>
+<th>Management Serveices &amp; Utilities</th>
+<th>系统管理和控制工具</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NoSQL/SQL Interface</td>
+<td>SQL 接口。接受用户的 SQL 命令，并且返回用户需要查询的结果。比如 select from 就是调用 SQL Interface</td>
+</tr>
+<tr>
+<td>Parser</td>
+<td>解析器。SQL 命令传递到解析器的时候会被解析器验证和解析。</td>
+</tr>
+<tr>
+<td>Optimizer</td>
+<td>查询优化器。SQL 语句在查询之前会使用查询优化器对查询进行优化，比如有 where 条件时，优化器来决定先投影还是先过滤。</td>
+</tr>
+<tr>
+<td>Cache 和 Buffer 解析器</td>
+<td>查询缓存。如果查询缓存有命中的查询结果，查询语句就可以直接去查询缓存中取数据。这个缓存机制是由一系列小缓存组成的。比如表缓存，记录缓存，key 缓存，权限缓存等</td>
+</tr>
+</tbody></table>
+<h3 id="引擎层"><a href="#引擎层" class="headerlink" title="引擎层"></a>引擎层</h3><p>对应插件式存储引擎。</p>
+<p>存储引擎层，存储引擎真正的负责了MySQL 中数据的存储和提取，服务器通过 API 与存储引擎进行通信。不同的存储引擎具有的功能不同，这样我们可以根据自己的实际需要进行选取。</p>
+<h3 id="存储层"><a href="#存储层" class="headerlink" title="存储层"></a>存储层</h3><p>对应物理文件系统。</p>
+<p>数据存储层，主要是将数据存储在运行于裸设备的文件系统之上，并完成与存储引擎的交互。</p>
+<h2 id="InnoDB-和-MyISAM"><a href="#InnoDB-和-MyISAM" class="headerlink" title="InnoDB 和 MyISAM"></a>InnoDB 和 MyISAM</h2><p>存储引擎的好处是，每个存储引擎都有各自的特点，能够根据具体的应用建立不同存储引擎表。目前最常用的两个存储引擎为InnoDB和MyISAM，我们简要介绍一下这两款存储引擎的异同，对于其他的存储引擎，例如NDB Cluster、Memory等，等以后用到了再学习。</p>
+<h3 id="InnoDB（默认）"><a href="#InnoDB（默认）" class="headerlink" title="InnoDB（默认）"></a>InnoDB（默认）</h3><ul>
+<li>InnoDB存储引擎支持事务、支持外键，其设计目标主要面向在线事务处理（OLTP）的应用，对于InnoDB每一条SQL语言都默认封装成事务，自动提交，这样会影响速度，所以最好把多条SQL语言放在begin和commit之间，组成一个事务。</li>
+<li>InnoDB是行锁设计，也就是锁的粒度最小为行，并支持类似于Oracle的非锁定读，即默认读取操作不会产生锁。</li>
+<li>InnoDB通过使用多版本并发控制（MVCC）来获得高并发性，并且实现了SQL标准的4种隔离级别，默认为REPEATABLE READ级别。InnoDB存储引擎在REPEATABLE READ事务隔离级别下，可以使用Next-KeyLock的锁算法避免幻读的产生，也就是说对于InnoDB在RR级别下就完全遵循和满足事务的ACID特性了。</li>
+<li>InnoDB存储引擎的表使用聚集索引和辅助索引的机制（数据存在聚集索引叶子节点上），单独存放到一个独立的ibd文件中。</li>
+<li>除此之外，InnoDB储存引擎还提供了插入缓冲（insert buffer）、二次写（double write）、自适应哈希索引（adaptive hash index）、预读（read ahead）等高性能和高可用的功能。</li>
+</ul>
+<h3 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h3><ul>
+<li>MyISAM存储引擎不支持事务、支持全文索引，主要面向一些OLAP数据库应用。</li>
+<li>MyISAM是表锁设计，也就是锁的粒度最小为表。</li>
+<li>MyISAM的缓冲池只缓存（cache）索引文件，而不缓冲数据文件，这点和大多数的数据库都非常不同。</li>
+<li>MyISAM存储引擎表是使用普通索引（没有主次之分，都是平级的），由MYD和MYI组成，MYD用来存放数据文件，MYI用来存放索引文件。 </li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>存储引擎</th>
+<th>事务</th>
+<th>外键</th>
+<th>锁粒度</th>
+<th>全文索引</th>
+<th>索引类别</th>
+<th>表文件</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>InnoDB</td>
+<td>支持</td>
+<td>支持</td>
+<td>表锁、行锁（默认）</td>
+<td>5.7之后支持</td>
+<td>聚集索引 + 辅助索引</td>
+<td>.frm + .ibd</td>
+<td></td>
+</tr>
+<tr>
+<td>MyISAM</td>
+<td>不支持</td>
+<td>不支持</td>
+<td>表锁</td>
+<td>支持</td>
+<td>平级索引</td>
+<td>.frm + .MYI + .MYD</td>
+<td></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>ref:</p>
+<ol>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35642036/article/details/82820178">InnoDB 与 MyISAM 的区别</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/">MySQL 8.0 Reference Manual</a></p>
+</li>
+</ol>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/InnoDB/" rel="tag"><i class="fa fa-tag"></i> InnoDB</a>
+              <a href="/tags/MyISAM/" rel="tag"><i class="fa fa-tag"></i> MyISAM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/02/MySQL10_MySQL%E4%B8%AD%E7%9A%84%E5%88%86%E5%8C%BA/" rel="prev" title="MySQL中的分区">
+                  <i class="fa fa-chevron-left"></i> MySQL中的分区
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/03/MySQL12_MySQL%E4%B8%AD%E7%9A%84%E9%94%81/" rel="next" title="MySQL中的锁">
+                  MySQL中的锁 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+<script src="/js/comments.js"></script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Saltedfish</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">16:04</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="https://cdn.jsdelivr.net/npm/ribbon.js@1.0.2/dist/ribbon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
