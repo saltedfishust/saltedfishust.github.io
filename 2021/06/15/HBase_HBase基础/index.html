@@ -27,17 +27,17 @@
 <meta property="og:site_name" content="Saltedfish">
 <meta property="og:description" content="数据模型从逻辑视图来看，HBase中的数据是以表形式进行组织的，而且和关系型数据库中的表一样，HBase中的表也由行和列构成，因此HBase非常容易理解。但从物理视图来看，HBase是一个Map，由键值（KeyValue，KV）构成，不过与普通的Map不同，HBase是一个稀疏的、分布式的、多维排序的Map。 逻辑视图首先介绍HBase的逻辑视图，HBase中的基本概念包括，  table：表，一">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626622239331-a14ffde9-b1bc-42db-a252-6356f28e9d5a.png">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626625593726-caad3ed0-5463-4841-a1b5-9805b1065cba.png">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626626033278-60fc8151-369f-4b2b-a996-ccd140ae7dda.png">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626663398474-ca21103f-7d05-411d-b488-ff33e371ac87.png">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626665504029-af916507-0e59-4c63-95f3-3c12402bbfb2.png">
+<meta property="og:image" content="d:/hexoBlog/source_posts/并发编程/hbase-1.png">
+<meta property="og:image" content="d:/hexoBlog/source_posts/并发编程/hbase-2.png">
+<meta property="og:image" content="d:/hexoBlog/source_posts/并发编程/hbase-3.png">
+<meta property="og:image" content="d:/hexoBlog/source_posts/并发编程/hbase-4.png">
+<meta property="og:image" content="d:/hexoBlog/source_posts/并发编程/hbase-5.png">
 <meta property="article:published_time" content="2021-06-15T11:25:15.000Z">
-<meta property="article:modified_time" content="2021-07-25T07:07:14.684Z">
+<meta property="article:modified_time" content="2021-07-25T08:51:19.899Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="HBase">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626622239331-a14ffde9-b1bc-42db-a252-6356f28e9d5a.png">
+<meta name="twitter:image" content="d:/hexoBlog/source_posts/并发编程/hbase-1.png">
 
 
 <link rel="canonical" href="http://example.com/2021/06/15/HBase_HBase%E5%9F%BA%E7%A1%80/">
@@ -225,7 +225,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-25 15:07:14" itemprop="dateModified" datetime="2021-07-25T15:07:14+08:00">2021-07-25</time>
+        <time title="修改时间：2021-07-25 16:51:19" itemprop="dateModified" datetime="2021-07-25T16:51:19+08:00">2021-07-25</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -278,9 +278,9 @@
 </li>
 </ul>
 <p>例如：下图是BigTable中一张示例表的<strong>逻辑视图</strong>，表中主要存储网页信息。示例表中包含两行数据，两个rowkey分别为com.cnn.www和com.example.www，按照字典序由小到大排列。每行数据有三个列簇，分别为anchor、contents以及people，其中列簇anchor下有两列，分别为cnnsi.com以及my.look.ca，其他两个列簇都仅有一列。可以看出，根据行com.cnn.www以及列anchor:cnnsi.com可以定位到数据CNN，对应的时间戳信息是t9。而同一行的另一列contents:html下却有三个版本的数据，版本号分别为t5、t6和t7。</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626622239331-a14ffde9-b1bc-42db-a252-6356f28e9d5a.png" alt="img"></p>
+<p><img src="D:\hexoBlog\source_posts\并发编程\hbase-1.png" alt="img"></p>
 <h2 id="物理视图"><a href="#物理视图" class="headerlink" title="物理视图"></a>物理视图</h2><p>HBase中的数据是按照<strong>列簇存储</strong>的，从概念上来说，列簇式存储介于<strong>行式存储（例如mysql）</strong>和<strong>列式存储（例如kudu）</strong>之间，可以通过不同的设计思路在行式存储和列式存储两者之间相互切换。即将数据按照列簇分别存储在不同的目录中。例如上图列簇anchor的所有数据存储在一起形成：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626625593726-caad3ed0-5463-4841-a1b5-9805b1065cba.png" alt="img"></p>
+<p><img src="D:\hexoBlog\source_posts\并发编程\hbase-2.png" alt="img"></p>
 <h2 id="关键特性"><a href="#关键特性" class="headerlink" title="关键特性"></a>关键特性</h2><p>BigTable论文中称BigTable为”sparse,distributed, persistent multidimensional sorted map”，可见BigTable本质上是一个Map结构数据库，HBase亦然，也是由一系列KV构成的。然而HBase这个Map系统却并不简单，有很多限定词——稀疏的、分布式的、持久性的、多维的以及排序的。</p>
 <ul>
 <li><p>多维：这个特性比较容易理解。HBase中的Map与普通Map最大的不同在于，key是一个复合数据结构，由多维元素构成，包括rowkey、columnfamily、qualifier、type以及timestamp。</p>
@@ -327,7 +327,7 @@
 </tr>
 </tbody></table>
 <h1 id="体系结构"><a href="#体系结构" class="headerlink" title="体系结构"></a>体系结构</h1><p>在Hbase中，表被分割成多个更小的块然后分散的存储在不同的服务器上，这些小块叫做Regions，存放Regions的地方叫做RegionServer。Master进程负责处理不同的RegionServer之间的Region的分发。在Hbase实现中HRegionServer和HRegion类代表RegionServer和Region。</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626626033278-60fc8151-369f-4b2b-a996-ccd140ae7dda.png" alt="img"></p>
+<p><img src="D:\hexoBlog\source_posts\并发编程\hbase-3.png" alt="img"></p>
 <h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><p>负责向外界提供各种接口，支持所有常见的DML操作以及DDL操作，即数据的增删改查和表的日常维护。HBase客户端访问数据行之前，首先需要通过元数据表定位目标数据所在RegionServer，之后才会发送请求到该RegionServer。同时这些元数据会被缓存在客户端本地，以方便之后的请求访问。如果集群RegionServer发生宕机或者执行了负载均衡等，从而导致数据分片发生迁移，客户端需要重新请求最新的元数据并缓存在本地。</p>
 <h2 id="Zookeeper"><a href="#Zookeeper" class="headerlink" title="Zookeeper"></a>Zookeeper</h2><p>主要用于协调管理分布式应用程序。在HBase系统中，ZooKeeper扮演着非常重要的角色：</p>
 <ul>
@@ -364,7 +364,7 @@
 </li>
 </ul>
 <p>所以HBase读写数据的基本流程如下图：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626663398474-ca21103f-7d05-411d-b488-ff33e371ac87.png" alt="img"></p>
+<p><img src="D:\hexoBlog\source_posts\并发编程\hbase-4.png" alt="img"></p>
 <ul>
 <li><p>首先调用client接口发起读写请求；</p>
 </li>
@@ -384,7 +384,7 @@
 <h2 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h2><p><a target="_blank" rel="noopener" href="https://www.yuque.com/saltedfish-kjhg7/yg9kww/alcor3">https://www.yuque.com/saltedfish-kjhg7/yg9kww/alcor3</a></p>
 <h2 id="LSM树"><a href="#LSM树" class="headerlink" title="LSM树"></a>LSM树</h2><p>LSM树（Log-StructuredMerge-Tree）本质上和B+树一样，是一种磁盘数据的索引结构。但和B+树不同的是，LSM树的索引对写入请求更友好。因为无论是何种写入请求，<strong>LSM树都会将写入操作处理为一次顺序写，而HDFS擅长的正是顺序写（且HDFS不支持随机写），因此基于HDFS实现的HBase采用LSM树作为索引是一种很合适的选择</strong>。</p>
 <p>前面已经说过，一个LSM树的索引主要由两部分构成：内存部分和磁盘部分。内存部分是一个ConcurrentSkipListMap，Key就是前面所说的Key部分，Value是一个字节数组。数据写入时，直接写入MemStore中。<strong>随着不断写入，一旦内存占用超过一定的阈值时，就把内存部分的数据导出，形成一个有序的数据文件（将所有写入转换为顺序写）</strong>，存储在磁盘上LSM树索引结构如下图所示。内存部分导出形成一个有序数据文件的过程称为flush。为了避免flush影响写入性能，会先把当前写入的MemStore设为Snapshot，不再容许新的写入操作写入这个Snapshot的MemStore。另开一个内存空间作为MemStore，让后面的数据写入。一旦Snapshot的MemStore写入完毕，对应内存空间就可以释放。这样，就可以通过两个MemStore来实现稳定的写入性能。</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2021/png/21753219/1626665504029-af916507-0e59-4c63-95f3-3c12402bbfb2.png" alt="img"></p>
+<p><img src="D:\hexoBlog\source_posts\并发编程\hbase-5.png" alt="img"></p>
 <p><strong>LSM树的索引结构本质是将写入操作全部转化成磁盘的顺序写入</strong>，极大地提高了写入操作的性能。<strong>但是，这种设计对读取操作是非常不利的，因为需要在读取的过程中，通过归并所有文件来读取所对应的KV，这是非常消耗IO资源的。</strong>因此，在HBase中设计了异步的compaction来降低文件个数，达到提高读取性能的目的。由于HDFS只支持文件的顺序写，不支持文件的随机写，而且HDFS擅长的场景是大文件存储而非小文件，所以上层HBase选择LSM树这种索引结构是最合适的。</p>
 <ol>
 <li>《HBase原理与实践》胡争 范欣欣</li>
