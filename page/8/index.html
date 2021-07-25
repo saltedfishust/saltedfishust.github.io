@@ -84,9 +84,9 @@
   <ul class="main-menu menu">
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">154</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">8</span></a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">83</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">156</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">9</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">85</span></a></li>
   </ul>
 </nav>
 
@@ -132,20 +132,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-count">85</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">154</span>
+        <span class="site-state-item-count">156</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -174,6 +174,260 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/05/27/%E5%9F%BA%E7%A1%80_%E5%8F%8D%E5%B0%84%E5%92%8C%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/05/27/%E5%9F%BA%E7%A1%80_%E5%8F%8D%E5%B0%84%E5%92%8C%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" class="post-title-link" itemprop="url">反射和动态代理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-27 19:25:15" itemprop="dateCreated datePublished" datetime="2019-05-27T19:25:15+08:00">2019-05-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 15:26:58" itemprop="dateModified" datetime="2021-07-25T15:26:58+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <span id="more"></span>
+
+<h1 id="反射基础"><a href="#反射基础" class="headerlink" title="反射基础"></a>反射基础</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReflectTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NoSuchFieldException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException </span>&#123;</span><br><span class="line">        A a1 = <span class="keyword">new</span> A(<span class="number">1</span>);</span><br><span class="line">        A a2 = <span class="keyword">new</span> A(<span class="number">2</span>);</span><br><span class="line">        <span class="comment">// 获取class对象的三种方式</span></span><br><span class="line">        System.out.println(<span class="string">&quot;-------------------------------Class&quot;</span>);</span><br><span class="line">        System.out.println(a1.getClass() == a2.getClass());      <span class="comment">// 方式1 true</span></span><br><span class="line">        System.out.println(a1.getClass() == A.class);            <span class="comment">// 方式2 true</span></span><br><span class="line">        System.out.println(a1.getClass() == Class.forName(<span class="string">&quot;A&quot;</span>)); <span class="comment">// 方式3 true</span></span><br><span class="line">        Class&lt;? extends A&gt; aClass = a1.getClass();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 访问字段Field</span></span><br><span class="line">        System.out.println(<span class="string">&quot;-------------------------------Field&quot;</span>);</span><br><span class="line">        Field field = aClass.getDeclaredField(<span class="string">&quot;a&quot;</span>); <span class="comment">// 获取名为&quot;a&quot;的变量</span></span><br><span class="line">        field.setAccessible(<span class="keyword">true</span>); <span class="comment">// 获取private的值</span></span><br><span class="line">        System.out.println(field.get(a1)); <span class="comment">// 1</span></span><br><span class="line">        System.out.println(field.get(a2)); <span class="comment">// 2</span></span><br><span class="line">        field.set(a1, <span class="number">11</span>);         <span class="comment">// 设置值</span></span><br><span class="line">        field.set(a2, <span class="number">22</span>);</span><br><span class="line">        System.out.println(field.get(a1)); <span class="comment">// 11</span></span><br><span class="line">        System.out.println(field.get(a2)); <span class="comment">// 22</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 访问方法Method</span></span><br><span class="line">        System.out.println(<span class="string">&quot;-------------------------------&quot;</span>);</span><br><span class="line">        Method method = aClass.getDeclaredMethod(<span class="string">&quot;getStringA&quot;</span>, <span class="keyword">int</span>.class); <span class="comment">// 传入方法名和参数</span></span><br><span class="line">        System.out.println(method); <span class="comment">// 打印方法的基本信息</span></span><br><span class="line">        System.out.println(method.getModifiers() + <span class="string">&quot; &quot;</span> + <span class="string">&quot; &quot;</span> + method.getReturnType() +</span><br><span class="line">                <span class="string">&quot; &quot;</span> + method.getName() + Arrays.toString(method.getParameterTypes()));</span><br><span class="line">        method.setAccessible(<span class="keyword">true</span>); <span class="comment">// 允许调用私有方法</span></span><br><span class="line">        String returnString = (String)method.invoke(a1, <span class="number">1</span>); <span class="comment">// 调用对象a1 的getStringA方法</span></span><br><span class="line">        System.out.println(returnString); <span class="comment">// 12</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调用构造方法</span></span><br><span class="line">        System.out.println(<span class="string">&quot;-------------------------------&quot;</span>);</span><br><span class="line">        A aNewInstance = A.class.newInstance();   <span class="comment">// 通过newInstance()创建对象，它只能调用该类的public无参数构造方法</span></span><br><span class="line">        System.out.println(aNewInstance.getA());  <span class="comment">// 0</span></span><br><span class="line">        Constructor&lt;A&gt; constructor = A.class.getConstructor(<span class="keyword">int</span>.class); <span class="comment">// 通过 Constructor创建对象</span></span><br><span class="line">        A newInstance = constructor.newInstance(<span class="number">123</span>);</span><br><span class="line">        System.out.println(newInstance.getA());    <span class="comment">// 123</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 获取继承关系</span></span><br><span class="line">        System.out.println(<span class="string">&quot;-------------------------------&quot;</span>);</span><br><span class="line">        Class&lt;? <span class="keyword">super</span> A&gt; superclass = A.class.getSuperclass(); <span class="comment">// 获取父类的class对象</span></span><br><span class="line">        System.out.println(superclass);</span><br><span class="line">        Class&lt;?&gt;[] interfaces = A.class.getInterfaces(); <span class="comment">// 获取继承的类</span></span><br><span class="line">        System.out.println(Arrays.toString(interfaces));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printClassInfo</span><span class="params">(Class cls)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Class name: &quot;</span> + cls.getName());</span><br><span class="line">        System.out.println(<span class="string">&quot;Simple name: &quot;</span> + cls.getSimpleName());</span><br><span class="line">        <span class="keyword">if</span> (cls.getPackage() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Package name: &quot;</span> + cls.getPackage().getName());</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;is interface: &quot;</span> + cls.isInterface());</span><br><span class="line">        System.out.println(<span class="string">&quot;is enum: &quot;</span> + cls.isEnum());</span><br><span class="line">        System.out.println(<span class="string">&quot;is array: &quot;</span> + cls.isArray());</span><br><span class="line">        System.out.println(<span class="string">&quot;is primitive: &quot;</span> + cls.isPrimitive());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 准备</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> <span class="keyword">implements</span> <span class="title">InterfaceA</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> a;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">(<span class="keyword">int</span> a)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String <span class="title">getStringA</span><span class="params">(<span class="keyword">int</span> p)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> String.valueOf(a + p);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">InterfaceA</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="反射的应用：动态代理"><a href="#反射的应用：动态代理" class="headerlink" title="反射的应用：动态代理"></a>反射的应用：动态代理</h1><p>静态代理很简单，就是定义了一个接口，我们直接实现它。还有一种方式是动态代码，我们仍然先定义了接口，但是我们并不去编写实现类，而是直接通过JDK提供的一个Proxy.newProxyInstance()创建了一个接口对象。这种没有实现类但是在运行期动态创建了一个接口对象的方式，我们称为动态代码。JDK提供的动态创建接口对象的方式，就叫动态代理。</p>
+<p>例如定义接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Hello</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">morning</span><span class="params">(String name)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> <span class="keyword">implements</span> <span class="title">Hello</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">morning</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Good morning, &quot;</span> + name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Hello hello = <span class="keyword">new</span> HelloWorld();</span><br><span class="line">hello.morning(<span class="string">&quot;Bob&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h2><p>动态代理实际上是JVM在运行期动态创建class字节码并加载的过程。其中最关键的两个类为<strong>InvocationHandler</strong>接口和<strong>Proxy</strong>类。其中</p>
+<ul>
+<li><strong>InvocationHandler接口</strong>是proxy代理实例的调用处理程序实现的一个接口，每一个动态代理类的调用处理程序都必须实现InvocationHandler接口，并且每个代理类的实例都关联到了实现该接口的动态代理类调用处理程序中，当我们通过动态代理对象调用一个方法时候，这个方法的调用就会被转发到实现InvocationHandler接口类的invoke方法来调用。</li>
+<li><strong>Proxy类</strong>就是用来创建一个代理对象的类，它提供了很多方法，但是我们最常用的是newProxyInstance方法。</li>
+</ul>
+<p>在运行期动态创建一个interface实例的方法如下：</p>
+<ol>
+<li><p>定义一个<strong>InvocationHandler</strong>实例，这个接口只有一个方法invoke，负责实现接口的方法调用，invoke的三个参数的含义分别为:</p>
+</li>
+<li><p>代理类代理的真实代理对象com.sun.proxy.$Proxy0，这里之所以要传进去是为了方便在invoke里进行一些额外的操作（后面会解释这个参数）；</p>
+</li>
+<li><p>我们所要调用某个对象真实的方法的Method对象；</p>
+</li>
+<li><p>指代代理对象方法传递的参数。</p>
+</li>
+<li><p>通过**Proxy.newProxyInstance()**创建interface的实例，它需要3个参数：</p>
+</li>
+<li><p>使用的ClassLoader，定义了由哪个classloader对象对生成的代理类进行加载，通常就是接口类的ClassLoader；</p>
+</li>
+<li><p>需要实现的接口数组，至少需要传入一个接口进去；</p>
+</li>
+<li><p>表示的是当动态代理对象调用方法的时候会关联到哪一个InvocationHandler对象上，并最终由其调用接口方法。</p>
+</li>
+<li><p>将返回的Object强制转型为接口；</p>
+</li>
+<li><p>当我们直接用对象调用方法时，就会执行handle的invoke中定义的逻辑，其中方法名、参数列表映射到invoke()的参数中。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">    <span class="comment">// 定义一个InvocationHandler实例，实现invoke方法</span></span><br><span class="line">    InvocationHandler handler = <span class="keyword">new</span> InvocationHandler() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(proxy != <span class="keyword">null</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;--invoke--  Proxy对象： &quot;</span> + proxy.getClass() + <span class="string">&quot;  实现了：&quot;</span> + Arrays.toString(proxy.getClass().getInterfaces()));</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;--invoke--  Method: &quot;</span> + method);</span><br><span class="line">            <span class="keyword">if</span> (method.getName().equals(<span class="string">&quot;morning&quot;</span>)) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;--invoke--  调用invoke方法：Good morning, &quot;</span> + args[<span class="number">0</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> args[<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 生成代理对象</span></span><br><span class="line">    Hello hello = (Hello) Proxy.newProxyInstance(</span><br><span class="line">        Hello.class.getClassLoader(), <span class="comment">// 传入ClassLoader</span></span><br><span class="line">        <span class="keyword">new</span> Class[]&#123;Hello.class&#125;, <span class="comment">// 传入要实现的接口</span></span><br><span class="line">        handler); <span class="comment">// 传入处理调用方法的InvocationHandler</span></span><br><span class="line">    System.out.println(<span class="string">&quot;---main---  生成的hello对象: &quot;</span> + hello.getClass());</span><br><span class="line">    System.out.println(<span class="string">&quot;---mian---  invoke返回值：&quot;</span> + hello.morning(<span class="string">&quot;bob&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---main---  生成的hello对象: <span class="class"><span class="keyword">class</span> $<span class="title">Proxy0</span></span></span><br><span class="line">--invoke--  Proxy对象： class $Proxy0  实现了：[interface Hello]</span><br><span class="line">--invoke--  Method: <span class="keyword">public</span> <span class="keyword">abstract</span> java.lang.String Hello.morning(java.lang.String)</span><br><span class="line">--invoke--  调用invoke方法：Good morning, bob</span><br><span class="line">---mian---  invoke返回值：bob</span><br></pre></td></tr></table></figure>
+
+<p>从输出的一二行可以知道InvocationHandler的invoke方法的第一个参数实际上就是代理对象（也就是Proxy.newProxyInstance(）生成的对象，它是通过JDK动态代理生成的），实现了Hello接口。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/" class="post-title-link" itemprop="url">Java 输入输出体系</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-03-22 19:25:15" itemprop="dateCreated datePublished" datetime="2019-03-22T19:25:15+08:00">2019-03-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-25 22:27:36" itemprop="dateModified" datetime="2021-01-25T22:27:36+08:00">2021-01-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="流的分类"><a href="#流的分类" class="headerlink" title="流的分类"></a>流的分类</h2><h3 id="输入流-和-输出流"><a href="#输入流-和-输出流" class="headerlink" title="输入流 和 输出流"></a>输入流 和 输出流</h3><p>划分输入/输出流时是从程序运行所在内存的角度来考虑的</p>
+<ul>
+<li>输入流：数据从外部设备往内存输入</li>
+<li>输出流：数据从内存往外部设备输出</li>
+</ul>
+<h3 id="字节流-和-字符流"><a href="#字节流-和-字符流" class="headerlink" title="字节流 和 字符流"></a>字节流 和 字符流</h3><p>字节流和字符流的用法几乎完全一样，区别在于字节流和字符流所操作的数据单元不同——字节流操作的数据单元是<code>8位的字节</code>，而字符流操作的数据单元是<code>16位的字符</code>。</p>
+<p>字节流主要由InputStream和OutputStream作为基类，而字符流则主要由Reader和Writer作为基类。</p>
+<h3 id="节点流-和-处理流"><a href="#节点流-和-处理流" class="headerlink" title="节点流 和 处理流"></a>节点流 和 处理流</h3><ul>
+<li>节点流：可以从/向一个特定的IO设备（如磁盘、网络）读/写数据的流，称为节点流，节点流也被称为低级流（Low Level Stream）。</li>
+<li>处理流：处理流则用于对一个已存在的流进行连接或封装，通过封装后的流来实现数据读/写功能。处理流也被称为高级流或包装流。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1047,215 +1301,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/11/03/ThinkingInJava_5-%E5%A4%9A%E6%80%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/11/03/ThinkingInJava_5-%E5%A4%9A%E6%80%81/" class="post-title-link" itemprop="url">多态</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-11-03 16:29:39" itemprop="dateCreated datePublished" datetime="2018-11-03T16:29:39+08:00">2018-11-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-24 17:31:20" itemprop="dateModified" datetime="2021-01-24T17:31:20+08:00">2021-01-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thinking-in-java/" itemprop="url" rel="index"><span itemprop="name">Thinking in java</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="方法绑定"><a href="#方法绑定" class="headerlink" title="方法绑定"></a><strong>方法绑定</strong></h1><p>将一个方法调用同一个方法主体关联起来被称作绑定，当绑定发生在程序运行之前时（如果有的话，由编译器和连接器负责，C就是一种前期绑定的语言）称为<strong>前期绑定</strong>（early binding）。 在运行时，根据对象的类型来决定运行哪个方法称为<strong>后期绑定</strong>（late binding)，后期绑定也被称为<strong>动态绑定</strong>（dynamic binding）或<strong>运行时绑定</strong>(run-time binding)。</p>
-<p><strong>Java 中除了static和final方法之外，其他所有的方法都是属于后期绑定。</strong>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/11/03/ThinkingInJava_5-%E5%A4%9A%E6%80%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/09/19/ThinkingInJava_4-%E5%A4%8D%E7%94%A8%E7%B1%BB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2018/09/19/ThinkingInJava_4-%E5%A4%8D%E7%94%A8%E7%B1%BB/" class="post-title-link" itemprop="url">复用类</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-19 14:10:53" itemprop="dateCreated datePublished" datetime="2018-09-19T14:10:53+08:00">2018-09-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-24 17:32:02" itemprop="dateModified" datetime="2021-01-24T17:32:02+08:00">2021-01-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thinking-in-java/" itemprop="url" rel="index"><span itemprop="name">Thinking in java</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>14 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="对psvm的理解"><a href="#对psvm的理解" class="headerlink" title="对psvm的理解"></a><strong>对psvm的理解</strong></h1><p>Java初学者大都是从main函数在控制台打印HelloWorld来开始Java学习的， 其形式为：public static void main（String[ ] args）。</p>
-<p>首先，main方法是JVM（java虚拟机）自动调用，JVM调用main方法的位置自然不会在某个类中、或某个包中，因此只有当main方法在公有级别上时，才对JVM可见，所以mian方法需要public修饰，同理，main方法所在的类也需要public修饰符。</p>
-<p>其次，由于main方法是所有程序的入口，<strong>也就是main被调用时没有任何对象创建</strong>，不通过对象调用某一方法，只有将该方法定义为静态方法，所以main方法是一个静态方法，即需要static修饰。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/09/19/ThinkingInJava_4-%E5%A4%8D%E7%94%A8%E7%B1%BB/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1280,13 +1325,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">548k</span>
+    <span title="站点总字数">555k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">16:36</span>
+    <span title="站点阅读时长">16:49</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

@@ -84,9 +84,9 @@
   <ul class="main-menu menu">
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">154</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">8</span></a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">83</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">156</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">9</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">85</span></a></li>
   </ul>
 </nav>
 
@@ -132,20 +132,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-count">85</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">154</span>
+        <span class="site-state-item-count">156</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -174,6 +174,226 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">synchronized 原理（Monitor、轻量级锁、锁重入、锁膨胀、重量级锁、自旋优化、偏向锁、锁消除、锁粗化）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-05 12:06:21" itemprop="dateCreated datePublished" datetime="2020-05-05T12:06:21+08:00">2020-05-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:25:14" itemprop="dateModified" datetime="2021-03-29T20:25:14+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="Monitor-原理"><a href="#Monitor-原理" class="headerlink" title="Monitor 原理"></a>Monitor 原理</h2><p>在介绍 Monitor 之前，需要了解一下对象头的知识，建议阅读<a target="_blank" rel="noopener" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/11/01/JVM_6_HotSpot%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E8%B1%A1/">HotSpot虚拟机对象头</a>。</p>
+<p>32位虚拟机对象头Mark Word：<br><img src="https://note.youdao.com/yws/api/personal/file/75DAE2F6DB5A4AE7B4AB4811CD9FC73C?method=download&shareKey=362bf3e98cf5735cf687f90350a87435" alt="image"></p>
+<p>Monitor 被翻译为监视器或<strong>管程</strong>，每个 Java 对象都可以关联一个 Monitor 对象，如果使用 synchronized 给对象上锁（注意，必须是重量级）之后，该对象头的 Mark Word 就被设置为指向 Monitor 对象的指针 + “10” 重量级锁标志。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/05/C7_synchronized%E5%8E%9F%E7%90%86/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/18/C6_%E5%8F%98%E9%87%8F%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/04/18/C6_%E5%8F%98%E9%87%8F%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">变量的线程安全分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-18 15:28:15" itemprop="dateCreated datePublished" datetime="2020-04-18T15:28:15+08:00">2020-04-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-26 00:12:46" itemprop="dateModified" datetime="2021-01-26T00:12:46+08:00">2021-01-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="成员变量和静态变量是否线程安全"><a href="#成员变量和静态变量是否线程安全" class="headerlink" title="成员变量和静态变量是否线程安全"></a>成员变量和静态变量是否线程安全</h2><ul>
+<li>如果它们没有共享，则线程安全</li>
+<li>如果它们被共享了，根据它们的状态是否能够改变，又分两种情况 <ul>
+<li>如果只有读操作，则线程安全</li>
+<li>如果有读写操作，则这段代码是临界区，需要考虑线程安全</li>
+</ul>
+</li>
+</ul>
+<h2 id="局部变量是否线程安全"><a href="#局部变量是否线程安全" class="headerlink" title="局部变量是否线程安全"></a>局部变量是否线程安全</h2><ul>
+<li>局部变量是线程安全的 </li>
+<li>但局部变量引用的对象则未必<ul>
+<li>如果该对象没有逃离方法的作用访问，它是线程安全的</li>
+<li>如果该对象逃离方法的作用范围，需要考虑线程安全
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/04/18/C6_%E5%8F%98%E9%87%8F%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1175,223 +1395,6 @@ Java 8 以后可以使用 lambda 精简代码<figure class="highlight java"><tab
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">动态规划问题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-09-14 19:25:15" itemprop="dateCreated datePublished" datetime="2019-09-14T19:25:15+08:00">2019-09-14</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-25 23:26:30" itemprop="dateModified" datetime="2021-01-25T23:26:30+08:00">2021-01-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>13k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>23 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="闫式DP分析法"><a href="#闫式DP分析法" class="headerlink" title="闫式DP分析法"></a>闫式DP分析法</h2><blockquote>
-<p>参考视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1X741127ZM/?spm_id_from=333.788.videocard.0">https://www.bilibili.com/video/BV1X741127ZM/?spm_id_from=333.788.videocard.0</a></p>
-</blockquote>
-<h3 id="分析思想"><a href="#分析思想" class="headerlink" title="分析思想"></a>分析思想</h3><p><img src="https://note.youdao.com/yws/api/personal/file/1208AC100C214D67A123AB26FB2ABB9B?method=download&shareKey=2fe85c9ad77c808886878f00a7b88dd4" alt="image"></p>
-<ul>
-<li>DP问题一般是求若干有限集合中的最值问题，并且此类问题存在子问题重叠<code>（Overlap-subproblems）</code>，如果通过暴力枚举每种可能解决问题，那么将会有大量重复的计算；如果从集合角度来分析DP问题，每次枚举一个集合并且利用子问题重叠特性，将子问题的解存储下来，可以大大提高效率；</li>
-<li>DP问题的核心是状态集合 f(i) 的定义，在状态及转移计算中，划分子集的依据：<strong>寻找最后一个不同点，即处理最后一个子集的选择</strong>。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%97%AE%E9%A2%98/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/09/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A0%E6%9D%83%E6%9C%89%E5%90%91%E5%9B%BE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/09/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A0%E6%9D%83%E6%9C%89%E5%90%91%E5%9B%BE/" class="post-title-link" itemprop="url">加权有向图的遍历（前序、后序、拓扑）和最短路径树（Dij、BF、Flyod）</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-09-01 22:50:15" itemprop="dateCreated datePublished" datetime="2019-09-01T22:50:15+08:00">2019-09-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-25 23:22:32" itemprop="dateModified" datetime="2021-01-25T23:22:32+08:00">2021-01-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>21k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>38 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="有向图的可达性（遍历）"><a href="#有向图的可达性（遍历）" class="headerlink" title="有向图的可达性（遍历）"></a>有向图的可达性（遍历）</h2><p>与无向图不同，有向图的遍历（或者叫排列）基于DFS，分为以下三种：</p>
-<h3 id="前序遍历：根最先"><a href="#前序遍历：根最先" class="headerlink" title="前序遍历：根最先"></a>前序遍历：根最先</h3><h3 id="后序遍历：根最后"><a href="#后序遍历：根最后" class="headerlink" title="后序遍历：根最后"></a>后序遍历：根最后</h3><h3 id="逆后序遍历（拓扑排序）"><a href="#逆后序遍历（拓扑排序）" class="headerlink" title="逆后序遍历（拓扑排序）"></a>逆后序遍历（拓扑排序）</h3><ul>
-<li>拓扑排序是将DAG中所有顶点排成一个线性序列，使得图中任意一对顶点 u 和 v，若边<code>&lt;u,v&gt;∈E(G)</code>，则 u 在线性序列中出现在 v 之前；</li>
-<li>定理1：当且仅当一幅有向图是无环有向图(DAG)时它才能进行拓扑排序（即拓扑有序）；</li>
-<li>定理2：一幅有向无环图的拓扑顺序即为所有顶点的逆后续排列；</li>
-<li>注意：在拓扑排序之前必须检查图中有没有环，如果有则返回null
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/09/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A0%E6%9D%83%E6%9C%89%E5%90%91%E5%9B%BE/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1416,13 +1419,13 @@ Java 8 以后可以使用 lambda 精简代码<figure class="highlight java"><tab
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">548k</span>
+    <span title="站点总字数">555k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">16:36</span>
+    <span title="站点阅读时长">16:49</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
