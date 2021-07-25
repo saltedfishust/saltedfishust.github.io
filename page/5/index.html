@@ -84,9 +84,9 @@
   <ul class="main-menu menu">
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">122</span></a></li>
-        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">5</span></a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">62</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">130</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">68</span></a></li>
   </ul>
 </nav>
 
@@ -132,20 +132,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">122</span>
+        <span class="site-state-item-count">130</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -174,6 +174,790 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/" class="post-title-link" itemprop="url">Thread类里的线程状态 和 操作系统的线程状态</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-10 11:25:35" itemprop="dateCreated datePublished" datetime="2020-03-10T11:25:35+08:00">2020-03-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-26 00:12:10" itemprop="dateModified" datetime="2021-01-26T00:12:10+08:00">2021-01-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="五种状态"><a href="#五种状态" class="headerlink" title="五种状态"></a>五种状态</h2><p>这是从操作系统层面来描述的。</p>
+<p><img src="https://note.youdao.com/yws/api/personal/file/1BA69F17AFAB416A9438E298535B16DF?method=download&shareKey=c99a0bf966172b28ffb3e4777cdfa62d" alt="image"></p>
+<center>操作系统层面--线程的生命周期（五种状态）-中文</center>
+
+<p><img src="https://note.youdao.com/yws/api/personal/file/F670D1CB16A648B3B3608675D70E2836?method=download&shareKey=a8f05e81e9886b909d0bc17b3a58d9e7" alt="image"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/10/C1_Thread%E7%B1%BB%E9%87%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%92%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/01/C0_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/03/01/C0_%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B%E5%92%8C%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B/" class="post-title-link" itemprop="url">创建线程和查看线程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-01 12:29:39" itemprop="dateCreated datePublished" datetime="2020-03-01T12:29:39+08:00">2020-03-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-02 14:55:38" itemprop="dateModified" datetime="2021-03-02T14:55:38+08:00">2021-03-02</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="线程与进程"><a href="#线程与进程" class="headerlink" title="线程与进程"></a>线程与进程</h3><h4 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h4><ul>
+<li>程序由指令和数据组成，但这些指令要运行，数据要读写，就必须将指令加载至 CPU，数据加载至内存。在指令运行过程中还需要用到磁盘、网络等设备。进程就是用来加载指令、管理内存、管理 IO 的。 </li>
+<li>当一个程序被运行，从磁盘加载这个程序的代码至内存，这时就开启了一个进程。进程就可以视为程序的一个实例。大部分程序可以同时运行多个实例进程（例如记事本、画图、浏览器 等），也有的程序只能启动一个实例进程（例如网易云音乐、360 安全卫士等）。</li>
+<li>32位虚拟机的最大寻址地址为 2<sup>32</sup> 也就是 4G，也就是说给进程分配的最大内存为4G。</li>
+</ul>
+<h4 id="进程间的通信方式"><a href="#进程间的通信方式" class="headerlink" title="进程间的通信方式"></a>进程间的通信方式</h4><ul>
+<li>管道：简单方便，但是半双工的单向通信，效率低下，不适合频繁通信的场景。</li>
+<li>消息队列：类似于缓存，生产者和消费者模式，队列充当中间商，优点是高效，缺点是消耗的内存比较大。</li>
+<li>共享内存：将分配给多个进程的虚拟内存各取一部分映射到同一块物理内存，多个进程就完成了内存共享，优点是节约了内存，缺点是进程较多时，频繁发生进程竞争内存影响效率。</li>
+<li>信号量：为了解决共享内存的问题，可以引入信号量，其本质就是一个计数器，实现进程之间的互斥和同步。</li>
+<li>套接字（Socket）：用于远程进程间的通信。</li>
+</ul>
+<h4 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h4><ul>
+<li>一个线程就是一个指令流，将指令流中的一条条指令以一定的顺序交给 CPU 执行。</li>
+</ul>
+<h4 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h4><ul>
+<li>共享内存：volatile共享内存</li>
+<li>消息传递：wait / notify / join / lock(park) / unlock(unpark)</li>
+<li>管道流：使用较少</li>
+</ul>
+<h4 id="二者对比"><a href="#二者对比" class="headerlink" title="二者对比"></a>二者对比</h4><ul>
+<li>定义区别如上</li>
+<li>进程基本上相互独立的，而线程存在于进程内，一个进程可包含多个线程，进程拥有共享的资源，如内存空间等，供其内部的线程共享 </li>
+<li>Java 中，进程作为资源分配的最小单位，线程作为最小调度单位</li>
+<li>进程间通信较为复杂<ul>
+<li>同一台计算机的进程通信称为 IPC（Inter-process communication）</li>
+<li>不同计算机之间的进程通信，需要通过网络，并遵守共同的协议，例如 HTTP</li>
+</ul>
+</li>
+<li>线程通信相对简单，因为它们共享进程内的内存，一个例子是多个线程可以访问同一个共享变量</li>
+<li>线程更轻量，线程上下文切换成本一般上要比进程上下文切换低</li>
+</ul>
+<h3 id="创建和运行线程"><a href="#创建和运行线程" class="headerlink" title="创建和运行线程"></a>创建和运行线程</h3><h4 id="方法1，直接使用-Thread"><a href="#方法1，直接使用-Thread" class="headerlink" title="方法1，直接使用 Thread"></a>方法1，直接使用 Thread</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建线程对象 </span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread() &#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构造方法的参数是给线程指定名字，推荐 </span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(<span class="string">&quot;t1&quot;</span>) &#123;</span><br><span class="line">    Override </span><br><span class="line">    <span class="comment">// run 方法内实现了要执行的任务</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line">t1.start();</span><br></pre></td></tr></table></figure>
+<p>也可以继承 Thread 类，并重写 run 方法。</p>
+<h4 id="方法2，使用-Runnable-配合-Thread"><a href="#方法2，使用-Runnable-配合-Thread" class="headerlink" title="方法2，使用 Runnable 配合 Thread"></a>方法2，使用 Runnable 配合 Thread</h4><p>把【线程】和【任务】（要执行的代码）分开，Runnable 对象仅仅作为 Thread 对象的 target，Runnable 实现类里包含的 run() 方法仅作为线程执行体。而实际的线程对象依然是 Thread 实例，只是该 Thread 线程负责执行其 target 的 run() 方法。</p>
+<ul>
+<li>Thread 代表线程 </li>
+<li>Runnable 可运行的任务（线程要执行的代码）<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123; </span><br><span class="line">    <span class="comment">// 要执行的任务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;; </span><br><span class="line"><span class="comment">// 创建线程对象 </span></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread( runnable ); </span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
+例如：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象 </span></span><br><span class="line">Runnable task2 = <span class="keyword">new</span> Runnable() &#123; </span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐 </span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>); </span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure>
+Java 8 以后可以使用 lambda 精简代码<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象 </span></span><br><span class="line">Runnable task2 = () -&gt; log.debug(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐 </span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(task2, <span class="string">&quot;t2&quot;</span>); </span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure>
+或者直接<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字</span></span><br><span class="line">Thread t2 = <span class="keyword">new</span> Thread(() -&gt; log.debug(<span class="string">&quot;hello&quot;</span>), <span class="string">&quot;t2&quot;</span>); </span><br><span class="line">t2.start();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="方法3，FutureTask-配合-Thread"><a href="#方法3，FutureTask-配合-Thread" class="headerlink" title="方法3，FutureTask 配合 Thread"></a>方法3，FutureTask 配合 Thread</h4><p>FutureTask 能够接收 Callable 类型的参数，用来处理有返回结果的情况，Callable接口可看成是Runnable接口的增强版，Callable 接口中的 call 方法比 run 方法功能更强大。</p>
+<ul>
+<li>call()方法可以有返回值;</li>
+<li>call()方法可以声明抛出异常。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建任务对象，传入一个 Callable 对象</span></span><br><span class="line">FutureTask&lt;Integer&gt; task3 = <span class="keyword">new</span> FutureTask&lt;&gt;(() -&gt; &#123; </span><br><span class="line">    log.debug(<span class="string">&quot;hello&quot;</span>); </span><br><span class="line">    <span class="keyword">return</span> <span class="number">100</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数1 是任务对象; 参数2 是线程名字，推荐 </span></span><br><span class="line"><span class="keyword">new</span> Thread(task3, <span class="string">&quot;t3&quot;</span>).start();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主线程阻塞，同步等待 task 执行完毕的结果 </span></span><br><span class="line">Integer result = task3.get(); </span><br><span class="line">log.debug(<span class="string">&quot;结果是:&#123;&#125;&quot;</span>, result);</span><br><span class="line"></span><br><span class="line"><span class="comment">/*输出</span></span><br><span class="line"><span class="comment">19:22:27 [t3] c.ThreadStarter - hello </span></span><br><span class="line"><span class="comment">19:22:27 [main] c.ThreadStarter - 结果是:100</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="三种方法对比"><a href="#三种方法对比" class="headerlink" title="三种方法对比"></a>三种方法对比</h4><p>采用实现 Runnable、Callable 接口的方式创建多线程的优缺点：</p>
+<ul>
+<li>线程类只是实现了 Runnable 接口或 Callable 接口，还可以继承其他类。</li>
+<li>在这种方式下，多个线程可以共享同一个 target 对象，所以非常适合多个相同线程来处理同一份资源的情况，从而可以将CPU、代码和数据分开，形成清晰的模型，较好地体现了面向对象的思想。</li>
+<li>劣势是，编程稍稍复杂，如果需要访问当前线程，则必须使用 Thread.currentThread()方法。。</li>
+</ul>
+<p>采用继承Thread类的方式创建多线程的优缺点：</p>
+<ul>
+<li>劣势是，因为线程类已经继承了 Thread 类，所以不能再继承其他父类。</li>
+<li>优势是，编写简单，如果需要访问当前线程，则无须使用 Thread.currentThread()方法，直接使用 this 即可获得当前线程。</li>
+</ul>
+<p>鉴于上面分析，因此一般推荐采用实现 Runnable接口、Callable接口的方式来创建多线程。</p>
+<h3 id="查看进程线程的方法"><a href="#查看进程线程的方法" class="headerlink" title="查看进程线程的方法"></a>查看进程线程的方法</h3><h4 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h4><p>任务管理器可以查看进程和线程数，也可以用来杀死进程 </p>
+<ul>
+<li><code>tasklist</code> 查看进程 </li>
+<li><code>taskkill</code> 杀死进程</li>
+</ul>
+<h4 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h4><ul>
+<li><code>ps -fe</code> 查看所有进程 </li>
+<li><code>ps -fT -p &lt;PID&gt;</code> 查看某个进程（PID）的所有线程 </li>
+<li><code>kill</code> 杀死进程 </li>
+<li><code>top</code> 按大写 H 切换是否显示线程 </li>
+<li><code>top -H -p &lt;PID&gt;</code> 查看某个进程（PID）的所有线程</li>
+</ul>
+<h4 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h4><ul>
+<li><code>jps</code> 命令查看所有 Java 进程 </li>
+<li><code>jstack &lt;PID&gt;</code> 查看某个 Java 进程（PID）的所有线程状态 </li>
+<li><code>jconsole</code> 来查看某个 Java 进程中线程的运行情况（图形界面）</li>
+</ul>
+<h4 id="案例1：CPU占用过高"><a href="#案例1：CPU占用过高" class="headerlink" title="案例1：CPU占用过高"></a>案例1：CPU占用过高</h4><ol>
+<li>用<code>top</code>定位哪个进程对cpu的占用过高； </li>
+<li>用<code>ps</code>命令进一步定位是哪个线程引起的cpu占用过高: <code>ps H -eo pid,tid,%cpu | grep 进程id</code>，ps是显示瞬间进程的状态，其中H是打印进程树（显示树状结构，表示程序间的相互关系），-eo代表筛选感兴趣的内容，pid–进程id、tid–线程id、%cpu–对cpu的占用，| grep – 管道运算符，筛选感兴趣的进程；</li>
+<li><code>jstack 进程id</code> 可以根据进程id 找到有问题的线程，进一步定位到问题代码的源码行号。</li>
+</ol>
+<h4 id="案例2：程序运行很长时间没有结果（死锁）"><a href="#案例2：程序运行很长时间没有结果（死锁）" class="headerlink" title="案例2：程序运行很长时间没有结果（死锁）"></a>案例2：程序运行很长时间没有结果（死锁）</h4><ol>
+<li><code>jps</code> 命令查看所有 Java 进程； </li>
+<li><code>jstack &lt;PID&gt;</code> 查看某个 Java 进程（PID）的所有线程状态（如下），或者用<code> jconsole</code> 来查看某个 Java 进程中线程的运行情况（图形界面）。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Found one Java-level deadlock:</span><br><span class="line">=============================</span><br><span class="line"><span class="string">&quot;Thread-1&quot;</span>:</span><br><span class="line">  waiting to lock monitor <span class="number">0x0000021e94958578</span> (object <span class="number">0x00000000d6fb0ca0</span>, a cn.itcast.jvm.t1.stack.A),</span><br><span class="line">  which is held by <span class="string">&quot;Thread-0&quot;</span></span><br><span class="line"><span class="string">&quot;Thread-0&quot;</span>:</span><br><span class="line">  waiting to lock monitor <span class="number">0x0000021e9495c618</span> (object <span class="number">0x00000000d6fb2dd8</span>, a cn.itcast.jvm.t1.stack.B),</span><br><span class="line">  which is held by <span class="string">&quot;Thread-1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）"><a href="#案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）" class="headerlink" title="案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）"></a>案例3：堆内存诊断（垃圾回收后，内存占用仍然很高）</h4><ol>
+<li>jps 工具：查看当前系统中有哪些 java 进程；</li>
+<li>jmap 工具： 查看堆内存占用情况<code> jmap - heap 进程id</code>； </li>
+<li>jconsole 工具： 图形界面的，多功能的监测工具，可以连续监测；</li>
+<li>jvisualvm 工具：图像界面的，可以检测内存占用，相比jconsole，它可以方便的抓取内存快照即堆转储（<code>堆 dump</code>）。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/11/22/%E5%9F%BA%E7%A1%80_%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/11/22/%E5%9F%BA%E7%A1%80_%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="post-title-link" itemprop="url">正则表达式</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-22 11:21:56" itemprop="dateCreated datePublished" datetime="2019-11-22T11:21:56+08:00">2019-11-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-26 00:17:00" itemprop="dateModified" datetime="2021-01-26T00:17:00+08:00">2021-01-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="正则表达式中的常用字符"><a href="#正则表达式中的常用字符" class="headerlink" title="正则表达式中的常用字符"></a>正则表达式中的常用字符</h2><h3 id="特殊字符及其操作"><a href="#特殊字符及其操作" class="headerlink" title="特殊字符及其操作"></a>特殊字符及其操作</h3><table>
+<thead>
+<tr>
+<th align="center">特殊字符</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">^</td>
+<td align="center">边界匹配符：匹配一行的开头，不占用字符</td>
+</tr>
+<tr>
+<td align="center">$</td>
+<td align="center">边界匹配符：匹配一行的结尾，不占用字符</td>
+</tr>
+<tr>
+<td align="center">.</td>
+<td align="center">表示任何单个字符</td>
+</tr>
+<tr>
+<td align="center">?</td>
+<td align="center">前一个字符 0 次或 1 次扩展</td>
+</tr>
+<tr>
+<td align="center">*</td>
+<td align="center">前一个字符 0 次或 无限次扩展</td>
+</tr>
+<tr>
+<td align="center">+</td>
+<td align="center">前一个字符 1 次或 无限次扩展</td>
+</tr>
+<tr>
+<td align="center">|</td>
+<td align="center">指定两项之间任选一项，例 abc | def 表示 abc、def</td>
+</tr>
+<tr>
+<td align="center">\</td>
+<td align="center">用于转义下一个字符</td>
+</tr>
+<tr>
+<td align="center">( )</td>
+<td align="center">分组标记，可将多个表达式合并成一个子表达式，内部只能使用 | 操作符</td>
+</tr>
+<tr>
+<td align="center">[ ]</td>
+<td align="center">字符集，对单个字符给出范围</td>
+</tr>
+<tr>
+<td align="center">{m}</td>
+<td align="center">前一个字符 m 次扩展</td>
+</tr>
+<tr>
+<td align="center">{m,n}</td>
+<td align="center">前一个字符 m-n 次扩展</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>上述所有的字符为正则表达式中定义的特殊字符，如果要匹配它们字符本身，需要进行转义。特别的在Java中，也是用 \ 来转义，Java中如果要匹配这些特殊字符需要经过两轮转义，即<code>\\</code>，所以在Java中要匹配 \ ，需要<code>\\\\</code>。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/22/%E5%9F%BA%E7%A1%80_%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/11/04/%E5%9F%BA%E7%A1%80_Scanner%E7%B1%BB%E7%9A%84next%E3%80%81nextLine%E3%80%81hasNext%E3%80%81hasNextLine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/11/04/%E5%9F%BA%E7%A1%80_Scanner%E7%B1%BB%E7%9A%84next%E3%80%81nextLine%E3%80%81hasNext%E3%80%81hasNextLine/" class="post-title-link" itemprop="url">Scanner类的next、nextLine、hasNext、hasNextLine</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-04 19:25:15" itemprop="dateCreated datePublished" datetime="2019-11-04T19:25:15+08:00">2019-11-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-27 22:06:28" itemprop="dateModified" datetime="2021-01-27T22:06:28+08:00">2021-01-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>hasNext() 是检测还有没有下一个输入；</li>
+<li>next() 是指针移动到当前下标，并取出下一个输入；</li>
+<li>nextLine() 把指针移动到下一行 让然后取出当前这一行的输入；</li>
+<li>hasNextLine() 是检测下一行有没有输入。</li>
+</ul>
+<h4 id="next-next"><a href="#next-next" class="headerlink" title="next/next"></a>next/next</h4><p>next 方法在缓存区读取内容时，会过滤掉有效字符前面的无效字符，对输入有效字符之前遇到的<code>空格键</code>、<code>Tab键</code>或<code>Enter键</code>等结束符，next 方法会自动将其过滤掉；只有在读取到有效字符之后，next 方法才将其后的<code>空格键</code>、<code>Tab键</code>或<code>Enter键</code>等视为结束符；所以next 方法不能得到带空格的字符串。</p>
+<h4 id="nextLine"><a href="#nextLine" class="headerlink" title="nextLine"></a>nextLine</h4><p>nextLine 方法字面上有扫描一整行的意思，<strong>它不会过滤掉无效字符</strong>，它的结束符只能是<code>Enter键</code>即换行键，即nextLine 方法返回的是换行之前没有被读取的所有字符，它是可以得到带空格的字符串的。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/04/%E5%9F%BA%E7%A1%80_Scanner%E7%B1%BB%E7%9A%84next%E3%80%81nextLine%E3%80%81hasNext%E3%80%81hasNextLine/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">动态规划问题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-09-14 19:25:15" itemprop="dateCreated datePublished" datetime="2019-09-14T19:25:15+08:00">2019-09-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-25 23:26:30" itemprop="dateModified" datetime="2021-01-25T23:26:30+08:00">2021-01-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>13k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>23 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="闫式DP分析法"><a href="#闫式DP分析法" class="headerlink" title="闫式DP分析法"></a>闫式DP分析法</h2><blockquote>
+<p>参考视频:<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1X741127ZM/?spm_id_from=333.788.videocard.0">https://www.bilibili.com/video/BV1X741127ZM/?spm_id_from=333.788.videocard.0</a></p>
+</blockquote>
+<h3 id="分析思想"><a href="#分析思想" class="headerlink" title="分析思想"></a>分析思想</h3><p><img src="https://note.youdao.com/yws/api/personal/file/1208AC100C214D67A123AB26FB2ABB9B?method=download&shareKey=2fe85c9ad77c808886878f00a7b88dd4" alt="image"></p>
+<ul>
+<li>DP问题一般是求若干有限集合中的最值问题，并且此类问题存在子问题重叠<code>（Overlap-subproblems）</code>，如果通过暴力枚举每种可能解决问题，那么将会有大量重复的计算；如果从集合角度来分析DP问题，每次枚举一个集合并且利用子问题重叠特性，将子问题的解存储下来，可以大大提高效率；</li>
+<li>DP问题的核心是状态集合 f(i) 的定义，在状态及转移计算中，划分子集的依据：<strong>寻找最后一个不同点，即处理最后一个子集的选择</strong>。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/09/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%97%AE%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/09/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A0%E6%9D%83%E6%9C%89%E5%90%91%E5%9B%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/uploads/avatar.png">
+      <meta itemprop="name" content="Saltedfish">
+      <meta itemprop="description" content="Stay hungry, stay foolish">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Saltedfish">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/09/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A0%E6%9D%83%E6%9C%89%E5%90%91%E5%9B%BE/" class="post-title-link" itemprop="url">加权有向图的遍历（前序、后序、拓扑）和最短路径树（Dij、BF、Flyod）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-09-01 22:50:15" itemprop="dateCreated datePublished" datetime="2019-09-01T22:50:15+08:00">2019-09-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-01-25 23:22:32" itemprop="dateModified" datetime="2021-01-25T23:22:32+08:00">2021-01-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>21k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>38 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="有向图的可达性（遍历）"><a href="#有向图的可达性（遍历）" class="headerlink" title="有向图的可达性（遍历）"></a>有向图的可达性（遍历）</h2><p>与无向图不同，有向图的遍历（或者叫排列）基于DFS，分为以下三种：</p>
+<h3 id="前序遍历：根最先"><a href="#前序遍历：根最先" class="headerlink" title="前序遍历：根最先"></a>前序遍历：根最先</h3><h3 id="后序遍历：根最后"><a href="#后序遍历：根最后" class="headerlink" title="后序遍历：根最后"></a>后序遍历：根最后</h3><h3 id="逆后序遍历（拓扑排序）"><a href="#逆后序遍历（拓扑排序）" class="headerlink" title="逆后序遍历（拓扑排序）"></a>逆后序遍历（拓扑排序）</h3><ul>
+<li>拓扑排序是将DAG中所有顶点排成一个线性序列，使得图中任意一对顶点 u 和 v，若边<code>&lt;u,v&gt;∈E(G)</code>，则 u 在线性序列中出现在 v 之前；</li>
+<li>定理1：当且仅当一幅有向图是无环有向图(DAG)时它才能进行拓扑排序（即拓扑有序）；</li>
+<li>定理2：一幅有向无环图的拓扑顺序即为所有顶点的逆后续排列；</li>
+<li>注意：在拓扑排序之前必须检查图中有没有环，如果有则返回null
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/09/01/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%8A%A0%E6%9D%83%E6%9C%89%E5%90%91%E5%9B%BE/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -611,665 +1395,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/" class="post-title-link" itemprop="url">排序之快速排序</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-07-04 19:28:15" itemprop="dateCreated datePublished" datetime="2019-07-04T19:28:15+08:00">2019-07-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-27 22:13:24" itemprop="dateModified" datetime="2021-01-27T22:13:24+08:00">2021-01-27</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>8 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>快速排序：基于分治思想，将一个数组分成两个数组独立排序，与归并排序是互补的，与归并排序不同的是它不是任意的划分，而是基于某个值的切分，使两边的数组分别不大于和不小于这个值，所以当两边子数组都有序时整个数组也有序了，并不需要归并；其核心方法是切分，切分的过程也就是排序的过程，每次切分后返回选定值的索引。</li>
-</ul>
-<ul>
-<li>时间复杂度：对于长度为N的任意数组，快速排序平均需要 ~2NlogN 次比较，最多需要 ~1/2N^2 次比较，所以排序之前随机打乱很重要，可以避免最坏情况。</li>
-</ul>
-<p>改进：</p>
-<ul>
-<li>对于小数组，插入排序比快速排序快，只需要修改一行代码 –&gt; if (hi &lt;= lo + M) { Insertion.sort(toBeSortedArray,lo,hi); return;}</li>
-<li>三取样切分</li>
-<li>三向快速排序：针对包含大量重复元素的数组的排序优化
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/" class="post-title-link" itemprop="url">排序之归并排序</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-07-04 19:25:15" itemprop="dateCreated datePublished" datetime="2019-07-04T19:25:15+08:00">2019-07-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-27 22:16:16" itemprop="dateModified" datetime="2021-01-27T22:16:16+08:00">2021-01-27</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>归并排序：基于递归和分治的思想，将一个数组对半分，然后将结果归并起来，被对半的数组又可以递归的对半分和归并… 其核心方法是原地归并，归并的过程就是排序的过程。</li>
-<li>时间复杂度：对于长度为N的任意数组，归并排序需要 1/2NlogN~NlogN 次比较，最多访问数组 6NlogN 次。</li>
-<li>特点：能够将任意长度为N的数组排序所需时间降低到与NlogN成正比，主要缺点是所需的额外空间和N成正比。</li>
-<li>理论：归并排序是一种渐进最优的基于比较排序的算法。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/07/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%88%9D%E7%BA%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%88%9D%E7%BA%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">排序之初级排序算法（选择排序、插入排序、冒泡排序、希尔排序）</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-06-14 19:25:15" itemprop="dateCreated datePublished" datetime="2019-06-14T19:25:15+08:00">2019-06-14</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-25 22:56:22" itemprop="dateModified" datetime="2021-01-25T22:56:22+08:00">2021-01-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>8 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>初级排序算法：</p>
-<ul>
-<li>选择排序   –    N^2</li>
-<li>插入排序   –   N~N^2</li>
-<li>冒泡排序   –    N^2</li>
-<li>希尔排序   –   NlogN ? </li>
-</ul>
-<p>高级排序算法：</p>
-<ul>
-<li>归并排序     –  NlogN</li>
-<li>快速排序     –  NlogN</li>
-<li>三向快速排序  – N ~ NlogN</li>
-<li>堆排序       –  NlogN
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%88%9D%E7%BA%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/" class="post-title-link" itemprop="url">对于数据结构的理解</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-06-04 19:25:15" itemprop="dateCreated datePublished" datetime="2019-06-04T19:25:15+08:00">2019-06-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-25 22:52:50" itemprop="dateModified" datetime="2021-01-25T22:52:50+08:00">2021-01-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="程序是什么？"><a href="#程序是什么？" class="headerlink" title="程序是什么？"></a>程序是什么？</h2><p>程序 = 数据结构 + 算法；</p>
-<p>把编写程序想象成搭积木的过程，那么数据结构就是一块块形状各异的积木块，而算法则是你要搭配它们的策略，只有你真正了解了每个积木块的特点和用途，然后运用不用的算法，就可以搭建出漂亮的房子、车子…</p>
-<h2 id="最基本的数据结构是什么？"><a href="#最基本的数据结构是什么？" class="headerlink" title="最基本的数据结构是什么？"></a>最基本的数据结构是什么？</h2><p>很多人可能对这个问题一头雾水，数组？栈和队列？他们都很基本啊，但显然我想要的答案不是这些，最基本的数据结构是<code>变量</code>，在面向对象的语言中，这个变量的范畴会更加宽泛，例如在Java中，变量包括基本类型变量（基本类型的实例）和对象（类的实例）。接下来我会解释为什么我这么说。</p>
-<h2 id="两类数据结构"><a href="#两类数据结构" class="headerlink" title="两类数据结构"></a>两类数据结构</h2><p>在分类之前，我们想探讨一下关于数组和链表的问题，这两种数据结构相信大家再熟悉不过，请回答以下问题：</p>
-<ul>
-<li>数组的基本定义是什么？数组的特点是什么？</li>
-<li>链表的基本定义是什么？链表的特点是什么？
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/06/04/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95_%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/" class="post-title-link" itemprop="url">Java 输入输出体系</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-03-22 19:25:15" itemprop="dateCreated datePublished" datetime="2019-03-22T19:25:15+08:00">2019-03-22</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-25 22:27:36" itemprop="dateModified" datetime="2021-01-25T22:27:36+08:00">2021-01-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="流的分类"><a href="#流的分类" class="headerlink" title="流的分类"></a>流的分类</h2><h3 id="输入流-和-输出流"><a href="#输入流-和-输出流" class="headerlink" title="输入流 和 输出流"></a>输入流 和 输出流</h3><p>划分输入/输出流时是从程序运行所在内存的角度来考虑的</p>
-<ul>
-<li>输入流：数据从外部设备往内存输入</li>
-<li>输出流：数据从内存往外部设备输出</li>
-</ul>
-<h3 id="字节流-和-字符流"><a href="#字节流-和-字符流" class="headerlink" title="字节流 和 字符流"></a>字节流 和 字符流</h3><p>字节流和字符流的用法几乎完全一样，区别在于字节流和字符流所操作的数据单元不同——字节流操作的数据单元是<code>8位的字节</code>，而字符流操作的数据单元是<code>16位的字符</code>。</p>
-<p>字节流主要由InputStream和OutputStream作为基类，而字符流则主要由Reader和Writer作为基类。</p>
-<h3 id="节点流-和-处理流"><a href="#节点流-和-处理流" class="headerlink" title="节点流 和 处理流"></a>节点流 和 处理流</h3><ul>
-<li>节点流：可以从/向一个特定的IO设备（如磁盘、网络）读/写数据的流，称为节点流，节点流也被称为低级流（Low Level Stream）。</li>
-<li>处理流：处理流则用于对一个已存在的流进行连接或封装，通过封装后的流来实现数据读/写功能。处理流也被称为高级流或包装流。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/03/22/%E5%9F%BA%E7%A1%80_%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E4%BD%93%E7%B3%BB/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/03/05/ThinkingInJava_12_%E6%95%B0%E7%BB%84/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/uploads/avatar.png">
-      <meta itemprop="name" content="Saltedfish">
-      <meta itemprop="description" content="Stay hungry, stay foolish">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Saltedfish">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/03/05/ThinkingInJava_12_%E6%95%B0%E7%BB%84/" class="post-title-link" itemprop="url">数组</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-03-05 14:15:15" itemprop="dateCreated datePublished" datetime="2019-03-05T14:15:15+08:00">2019-03-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-01-25 15:44:12" itemprop="dateModified" datetime="2021-01-25T15:44:12+08:00">2021-01-25</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thinking-in-java/" itemprop="url" rel="index"><span itemprop="name">Thinking in java</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>9.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>18 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="数组与容器"><a href="#数组与容器" class="headerlink" title="数组与容器"></a>数组与容器</h1><p>数组与其他种类的容器之间的区别有三方面：效率、类型和保存基本类型的能力。在Java中，数组是一种效率最高的存储和随机访问对象引用序列的方式。数组就是一个简单的线性序，这使得元素访问非常快速。但是为这种速度所付出的代价是数组对象的大小被固定，并且在其生命周期中不可改变。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/03/05/ThinkingInJava_12_%E6%95%B0%E7%BB%84/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1294,13 +1419,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">427k</span>
+    <span title="站点总字数">440k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">12:56</span>
+    <span title="站点阅读时长">13:20</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
