@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/DF730D31E66441AE8FE7F7261607D853?method=download&shareKey=d55375734274aff6748d28b843d9b790">
 <meta property="og:image" content="https://note.youdao.com/yws/api/personal/file/530CA05CC05E4FBBA857766C76C506B3?method=download&shareKey=97d2a387c0336917eccc84825ec0ee6f">
 <meta property="article:published_time" content="2020-10-22T11:25:15.000Z">
-<meta property="article:modified_time" content="2021-03-02T05:41:38.000Z">
+<meta property="article:modified_time" content="2021-08-08T17:26:20.821Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="堆">
 <meta property="article:tag" content="GC机制">
@@ -234,7 +234,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-02 13:41:38" itemprop="dateModified" datetime="2021-03-02T13:41:38+08:00">2021-03-02</time>
+        <time title="修改时间：2021-08-09 01:26:20" itemprop="dateModified" datetime="2021-08-09T01:26:20+08:00">2021-08-09</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -288,7 +288,7 @@
 <blockquote>
 <p>关于GC Roots到底是对象还是对象的引用问题，R大的回答是：<code>所谓“GC roots”，或者说tracing GC的“根集合”，就是一组必须活跃的引用。注意，是一组必须活跃的引用，不是对象。</code>（见参考7）而很多地方包括都理解成对象，我的想法是皆可，因为引用代表了对象的地址，理解成引用的确更直观，下面的叙述并没有严格区分到底是对象还是指向对象的引用。</p>
 </blockquote>
-<h5 id="可达性分析与四种引用"><a href="#可达性分析与四种引用" class="headerlink" title="可达性分析与四种引用"></a>可达性分析与四种引用</h5><p>由于篇幅过长，进行了拆分，见 <a target="_blank" rel="noopener" href="https://saltedfishust.github.io/saltedfishust.github.io/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/">可达性分析与四种引用类型</a>。</p>
+<h5 id="可达性分析与四种引用"><a href="#可达性分析与四种引用" class="headerlink" title="可达性分析与四种引用"></a>可达性分析与四种引用</h5><p>由于篇幅过长，进行了拆分，见 <a target="_blank" rel="noopener" href="https://saltedfishust.github.io/2020/10/23/JVM_5_%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E5%9B%9B%E7%A7%8D%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B/">可达性分析与四种引用类型</a>。</p>
 <h4 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h4><h5 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h5><p><img src="https://note.youdao.com/yws/api/personal/file/4F298DE591394B6292668AD14294F44D?method=download&shareKey=d55375734274aff6748d28b843d9b790" alt="image"></p>
 <ol>
 <li>标记：标记垃圾；</li>
@@ -345,14 +345,12 @@
 <li><p>Minor GC 和 Full GC</p>
 <ul>
 <li>Minor GC 和 Full GC：第一次当Eden内存不足以放新对象时（这时幸存区为空），采用<code>复制</code>算法，将Eden区所有存活的对象复制到幸存区To，让幸存的对象分代年龄+1，然后交换From和To的位置（指针交换）；继续放对象，当第二次Eden内存不足时，将Eden和幸存区From所有存活的对象复制到幸存区To，让幸存的对象分代年龄再+1，然后交换From和To的位置（指针交换）；当分代年龄达到限制时（默认15）幸存区的对象会晋升到老年代，或者<code>大对象直接进入老年代</code>，这个对象的大小阈值可通过参数<code>-XX:PretenureSizeThreshold=size</code>设置（只对Serial和ParNew两款新生代收集器有效），或者经过<code>动态对象年龄判定</code>的对象也会晋升到老年代，或者通过<code>空间分配担保</code>机制晋升到老年代；当老年代的内存不足以放晋升新对象，就会触发Full GC，采用<code>标记-清除</code>算法或<code>标记-整理</code>算法。</li>
-<li>Minor GC 的时间远远低于 Full GC </li>
-</ul>
-</li>
-</ol>
-<blockquote>
+<li>Minor GC 的时间远远低于 Full GC <blockquote>
 <p>有趣的小细节：PretenureSizeThreshold默认为0，但新对象默认一律分配在Eden，大于Eden区大小时，放到老年代，这里为0的实际含义其实是Eden区的大小。</p>
 </blockquote>
-<ol start="2">
+</li>
+</ul>
+</li>
 <li><p>分代收集过程要点总结</p>
 <ul>
 <li><p>对象首先分配在伊甸园区域 </p>
@@ -444,13 +442,12 @@
 <li><p>HotSpot中的卡表<br>卡表最简单的形式可以只是一个字节数组。HotSpot正是这么做的，字节数组的每一个元素都对应着其标识的内存区域中一块特定大小的内存块，这个内存块被称作<code>“卡页”（Card Page）</code>。一般来说，卡页大小都是以2的N次幂的字节数，HotSpot中使用的卡页是2的9次幂，即512字节。一个卡页的内存中通常包含不止一个对象，只要卡页内有一个（或更多）对象的字段存在着跨代指针，那就将对应卡表的数组元素的值标识为1，并称这个元素变脏，没有则标识为0。在垃圾收集发生时，只要筛选出卡表中的脏卡，就能轻易得出哪些卡页内存块中包含跨代指针，把它们加入GC Roots中一并扫描。</p>
 </li>
 <li><p>如何维护卡表？<br>  当有本区域对象引用了其他分代区域中对象时（这里《深入理解Java虚拟机》书上写反了），其对应的卡表元素就应该变脏，变脏时间点原则上应该发生在引用类型字段赋值的那一刻。但问题是如何变脏，即如何在对象赋值的那一刻去更新维护卡表呢？假如是解释执行的字节码，那相对好处理，虚拟机负责每条字节码指令的执行，有充分的介入空间；但在编译执行的场景中呢？经过即时编译后的代码已经是纯粹的机器指令流了，这就必须找到一个在机器码层面的手段，把维护卡表的动作放到每一个赋值操作之中。<br>  在HotSpot虚拟机里是通过<code>写屏障（Write Barrier）</code>技术维护卡表状态的。在赋值前的部分的写屏障叫作<code>写前屏障（Pre-Write Barrier）</code>，在赋值后的则叫作<code>写后屏障（Post-Write Barrier）</code>，写屏障是一个异步操作，不会立即更新，会把待更新的卡表指令放入脏卡队列，等待后续线程 concurrent refinement threads 更新卡表。</p>
-</li>
-</ul>
 <blockquote>
 <p>注意：这个“写屏障”以及后面在低延迟收集器中会提到的“读屏障”与并发编程里volatile型变量中为了保证可见性和有序性的读、写屏障不同，不要混淆。</p>
 </blockquote>
-<ul>
-<li>卡表在高并发场景下的<code>伪共享问题</code><br>伪共享是处理并发底层细节时一种经常需要考虑的问题，因为CPU直接到内存读取数据很慢，所以现代中央处理器的缓存系统中是以缓存行（Cache Line）为单位存储的，即先将内存中的数据缓存到缓存行里。而在并发的场景下，每个线程占用一个CPU（核心），当多个CPU要访问同一个数据时，就意味着会产生多个数据备份，因为每个CPU都有一个数据备份（缓存行），所以规定在同一缓存行的数据，只要其中一个CPU对缓存行的数据进行了修改，那么其他CPU（线程）同一缓存行必须失效，如果这个数据恰好都缓存到同一个缓存行了，就会彼此影响（写回、无效化或者同步）而导致性能降低，这就是伪共享问题。<br>一种简单的解决方案是不采用无条件的写屏障，而是先检查卡表标记，只有当该卡表元素未被标记过时才将其标记为变脏，在JDK 7之后，HotSpot虚拟机增加了一个新的参数<code>-XX：+UseCondCardMark</code>，用来决定是否开启卡表更新的条件判断。开启会增加一次额外判断的开销，但能够避免伪共享问题，两者各有性能损耗，是否打开要根据应用实际运行情况来进行测试权衡。<blockquote>
+</li>
+<li><p>卡表在高并发场景下的<code>伪共享问题</code><br>伪共享是处理并发底层细节时一种经常需要考虑的问题，因为CPU直接到内存读取数据很慢，所以现代中央处理器的缓存系统中是以缓存行（Cache Line）为单位存储的，即先将内存中的数据缓存到缓存行里。而在并发的场景下，每个线程占用一个CPU（核心），当多个CPU要访问同一个数据时，就意味着会产生多个数据备份，因为每个CPU都有一个数据备份（缓存行），所以规定在同一缓存行的数据，只要其中一个CPU对缓存行的数据进行了修改，那么其他CPU（线程）同一缓存行必须失效，如果这个数据恰好都缓存到同一个缓存行了，就会彼此影响（写回、无效化或者同步）而导致性能降低，这就是伪共享问题。<br>一种简单的解决方案是不采用无条件的写屏障，而是先检查卡表标记，只有当该卡表元素未被标记过时才将其标记为变脏，在JDK 7之后，HotSpot虚拟机增加了一个新的参数<code>-XX：+UseCondCardMark</code>，用来决定是否开启卡表更新的条件判断。开启会增加一次额外判断的开销，但能够避免伪共享问题，两者各有性能损耗，是否打开要根据应用实际运行情况来进行测试权衡。</p>
+<blockquote>
 <p>值得一提的是关于伪共享问题有一个经典的案例，在原子累加器<code>LongAdder</code>的源码中为了避免伪共享问题，使用的方法是通过注解<code>@sun.misc.Contended</code>为缓存数据增加一个128字节的Padding，因为一个缓存行64个字节，增加128个字节必定使他们不在同一缓存行。</p>
 </blockquote>
 </li>
