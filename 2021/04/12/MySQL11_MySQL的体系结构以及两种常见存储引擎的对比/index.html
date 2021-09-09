@@ -20,16 +20,16 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
 
 <meta name="hexo-config" content="{&quot;hostname&quot;:&quot;example.com&quot;,&quot;root&quot;:&quot;/&quot;,&quot;images&quot;:&quot;/images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;}}">
-<meta name="description" content="MySQL的体系结构从下图可以发现，MySQL主要由以下几部分组成：  连接池组件 工具组件（MySQL Shell） NoSQL&#x2F;SQL接口组件 查询分析器组件 优化器组件 缓冲缓冲（Caches &amp; Buffers）组件 插件式存储引擎 物理文件系统   其中MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎，注意我们说的是表存储引擎，因为其存储引擎是以表为单位">
+<meta name="description" content="MySQL的体系结构从下图可以发现，MySQL主要由以下几部分组成：  连接池组件 工具组件（MySQL Shell） NoSQL&#x2F;SQL接口组件 查询分析器组件 优化器组件 缓存缓冲（Caches &amp; Buffers）组件 插件式存储引擎 物理文件系统   其中MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎，注意我们说的是表存储引擎，因为其存储引擎是以表为单位">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL的体系结构以及两种常见存储引擎的对比">
 <meta property="og:url" content="http://example.com/2021/04/12/MySQL11_MySQL%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E4%BB%A5%E5%8F%8A%E4%B8%A4%E7%A7%8D%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%9A%84%E5%AF%B9%E6%AF%94/index.html">
 <meta property="og:site_name" content="Saltedfish">
-<meta property="og:description" content="MySQL的体系结构从下图可以发现，MySQL主要由以下几部分组成：  连接池组件 工具组件（MySQL Shell） NoSQL&#x2F;SQL接口组件 查询分析器组件 优化器组件 缓冲缓冲（Caches &amp; Buffers）组件 插件式存储引擎 物理文件系统   其中MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎，注意我们说的是表存储引擎，因为其存储引擎是以表为单位">
+<meta property="og:description" content="MySQL的体系结构从下图可以发现，MySQL主要由以下几部分组成：  连接池组件 工具组件（MySQL Shell） NoSQL&#x2F;SQL接口组件 查询分析器组件 优化器组件 缓存缓冲（Caches &amp; Buffers）组件 插件式存储引擎 物理文件系统   其中MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎，注意我们说的是表存储引擎，因为其存储引擎是以表为单位">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://dev.mysql.com/doc/refman/8.0/en/images/mysql-architecture.png">
 <meta property="article:published_time" content="2021-04-11T17:12:45.000Z">
-<meta property="article:modified_time" content="2021-07-25T06:48:01.848Z">
+<meta property="article:modified_time" content="2021-09-09T14:17:06.598Z">
 <meta property="article:author" content="Saltedfish">
 <meta property="article:tag" content="InnoDB">
 <meta property="article:tag" content="MyISAM">
@@ -222,7 +222,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-25 14:48:01" itemprop="dateModified" datetime="2021-07-25T14:48:01+08:00">2021-07-25</time>
+        <time title="修改时间：2021-09-09 22:17:06" itemprop="dateModified" datetime="2021-09-09T22:17:06+08:00">2021-09-09</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -267,7 +267,7 @@
 <li>NoSQL/SQL接口组件</li>
 <li>查询分析器组件</li>
 <li>优化器组件</li>
-<li>缓冲缓冲（Caches &amp; Buffers）组件</li>
+<li>缓存缓冲（Caches &amp; Buffers）组件</li>
 <li>插件式存储引擎</li>
 <li>物理文件系统</li>
 </ul>
